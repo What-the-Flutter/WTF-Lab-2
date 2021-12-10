@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'subject_route.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,9 +14,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(primarySwatch: Colors.indigo),
-      home: const ChatJournal(title: 'Chat Journal'),
-    );
+        theme: ThemeData(primarySwatch: Colors.indigo),
+        initialRoute: '/',
+        routes: {
+          '/': (context) => const ChatJournal(title: 'Chat Journal'),
+          EventList.routeName: (context) => const EventList(),
+        });
   }
 }
 
@@ -65,22 +69,23 @@ class _ChatJournalState extends State<ChatJournal> {
           onPressed: _stubMethod,
           tooltip: 'Open Menu',
         ),
-        title: Container(
-          child: RichText(
-              text: TextSpan(
-                  children: [
-                TextSpan(text: widget.title),
-                WidgetSpan(
-                    child: Container(
+        centerTitle: true,
+        title: RichText(
+          text: TextSpan(
+            children: [
+              TextSpan(text: widget.title),
+              WidgetSpan(
+                child: Container(
                   child: const Text('🏡'),
                   padding: const EdgeInsets.only(left: 8),
-                )),
-              ],
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                      color: Colors.amber[50]))),
-          alignment: Alignment.center,
+                ),
+              ),
+            ],
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+                color: Colors.amber[50]),
+          ),
         ),
         actions: [
           Container(
@@ -104,27 +109,30 @@ class _ChatJournalState extends State<ChatJournal> {
                 borderRadius: BorderRadius.circular(15),
               ),
               child: Center(
-                child: RichText(
-                  text: const TextSpan(
-                    children: [
-                      WidgetSpan(
-                        child: Padding(
-                          padding: EdgeInsets.only(right: 16),
-                          child: Icon(
-                            Icons.flutter_dash,
+                child: GestureDetector(
+                  onTap: _stubMethod,
+                  child: RichText(
+                    text: const TextSpan(
+                      children: [
+                        WidgetSpan(
+                          child: Padding(
+                            padding: EdgeInsets.only(right: 16),
+                            child: Icon(
+                              Icons.flutter_dash,
+                              color: Color(0xff49664c),
+                            ),
+                          ),
+                        ),
+                        TextSpan(
+                          text: 'Questionary Bot',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
                             color: Color(0xff49664c),
                           ),
                         ),
-                      ),
-                      TextSpan(
-                        text: 'Questionary Bot',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xff49664c),
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -134,7 +142,9 @@ class _ChatJournalState extends State<ChatJournal> {
           ),
           Expanded(
             child: ListView.separated(
-              separatorBuilder: (context, index) => const Divider(),
+              separatorBuilder: (context, index) => const Divider(
+                thickness: 2,
+              ),
               itemCount: _categoryTitles.length,
               itemBuilder: (context, index) {
                 return ListTile(
@@ -142,6 +152,8 @@ class _ChatJournalState extends State<ChatJournal> {
                     setState(() {
                       _selectedIndex = index;
                     });
+                    Navigator.pushNamed(context, EventList.routeName,
+                        arguments: _categoryTitles[index]);
                   },
                   selected: index == _selectedIndex,
                   selectedTileColor: _acsentColor,
