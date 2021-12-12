@@ -12,12 +12,13 @@ class EventList extends StatefulWidget {
 }
 
 class _EventListState extends State<EventList> {
-  static const _acsentColor = Color(0xff86BB8B);
+  static const _accentColor = Color(0xff86BB8B);
   final _textInputController = TextEditingController();
 
   final List<Event> _eventsList = [];
   late String _title;
   final Set<int> _selectedIndex = {};
+  late int _amountSelectedEvents;
   bool _validateText = false;
 
   @override
@@ -41,41 +42,78 @@ class _EventListState extends State<EventList> {
     }
   }
 
-  void _removeEvent() {}
+  void _removeEvent() {
+    var indexes = [];
+    for (var i = 0; i < _eventsList.length; i++) {
+      if (_eventsList[i].isSelected) indexes.add(i);
+    }
+
+    for (var item in indexes.reversed) {
+      _eventsList.removeAt(item);
+    }
+    setState(_countSelectedEvents);
+    Navigator.pop(context);
+  }
 
   void _copyEvent() {
     var data = '';
-    for (var item in _selectedIndex) {
-      data += _eventsList[item].content;
+    for (var item in _eventsList) {
+      if (item.isSelected) data += '${item.content}\n';
     }
     Clipboard.setData(ClipboardData(text: data));
+    setState(() {
+      for (var item in _eventsList) {
+        item.isSelected = false;
+      }
+      _countSelectedEvents();
+    });
+  }
+
+  String _getTimeFromDate(DateTime date) {
+    return '${date.hour.toString()}:${date.minute.toString()}';
+  }
+
+  bool _isAnyItemSelected() {
+    for (var item in _eventsList) {
+      if (item.isSelected == true) return true;
+    }
+    return false;
+  }
+
+  void _countSelectedEvents() {
+    var result = 0;
+    for (var item in _eventsList) {
+      if (item.isSelected == true) result++;
+    }
+    _amountSelectedEvents = result;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    print(_countSelectedEvents);
+    _title = ModalRoute.of(context)!.settings.arguments as String;
+    return Scaffold(
+      appBar: _isAnyItemSelected() ? _optionsAppBar : _defAppBar,
+      body: _routeBody,
+      backgroundColor: Colors.blueGrey,
+    );
   }
 
   AlertDialog get _deleteAlertDilog {
     return AlertDialog(
       title: const Text('Deleting events'),
       content: Text(
-          'Are you sure you want to delete ${_selectedIndex.length} selected events?'),
+          'Are you sure you want to delete ${_amountSelectedEvents.toString()} selected events?'),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
           child: const Text('Cancel'),
         ),
         TextButton(
-          onPressed: () {},
+          onPressed: _removeEvent,
           child: const Text('OK'),
         ),
       ],
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    _title = ModalRoute.of(context)!.settings.arguments as String;
-    return Scaffold(
-      appBar: _selectedIndex.isEmpty ? _defAppBar : _optionsAppBar,
-      body: _routeBody,
-      backgroundColor: Colors.blueGrey,
     );
   }
 
@@ -83,7 +121,12 @@ class _EventListState extends State<EventList> {
     return AppBar(
       leading: IconButton(
         onPressed: () {
-          setState(_selectedIndex.clear);
+          setState(() {
+            for (var item in _eventsList) {
+              item.isSelected = false;
+            }
+            _countSelectedEvents();
+          });
         },
         icon: const Icon(
           Icons.cancel,
@@ -92,7 +135,7 @@ class _EventListState extends State<EventList> {
       actions: [
         Padding(
           child: Text(
-            '${_selectedIndex.length}',
+            '$_amountSelectedEvents',
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           padding: const EdgeInsets.only(right: 100, top: 16),
@@ -172,11 +215,14 @@ class _EventListState extends State<EventList> {
             children: <Widget>[
               IconButton(
                 onPressed: () {},
-                icon: const Icon(Icons.bubble_chart),
+                icon: const Icon(
+                  Icons.bubble_chart,
+                ),
               ),
               Expanded(
                 child: SizedBox(
                   child: TextField(
+                    minLines: 1,
                     onSubmitted: (var stub) {
                       _addEvent();
                     },
@@ -200,7 +246,9 @@ class _EventListState extends State<EventList> {
               ),
               IconButton(
                 onPressed: _addEvent,
-                icon: const Icon(Icons.send),
+                icon: const Icon(
+                  Icons.send,
+                ),
               ),
             ],
           ),
@@ -218,20 +266,31 @@ class _EventListState extends State<EventList> {
             return GestureDetector(
               onTap: () {
                 setState(() {
-                  if (_selectedIndex.isNotEmpty) {
+                  /*   if (_selectedIndex.isNotEmpty) {
                     _selectedIndex.contains(index)
                         ? _selectedIndex.remove(index)
                         : _selectedIndex.add(index);
+                  } */
+                  for (var item in _eventsList) {
+                    if (item.isSelected == true) {
+                      _eventsList[index].isSelected
+                          ? _eventsList[index].isSelected = false
+                          : _eventsList[index].isSelected = true;
+                      _countSelectedEvents();
+
+                      return;
+                    }
                   }
                 });
               },
               onLongPress: () {
                 setState(() {
+                  _eventsList[index].isSelected = true;
                   _selectedIndex.add(index);
-                  print(_selectedIndex);
+                  _countSelectedEvents();
                 });
               },
-              child: Container(
+              /* child: Container(
                 padding: const EdgeInsets.only(
                     left: 14, right: 46, top: 10, bottom: 10),
                 child: Align(
@@ -241,13 +300,43 @@ class _EventListState extends State<EventList> {
                         borderRadius: BorderRadius.circular(15),
                         color: _selectedIndex.contains(index)
                             ? const Color(0xff6b956f)
-                            : _acsentColor),
+                            : _accentColor),
                     padding: const EdgeInsets.all(10),
                     child: Text(
                       _eventsList[index].content,
                       style: const TextStyle(fontSize: 20),
+                      textAlign: TextAlign.left,
                     ),
                   ),
+                ),
+              ), */
+              child: Container(
+                padding: const EdgeInsets.only(
+                    left: 14, right: 46, top: 10, bottom: 10),
+                child: Column(
+                  children: [
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: _eventsList[index].isSelected
+                              ? const Color(0xff6b956f)
+                              : _accentColor,
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        padding: const EdgeInsets.only(
+                          top: 10,
+                          right: 15,
+                          left: 15,
+                          bottom: 10,
+                        ),
+                        child: Text(
+                          _eventsList[index].content,
+                          style: const TextStyle(fontSize: 20),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             );
@@ -264,7 +353,7 @@ class _EventListState extends State<EventList> {
           padding: const EdgeInsets.only(top: 30),
           child: Container(
             decoration: BoxDecoration(
-              color: _acsentColor.withOpacity(0.8),
+              color: _accentColor.withOpacity(0.8),
               borderRadius: BorderRadius.circular(15),
             ),
             height: 260,
