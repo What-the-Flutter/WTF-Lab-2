@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
         initialRoute: '/',
         routes: {
           '/': (context) => const ChatJournal(title: 'Chat Journal'),
-          EventList.routeName: (context) => const EventList(),
+          EventList.routeName: (context) => EventList(),
         });
   }
 }
@@ -141,40 +141,43 @@ class _ChatJournalState extends State<ChatJournal> {
             padding: const EdgeInsets.only(top: 20, right: 36, left: 36),
           ),
           Expanded(
-            child: ListView.separated(
-              separatorBuilder: (context, index) => const Divider(
-                thickness: 2,
-              ),
-              itemCount: _categoryTitles.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  onTap: () {
-                    setState(() {
-                      _selectedIndex = index;
-                    });
-                    Navigator.pushNamed(context, EventList.routeName,
-                        arguments: _categoryTitles[index]);
-                  },
-                  selected: index == _selectedIndex,
-                  selectedTileColor: _acsentColor,
-                  contentPadding: const EdgeInsets.only(left: 36),
-                  title: Text(
-                    _categoryTitles[index],
-                    style: _categoryTitleStyle,
-                  ),
-                  leading: CircleAvatar(
-                    child: Icon(
-                      _categoryIcons[index],
-                      size: 28,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 20),
+              child: ListView.separated(
+                separatorBuilder: (context, index) => const Divider(
+                  thickness: 2,
+                ),
+                itemCount: _categoryTitles.length,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    onTap: () {
+                      setState(() {
+                        _selectedIndex = index;
+                      });
+                      Navigator.pushNamed(context, EventList.routeName,
+                          arguments: _categoryTitles[index]);
+                    },
+                    selected: index == _selectedIndex,
+                    selectedTileColor: _acsentColor,
+                    contentPadding: const EdgeInsets.only(left: 36),
+                    title: Text(
+                      _categoryTitles[index],
+                      style: _categoryTitleStyle,
                     ),
-                    radius: 28,
-                  ),
-                  subtitle: const Text(
-                    _categorySubtitleText,
-                    style: _categorySubtitleStyle,
-                  ),
-                );
-              },
+                    leading: CircleAvatar(
+                      child: Icon(
+                        _categoryIcons[index],
+                        size: 28,
+                      ),
+                      radius: 28,
+                    ),
+                    subtitle: const Text(
+                      _categorySubtitleText,
+                      style: _categorySubtitleStyle,
+                    ),
+                  );
+                },
+              ),
             ),
           ),
         ],
