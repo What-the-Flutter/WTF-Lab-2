@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/event.dart';
+import 'package:flutter/services.dart';
 
 class EventList extends StatefulWidget {
   static const routeName = '/events_route';
@@ -17,6 +18,7 @@ class _EventListState extends State<EventList> {
   final List<Event> _eventsList = [];
   late String _title;
   final Set<int> _selectedIndex = {};
+  bool _validateText = false;
 
   @override
   void dispose() {
@@ -25,48 +27,138 @@ class _EventListState extends State<EventList> {
   }
 
   void _addEvent() {
-    var event = Event();
-    event.content = _textInputController.text;
-    _textInputController.clear();
-    event.date = DateTime.now();
-    _eventsList.add(event);
-    setState(() {});
+    setState(() {
+      _textInputController.text.isEmpty
+          ? _validateText = true
+          : _validateText = false;
+    });
+    if (!_validateText) {
+      var event = Event();
+      event.content = _textInputController.text;
+      _textInputController.clear();
+      event.date = DateTime.now();
+      _eventsList.add(event);
+    }
+  }
+
+  void _removeEvent() {}
+
+  void _copyEvent() {
+    var data = '';
+    for (var item in _selectedIndex) {
+      data += _eventsList[item].content;
+    }
+    Clipboard.setData(ClipboardData(text: data));
+  }
+
+  AlertDialog get _deleteAlertDilog {
+    return AlertDialog(
+      title: const Text('Deleting events'),
+      content: Text(
+          'Are you sure you want to delete ${_selectedIndex.length} selected events?'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () {},
+          child: const Text('OK'),
+        ),
+      ],
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     _title = ModalRoute.of(context)!.settings.arguments as String;
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: Text(
-          _title,
-          style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-              color: Colors.amber[50]),
-        ),
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back,
-          ),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        actions: <Widget>[
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.search),
-          ),
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.favorite_outline),
-          ),
-        ],
-      ),
+      appBar: _selectedIndex.isEmpty ? _defAppBar : _optionsAppBar,
       body: _routeBody,
       backgroundColor: Colors.blueGrey,
+    );
+  }
+
+  AppBar get _optionsAppBar {
+    return AppBar(
+      leading: IconButton(
+        onPressed: () {
+          setState(_selectedIndex.clear);
+        },
+        icon: const Icon(
+          Icons.cancel,
+        ),
+      ),
+      actions: [
+        Padding(
+          child: Text(
+            '${_selectedIndex.length}',
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          padding: const EdgeInsets.only(right: 100, top: 16),
+        ),
+        Row(
+          children: [
+            IconButton(
+              onPressed: () {},
+              icon: const Icon(
+                Icons.edit,
+              ),
+            ),
+            IconButton(
+              onPressed: _copyEvent,
+              icon: const Icon(
+                Icons.copy,
+              ),
+            ),
+            IconButton(
+              onPressed: () {},
+              icon: const Icon(
+                Icons.favorite_outline,
+              ),
+            ),
+            IconButton(
+              onPressed: () {
+                showDialog(
+                    context: context,
+                    builder: (var context) => _deleteAlertDilog);
+              },
+              icon: const Icon(
+                Icons.delete,
+              ),
+            ),
+          ],
+        )
+      ],
+    );
+  }
+
+  AppBar get _defAppBar {
+    return AppBar(
+      centerTitle: true,
+      title: Text(
+        _title,
+        style: TextStyle(
+            fontWeight: FontWeight.bold, fontSize: 20, color: Colors.amber[50]),
+      ),
+      leading: IconButton(
+        icon: const Icon(
+          Icons.arrow_back,
+        ),
+        onPressed: () {
+          Navigator.pop(context);
+        },
+      ),
+      actions: <Widget>[
+        IconButton(
+          onPressed: () {},
+          icon: const Icon(Icons.search),
+        ),
+        IconButton(
+          onPressed: () {},
+          icon: const Icon(Icons.favorite_outline),
+        ),
+      ],
     );
   }
 
@@ -92,14 +184,15 @@ class _EventListState extends State<EventList> {
                     style: const TextStyle(
                       fontSize: 20,
                     ),
-                    decoration: const InputDecoration(
-                      enabledBorder: OutlineInputBorder(
+                    decoration: InputDecoration(
+                      errorText: _validateText ? "Event can't be empty!" : null,
+                      enabledBorder: const OutlineInputBorder(
                           borderSide: BorderSide(color: Colors.transparent)),
-                      focusedBorder: OutlineInputBorder(
+                      focusedBorder: const OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.transparent),
                       ),
                       hintText: 'Type your events',
-                      fillColor: Color(0xffe5e5e5),
+                      fillColor: const Color(0xffe5e5e5),
                       filled: true,
                     ),
                   ),
@@ -147,7 +240,7 @@ class _EventListState extends State<EventList> {
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(15),
                         color: _selectedIndex.contains(index)
-                            ? const Color(0xff507050)
+                            ? const Color(0xff6b956f)
                             : _acsentColor),
                     padding: const EdgeInsets.all(10),
                     child: Text(
@@ -174,8 +267,8 @@ class _EventListState extends State<EventList> {
               color: _acsentColor.withOpacity(0.8),
               borderRadius: BorderRadius.circular(15),
             ),
-            height: 300,
-            width: 300,
+            height: 260,
+            width: 330,
             padding: const EdgeInsets.all(10),
             child: Column(
               children: [
