@@ -1,7 +1,8 @@
 class Event {
   late String content;
   late DateTime date;
-  late bool isFavourite = false;
-  late bool isSelected = false;
-  late bool idEdited = false;
+  bool isFavourite = false;
+  bool isSelected = false;
+  bool isEditing = false;
+  bool isEdited = false;
 }

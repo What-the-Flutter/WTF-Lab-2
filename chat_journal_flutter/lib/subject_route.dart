@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../models/event.dart';
 import 'package:flutter/services.dart';
+
+import '../models/event.dart';
 
 class EventList extends StatefulWidget {
   static const routeName = '/events_route';
@@ -14,12 +15,17 @@ class EventList extends StatefulWidget {
 class _EventListState extends State<EventList> {
   static const _accentColor = Color(0xff86BB8B);
   final _textInputController = TextEditingController();
+  int _selectedIndex = -1;
 
-  final List<Event> _eventsList = [];
+  List<Event> _eventsList = [];
+  List<Event> _favouriteEventsList = [];
   late String _title;
-  final Set<int> _selectedIndex = {};
   late int _amountSelectedEvents;
   bool _validateText = false;
+  bool _isFavouritesOn = false;
+
+  String _aboutRoute =
+      'Add your first event to this page by entering some text in the textbox below and hitting the send button. Long tap the send button to align the event in the opposite direction. Tap on the bookmark icon on the top right corner to show the bookmarked events only.';
 
   @override
   void dispose() {
@@ -28,6 +34,12 @@ class _EventListState extends State<EventList> {
   }
 
   void _addEvent() {
+    if (_selectedIndex != -1) {
+      if (_eventsList[_selectedIndex].isEditing == true) {
+        _cofirmEditingEvent();
+        return;
+      }
+    }
     setState(() {
       _textInputController.text.isEmpty
           ? _validateText = true
@@ -40,6 +52,20 @@ class _EventListState extends State<EventList> {
       event.date = DateTime.now();
       _eventsList.add(event);
     }
+  }
+
+  void _editEvent() {
+    setState(() {
+      for (var item in _eventsList) {
+        if (item.isSelected == true) {
+          _textInputController.text = item.content;
+          item.isEditing = true;
+          print('${item.content} + ${item.isEditing}');
+        }
+      }
+      _textInputController.selection = TextSelection.fromPosition(
+          TextPosition(offset: _textInputController.text.length));
+    });
   }
 
   void _removeEvent() {
@@ -69,6 +95,13 @@ class _EventListState extends State<EventList> {
     });
   }
 
+  bool _isEditing() {
+    for (var item in _eventsList) {
+      if (item.isEditing == true) return true;
+    }
+    return false;
+  }
+
   String _getTimeFromDate(DateTime date) {
     return '${date.hour.toString()}:${date.minute.toString()}';
   }
@@ -88,9 +121,34 @@ class _EventListState extends State<EventList> {
     _amountSelectedEvents = result;
   }
 
+  void _cofirmEditingEvent() {
+    setState(() {
+      _eventsList[_selectedIndex].content = _textInputController.text;
+      _eventsList[_selectedIndex].isEditing = false;
+      _eventsList[_selectedIndex].isEdited = true;
+      _eventsList[_selectedIndex].isSelected = false;
+      _textInputController.text = '';
+    });
+  }
+
+  void _showFavourites() {
+    setState(() {
+      if (_isFavouritesOn) {
+        _isFavouritesOn = false;
+      } else {
+        _isFavouritesOn = true;
+      }
+
+      if (_favouriteEventsList.isEmpty) return;
+      var _temp = <Event>[];
+      _temp = _eventsList;
+      _eventsList = _favouriteEventsList;
+      _favouriteEventsList = _temp;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    print(_countSelectedEvents);
     _title = ModalRoute.of(context)!.settings.arguments as String;
     return Scaffold(
       appBar: _isAnyItemSelected() ? _optionsAppBar : _defAppBar,
@@ -124,6 +182,7 @@ class _EventListState extends State<EventList> {
           setState(() {
             for (var item in _eventsList) {
               item.isSelected = false;
+              item.isEditing = false;
             }
             _countSelectedEvents();
           });
@@ -132,46 +191,58 @@ class _EventListState extends State<EventList> {
           Icons.cancel,
         ),
       ),
+      title: Text(
+        '$_amountSelectedEvents',
+        textAlign: TextAlign.left,
+        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+      ),
       actions: [
-        Padding(
-          child: Text(
-            '$_amountSelectedEvents',
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          padding: const EdgeInsets.only(right: 100, top: 16),
-        ),
-        Row(
-          children: [
-            IconButton(
-              onPressed: () {},
-              icon: const Icon(
-                Icons.edit,
-              ),
-            ),
-            IconButton(
-              onPressed: _copyEvent,
-              icon: const Icon(
-                Icons.copy,
-              ),
-            ),
-            IconButton(
-              onPressed: () {},
-              icon: const Icon(
-                Icons.favorite_outline,
-              ),
-            ),
-            IconButton(
-              onPressed: () {
-                showDialog(
-                    context: context,
-                    builder: (var context) => _deleteAlertDilog);
-              },
-              icon: const Icon(
-                Icons.delete,
-              ),
-            ),
-          ],
-        )
+        _isEditing()
+            ? Row(
+                children: [
+                  IconButton(
+                    onPressed: _cofirmEditingEvent,
+                    icon: const Icon(
+                      Icons.check,
+                      size: 28,
+                    ),
+                  )
+                ],
+              )
+            : Row(
+                children: [
+                  _amountSelectedEvents == 1
+                      ? IconButton(
+                          onPressed: _editEvent,
+                          icon: const Icon(
+                            Icons.edit,
+                          ),
+                        )
+                      : Container(),
+                  IconButton(
+                    onPressed: _copyEvent,
+                    icon: const Icon(
+                      Icons.copy,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () {},
+                    icon: const Icon(
+                      Icons.favorite_outline,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      showDialog(
+                          context: context,
+                          builder: (var context) => _deleteAlertDilog);
+                    },
+                    icon: const Icon(
+                      Icons.delete,
+                    ),
+                  ),
+                ],
+              )
       ],
     );
   }
@@ -198,8 +269,13 @@ class _EventListState extends State<EventList> {
           icon: const Icon(Icons.search),
         ),
         IconButton(
-          onPressed: () {},
-          icon: const Icon(Icons.favorite_outline),
+          onPressed: _showFavourites,
+          icon: _isFavouritesOn
+              ? const Icon(
+                  Icons.favorite_rounded,
+                  color: Color(0xffFC0A54),
+                )
+              : const Icon(Icons.favorite_outline),
         ),
       ],
     );
@@ -266,19 +342,26 @@ class _EventListState extends State<EventList> {
             return GestureDetector(
               onTap: () {
                 setState(() {
-                  /*   if (_selectedIndex.isNotEmpty) {
-                    _selectedIndex.contains(index)
-                        ? _selectedIndex.remove(index)
-                        : _selectedIndex.add(index);
-                  } */
                   for (var item in _eventsList) {
+                    if (item.isEditing) return;
                     if (item.isSelected == true) {
                       _eventsList[index].isSelected
                           ? _eventsList[index].isSelected = false
                           : _eventsList[index].isSelected = true;
                       _countSelectedEvents();
-
+                      _selectedIndex = index;
                       return;
+                    } else {
+                      if (!_isFavouritesOn) {
+                        if (_eventsList[index].isFavourite) {
+                          _eventsList[index].isFavourite = false;
+                          _favouriteEventsList.remove(_eventsList[index]);
+                        } else {
+                          _eventsList[index].isFavourite = true;
+                          _favouriteEventsList.add(_eventsList[index]);
+                        }
+                        return;
+                      }
                     }
                   }
                 });
@@ -286,9 +369,10 @@ class _EventListState extends State<EventList> {
               onLongPress: () {
                 setState(() {
                   _eventsList[index].isSelected = true;
-                  _selectedIndex.add(index);
+                  _selectedIndex = index;
                   _countSelectedEvents();
                 });
+                setState(() {});
               },
               /* child: Container(
                 padding: const EdgeInsets.only(
@@ -312,31 +396,75 @@ class _EventListState extends State<EventList> {
               ), */
               child: Container(
                 padding: const EdgeInsets.only(
-                    left: 14, right: 46, top: 10, bottom: 10),
-                child: Column(
-                  children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: _eventsList[index].isSelected
-                              ? const Color(0xff6b956f)
-                              : _accentColor,
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        padding: const EdgeInsets.only(
-                          top: 10,
-                          right: 15,
-                          left: 15,
-                          bottom: 10,
-                        ),
-                        child: Text(
-                          _eventsList[index].content,
-                          style: const TextStyle(fontSize: 20),
+                    left: 14, right: 46, top: 6, bottom: 6),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Stack(
+                    alignment: Alignment.bottomLeft,
+                    children: [
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(minWidth: 146),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: _eventsList[index].isSelected
+                                ? const Color(0xff6b956f)
+                                : _accentColor,
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          padding: const EdgeInsets.only(
+                            top: 10,
+                            right: 15,
+                            left: 15,
+                            bottom: 24,
+                          ),
+                          child: Text(
+                            _eventsList[index].content,
+                            style: const TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.only(left: 15),
+                            child: Text(
+                              _getTimeFromDate(
+                                _eventsList[index].date,
+                              ),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                                color: Color(0xff4c4c4c),
+                              ),
+                            ),
+                          ),
+                          _eventsList[index].isFavourite
+                              ? Container(
+                                  height: 34,
+                                  child: const Icon(
+                                    Icons.favorite_rounded,
+                                    size: 18,
+                                    color: Color(0xffFC0A54),
+                                  ),
+                                  padding: const EdgeInsets.only(left: 6),
+                                )
+                              : Container(
+                                  height: 34,
+                                ),
+                          _eventsList[index].isEdited
+                              ? Container(
+                                  height: 34,
+                                  child: const Icon(Icons.edit, size: 18),
+                                  padding: const EdgeInsets.only(left: 4),
+                                )
+                              : Container(
+                                  height: 34,
+                                ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             );
@@ -371,7 +499,7 @@ class _EventListState extends State<EventList> {
                 ),
                 Padding(
                   child: Text(
-                    "Add your first event to '$_title' page by entering some text in the textbox below and hitting the send button. Long tap the send button to align the event in the opposite direction. Tap on the bookmark icon on the top right corner to show the bookmarked events only.",
+                    '$_aboutRoute',
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w400,
