@@ -20,11 +20,11 @@ class _EventListState extends State<EventList> {
   List<Event> _eventsList = [];
   List<Event> _favouriteEventsList = [];
   late String _title;
-  late int _amountSelectedEvents;
+  int _amountSelectedEvents = 0;
   bool _validateText = false;
   bool _isFavouritesOn = false;
 
-  String _aboutRoute =
+  final String _aboutRoute =
       'Add your first event to this page by entering some text in the textbox below and hitting the send button. Long tap the send button to align the event in the opposite direction. Tap on the bookmark icon on the top right corner to show the bookmarked events only.';
 
   @override
@@ -140,6 +140,7 @@ class _EventListState extends State<EventList> {
       }
 
       if (_favouriteEventsList.isEmpty) return;
+      _favouriteEventsList.sort((a, b) => a.date.compareTo(b.date));
       var _temp = <Event>[];
       _temp = _eventsList;
       _eventsList = _favouriteEventsList;
@@ -226,12 +227,6 @@ class _EventListState extends State<EventList> {
                     ),
                   ),
                   IconButton(
-                    onPressed: () {},
-                    icon: const Icon(
-                      Icons.favorite_outline,
-                    ),
-                  ),
-                  IconButton(
                     onPressed: () {
                       showDialog(
                           context: context,
@@ -308,6 +303,12 @@ class _EventListState extends State<EventList> {
                     ),
                     decoration: InputDecoration(
                       errorText: _validateText ? "Event can't be empty!" : null,
+                      errorStyle: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                        foreground: Paint()..color = Colors.white,
+                        background: Paint()..color = Colors.red,
+                      ),
                       enabledBorder: const OutlineInputBorder(
                           borderSide: BorderSide(color: Colors.transparent)),
                       focusedBorder: const OutlineInputBorder(
@@ -341,30 +342,20 @@ class _EventListState extends State<EventList> {
           itemBuilder: (context, index) {
             return GestureDetector(
               onTap: () {
-                setState(() {
-                  for (var item in _eventsList) {
-                    if (item.isEditing) return;
-                    if (item.isSelected == true) {
-                      _eventsList[index].isSelected
-                          ? _eventsList[index].isSelected = false
-                          : _eventsList[index].isSelected = true;
-                      _countSelectedEvents();
-                      _selectedIndex = index;
-                      return;
-                    } else {
-                      if (!_isFavouritesOn) {
-                        if (_eventsList[index].isFavourite) {
-                          _eventsList[index].isFavourite = false;
-                          _favouriteEventsList.remove(_eventsList[index]);
-                        } else {
-                          _eventsList[index].isFavourite = true;
-                          _favouriteEventsList.add(_eventsList[index]);
-                        }
-                        return;
-                      }
-                    }
+                if (_amountSelectedEvents > 0) {
+                  _eventsList[index].isSelected
+                      ? _eventsList[index].isSelected = false
+                      : _eventsList[index].isSelected = true;
+                } else {
+                  if (_eventsList[index].isFavourite) {
+                    _favouriteEventsList.remove(_eventsList[index]);
+                    _eventsList[index].isFavourite = false;
+                  } else {
+                    _favouriteEventsList.add(_eventsList[index]);
+                    _eventsList[index].isFavourite = true;
                   }
-                });
+                }
+                setState(_countSelectedEvents);
               },
               onLongPress: () {
                 setState(() {
@@ -374,26 +365,6 @@ class _EventListState extends State<EventList> {
                 });
                 setState(() {});
               },
-              /* child: Container(
-                padding: const EdgeInsets.only(
-                    left: 14, right: 46, top: 10, bottom: 10),
-                child: Align(
-                  alignment: Alignment.topLeft,
-                  child: Container(
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(15),
-                        color: _selectedIndex.contains(index)
-                            ? const Color(0xff6b956f)
-                            : _accentColor),
-                    padding: const EdgeInsets.all(10),
-                    child: Text(
-                      _eventsList[index].content,
-                      style: const TextStyle(fontSize: 20),
-                      textAlign: TextAlign.left,
-                    ),
-                  ),
-                ),
-              ), */
               child: Container(
                 padding: const EdgeInsets.only(
                     left: 14, right: 46, top: 6, bottom: 6),
@@ -403,7 +374,7 @@ class _EventListState extends State<EventList> {
                     alignment: Alignment.bottomLeft,
                     children: [
                       ConstrainedBox(
-                        constraints: const BoxConstraints(minWidth: 146),
+                        constraints: const BoxConstraints(minWidth: 106),
                         child: Container(
                           decoration: BoxDecoration(
                             color: _eventsList[index].isSelected
