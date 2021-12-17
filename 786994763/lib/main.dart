@@ -1,6 +1,8 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+
+import 'styles.dart';
 import 'subject_route.dart';
 
 void main() {
@@ -14,12 +16,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        theme: ThemeData(primarySwatch: Colors.indigo),
-        initialRoute: '/',
-        routes: {
-          '/': (context) => const ChatJournal(title: 'Chat Journal'),
-          EventList.routeName: (context) => EventList(),
-        });
+      theme: ThemeData(primarySwatch: Colors.indigo),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const ChatJournal(title: 'Chat Journal'),
+        EventList.routeName: (context) => EventList(),
+      },
+    );
   }
 }
 
@@ -32,33 +35,21 @@ class ChatJournal extends StatefulWidget {
 }
 
 class _ChatJournalState extends State<ChatJournal> {
-  void _stubMethod() {}
-
   int _selectedIndex = -1;
+
+  final _acsentColor = const Color(0xff86BB8B);
+
+  final _categorySubtitleText = 'No Events. Click to create one.';
+
+  final _categoryTitles = <String>['Travel', 'Family', 'Sports'];
+  final _categoryIcons = [
+    Icons.flight_takeoff,
+    Icons.chair,
+    Icons.sports_basketball
+  ];
 
   @override
   Widget build(BuildContext context) {
-    const _acsentColor = Color(0xff86BB8B);
-
-    const _categoryTitleStyle = TextStyle(
-      fontSize: 24,
-      fontWeight: FontWeight.bold,
-    );
-
-    const _categorySubtitleStyle = TextStyle(
-      fontWeight: FontWeight.w600,
-      fontSize: 16,
-    );
-
-    const _categorySubtitleText = 'No Events. Click to create one.';
-
-    const _categoryTitles = <String>['Travel', 'Family', 'Sports'];
-    const _categoryIcons = [
-      Icons.flight_takeoff,
-      Icons.chair,
-      Icons.sports_basketball
-    ];
-
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -66,27 +57,11 @@ class _ChatJournalState extends State<ChatJournal> {
             Icons.menu,
             color: Colors.amber[50],
           ),
-          onPressed: _stubMethod,
+          onPressed: () {},
           tooltip: 'Open Menu',
         ),
         centerTitle: true,
-        title: RichText(
-          text: TextSpan(
-            children: [
-              TextSpan(text: widget.title),
-              WidgetSpan(
-                child: Container(
-                  child: const Text('🏡'),
-                  padding: const EdgeInsets.only(left: 8),
-                ),
-              ),
-            ],
-            style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-                color: Colors.amber[50]),
-          ),
-        ),
+        title: _titleHomePage,
         actions: [
           Container(
             child: IconButton(
@@ -94,7 +69,7 @@ class _ChatJournalState extends State<ChatJournal> {
                 Icons.dark_mode,
                 size: 30,
               ),
-              onPressed: _stubMethod,
+              onPressed: () {},
             ),
             padding: const EdgeInsets.only(right: 6),
           )
@@ -102,121 +77,17 @@ class _ChatJournalState extends State<ChatJournal> {
       ),
       body: Column(
         children: [
-          Padding(
-            child: Container(
-              decoration: BoxDecoration(
-                color: _acsentColor.withOpacity(0.85),
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: Center(
-                child: GestureDetector(
-                  onTap: _stubMethod,
-                  child: RichText(
-                    text: const TextSpan(
-                      children: [
-                        WidgetSpan(
-                          child: Padding(
-                            padding: EdgeInsets.only(right: 16),
-                            child: Icon(
-                              Icons.flutter_dash,
-                              color: Color(0xff49664c),
-                            ),
-                          ),
-                        ),
-                        TextSpan(
-                          text: 'Questionary Bot',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xff49664c),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              height: 50,
-            ),
-            padding: const EdgeInsets.only(top: 20, right: 36, left: 36),
-          ),
+          _questionaryBot,
           Expanded(
             child: Padding(
               padding: const EdgeInsets.only(top: 20),
-              child: ListView.separated(
-                separatorBuilder: (context, index) => const Divider(
-                  thickness: 2,
-                ),
-                itemCount: _categoryTitles.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    onTap: () {
-                      setState(() {
-                        _selectedIndex = index;
-                      });
-                      Navigator.pushNamed(context, EventList.routeName,
-                          arguments: _categoryTitles[index]);
-                    },
-                    selected: index == _selectedIndex,
-                    selectedTileColor: _acsentColor,
-                    contentPadding: const EdgeInsets.only(left: 36),
-                    title: Text(
-                      _categoryTitles[index],
-                      style: _categoryTitleStyle,
-                    ),
-                    leading: CircleAvatar(
-                      child: Icon(
-                        _categoryIcons[index],
-                        size: 28,
-                      ),
-                      radius: 28,
-                    ),
-                    subtitle: const Text(
-                      _categorySubtitleText,
-                      style: _categorySubtitleStyle,
-                    ),
-                  );
-                },
-              ),
+              child: _pagesListView,
             ),
           ),
         ],
       ),
       backgroundColor: Colors.blueGrey,
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.book,
-              size: 30,
-            ),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.assignment,
-              size: 30,
-            ),
-            label: 'Daily',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.map,
-              size: 30,
-            ),
-            label: 'Timeline',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.explore,
-              size: 30,
-            ),
-            label: 'Explore',
-            backgroundColor: Colors.green,
-          ),
-        ],
-      ),
+      bottomNavigationBar: _bottomNavBar,
       floatingActionButton: FloatingActionButton(
         child: const Icon(
           Icons.add,
@@ -224,8 +95,143 @@ class _ChatJournalState extends State<ChatJournal> {
           color: Color(0xff49664c),
         ),
         backgroundColor: _acsentColor,
-        onPressed: _stubMethod,
+        onPressed: () {},
       ),
+    );
+  }
+
+  Widget get _titleHomePage {
+    return RichText(
+      text: TextSpan(
+        children: [
+          TextSpan(text: widget.title),
+          WidgetSpan(
+            child: Container(
+              child: const Text('🏡'),
+              padding: const EdgeInsets.only(left: 8),
+            ),
+          ),
+        ],
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 20,
+          color: Colors.amber[50],
+        ),
+      ),
+    );
+  }
+
+  Widget get _questionaryBot {
+    return Padding(
+      child: Container(
+        decoration: BoxDecoration(
+          color: _acsentColor.withOpacity(0.85),
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: Center(
+          child: GestureDetector(
+            onTap: () {},
+            child: RichText(
+              text: const TextSpan(
+                children: [
+                  WidgetSpan(
+                    child: Padding(
+                      padding: EdgeInsets.only(right: 16),
+                      child: Icon(
+                        Icons.flutter_dash,
+                        color: Color(0xff49664c),
+                      ),
+                    ),
+                  ),
+                  TextSpan(
+                    text: 'Questionary Bot',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xff49664c),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        height: 50,
+      ),
+      padding: const EdgeInsets.only(top: 20, right: 36, left: 36),
+    );
+  }
+
+  Widget get _pagesListView {
+    return ListView.separated(
+      separatorBuilder: (context, index) => const Divider(
+        thickness: 2,
+      ),
+      itemCount: _categoryTitles.length,
+      itemBuilder: (context, index) {
+        return ListTile(
+          onTap: () {
+            void setState() => _selectedIndex = index;
+            Navigator.pushNamed(context, EventList.routeName,
+                arguments: _categoryTitles[index]);
+          },
+          selected: index == _selectedIndex,
+          selectedTileColor: _acsentColor,
+          contentPadding: const EdgeInsets.only(left: 36),
+          title: Text(
+            _categoryTitles[index],
+            style: categoryTitleStyle,
+          ),
+          leading: CircleAvatar(
+            child: Icon(
+              _categoryIcons[index],
+              size: 28,
+            ),
+            radius: 28,
+          ),
+          subtitle: Text(
+            _categorySubtitleText,
+            style: categorySubtitleStyle,
+          ),
+        );
+      },
+    );
+  }
+
+  BottomNavigationBar get _bottomNavBar {
+    return BottomNavigationBar(
+      type: BottomNavigationBarType.fixed,
+      items: const <BottomNavigationBarItem>[
+        BottomNavigationBarItem(
+          icon: Icon(
+            Icons.book,
+            size: 30,
+          ),
+          label: 'Home',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(
+            Icons.assignment,
+            size: 30,
+          ),
+          label: 'Daily',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(
+            Icons.map,
+            size: 30,
+          ),
+          label: 'Timeline',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(
+            Icons.explore,
+            size: 30,
+          ),
+          label: 'Explore',
+          backgroundColor: Colors.green,
+        ),
+      ],
     );
   }
 }
