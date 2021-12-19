@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import '../models/event.dart';
 
-class Page {
+class PageInfo {
   late String title;
-  late String subtitle;
+  String subtitle = 'No Events. Click to create one.';
   late Icon icon;
   late DateTime createdTime;
   late DateTime lastEditTime;
-  late bool isPinned;
+  List<Event> eventList = [];
+  bool isPinned = false;
+
+  PageInfo(this.title, this.icon, this.createdTime, this.lastEditTime);
 }

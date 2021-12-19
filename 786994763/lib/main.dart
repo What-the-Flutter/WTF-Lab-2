@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import 'add_page_route.dart';
+import 'models/page.dart';
 import 'styles.dart';
 import 'subject_route.dart';
 
@@ -41,17 +42,48 @@ class _ChatJournalState extends State<ChatJournal> {
 
   final _accentColor = const Color(0xff86BB8B);
 
-  final _pageSubtitleText = 'No Events. Click to create one.';
+  List<PageInfo> _pagesList = [];
 
-  final _pageTitles = <String>['Travel', 'Family', 'Sports'];
-  final _pageIcons = [
-    Icons.flight_takeoff,
-    Icons.chair,
-    Icons.sports_basketball
-  ];
+  void _addNewPage() async {
+    final result = await Navigator.pushNamed(
+      context,
+      PageInput.routeName,
+      arguments: _pagesList,
+    ) as List<PageInfo>;
+    _pagesList = result;
+    setState(() {});
+  }
+
+  void _addEvents(int index) async {
+    print('kek: $_pagesList[index].title');
+    await Navigator.pushNamed(context, EventList.routeName,
+        arguments: _pagesList[index]);
+    //_pagesList[index] = result;
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_pagesList.isEmpty) {
+      _pagesList.add(PageInfo(
+        'Travel',
+        const Icon(Icons.flight_takeoff),
+        DateTime.now(),
+        DateTime.now(),
+      ));
+      _pagesList.add(PageInfo(
+        'Family',
+        const Icon(Icons.chair),
+        DateTime.now(),
+        DateTime.now(),
+      ));
+      _pagesList.add(PageInfo(
+        'Sports',
+        const Icon(Icons.sports_basketball),
+        DateTime.now(),
+        DateTime.now(),
+      ));
+    }
     return Scaffold(
       appBar: _homeAppBar,
       body: Column(
@@ -150,35 +182,39 @@ class _ChatJournalState extends State<ChatJournal> {
       separatorBuilder: (context, index) => const Divider(
         thickness: 2,
       ),
-      itemCount: _pageTitles.length,
+      itemCount: _pagesList.length,
       itemBuilder: (context, index) {
         return ListTile(
           onTap: () {
             void setState() => _selectedIndex = index;
-            Navigator.pushNamed(
-              context,
-              EventList.routeName,
-              arguments: _pageTitles[index],
-            );
+            _addEvents(index);
           },
           selected: index == _selectedIndex,
-          selectedTileColor: _accentColor,
-          contentPadding: const EdgeInsets.only(left: 36),
+          contentPadding: const EdgeInsets.only(left: 26),
+          trailing: _pagesList[index].eventList.isNotEmpty
+              ? Container(
+                  child: Text('${_pagesList[index].eventList.last.date.hour}:' +
+                      '${_pagesList[index].eventList.last.date.hour}'),
+                  padding: const EdgeInsets.only(right: 10),
+                )
+              : const Text(''),
           title: Text(
-            _pageTitles[index],
+            _pagesList[index].title,
             style: categoryTitleStyle,
           ),
           leading: CircleAvatar(
-            child: Icon(
-              _pageIcons[index],
-              size: 28,
-            ),
+            child: _pagesList[index].icon,
             radius: 28,
           ),
-          subtitle: Text(
-            _pageSubtitleText,
-            style: categorySubtitleStyle,
-          ),
+          subtitle: _pagesList[index].eventList.isNotEmpty
+              ? Text(
+                  _pagesList[index].eventList.last.content,
+                  style: categorySubtitleStyle,
+                )
+              : Text(
+                  _pagesList[index].subtitle,
+                  style: categorySubtitleStyle,
+                ),
         );
       },
     );
@@ -192,13 +228,7 @@ class _ChatJournalState extends State<ChatJournal> {
         color: Color(0xff49664c),
       ),
       backgroundColor: _accentColor,
-      onPressed: () {
-        Navigator.pushNamed(
-          context,
-          PageInput.routeName,
-          arguments: _pageTitles,
-        );
-      },
+      onPressed: _addNewPage,
     );
   }
 

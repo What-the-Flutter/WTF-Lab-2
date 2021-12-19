@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'models/adding_page.dart';
+import 'models/page.dart';
 import 'styles.dart';
 
 class PageInput extends StatefulWidget {
@@ -19,7 +20,7 @@ class _PageInputState extends State<PageInput> {
 
   @override
   Widget build(BuildContext context) {
-    _pagesList = ModalRoute.of(context)!.settings.arguments as List;
+    _pagesList = ModalRoute.of(context)!.settings.arguments as List<PageInfo>;
     if (_pageIcons.isEmpty) {
       _pageIcons.add(NewPage.selected(const Icon(Icons.cake), true));
       _pageIcons.add(NewPage(const Icon(Icons.chair)));
@@ -62,8 +63,17 @@ class _PageInputState extends State<PageInput> {
     setState(() {});
   }
 
+  Icon get _selectedPageIcon {
+    for (var item in _pageIcons) {
+      if (item.isSelected) return item.icon;
+    }
+    return _pageIcons.first.icon;
+  }
+
   void _addNewPage() {
-    Navigator.pop(context);
+    _pagesList.add(PageInfo(_titlePageController.text, _selectedPageIcon,
+        DateTime.now(), DateTime.now()));
+    Navigator.pop(context, _pagesList);
   }
 
   Widget get _homeWidget {
@@ -186,7 +196,7 @@ class _PageInputState extends State<PageInput> {
       height: 60,
       width: 60,
       child: FloatingActionButton(
-        onPressed: () => Navigator.pop(context),
+        onPressed: () => Navigator.pop(context, _pagesList),
         child: const Icon(
           Icons.clear,
           size: 34,

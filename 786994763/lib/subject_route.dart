@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../models/event.dart';
+import 'models/page.dart';
 import 'styles.dart';
 
 class EventList extends StatefulWidget {
@@ -20,7 +21,8 @@ class _EventListState extends State<EventList> {
 
   List<Event> _eventsList = [];
   List<Event> _favouriteEventsList = [];
-  late String _title;
+  String _title = '';
+  late PageInfo _parentPage;
   int _amountSelectedEvents = 0;
   bool _validateText = false;
   bool _isFavouritesOn = false;
@@ -162,11 +164,16 @@ class _EventListState extends State<EventList> {
 
   @override
   Widget build(BuildContext context) {
-    _title = ModalRoute.of(context)!.settings.arguments as String;
-    return Scaffold(
-      appBar: _isAnyItemSelected() ? _eventSelectedAppBar : _defaultAppBar,
-      body: _routeBody,
-      backgroundColor: Colors.blueGrey,
+    //print((ModalRoute.of(context)!.settings.arguments as PageInfo).title);
+    _parentPage = ModalRoute.of(context)!.settings.arguments as PageInfo;
+    _title = _parentPage.title;
+    if (_parentPage.eventList.isNotEmpty) _eventsList = _parentPage.eventList;
+    return MaterialApp(
+      home: Scaffold(
+        appBar: _isAnyItemSelected() ? _eventSelectedAppBar : _defaultAppBar,
+        body: _routeBody,
+        backgroundColor: Colors.blueGrey,
+      ),
     );
   }
 
@@ -266,6 +273,7 @@ class _EventListState extends State<EventList> {
 
   AppBar get _defaultAppBar {
     return AppBar(
+      backgroundColor: Colors.indigo,
       centerTitle: true,
       title: Text(
         _title,
@@ -280,7 +288,8 @@ class _EventListState extends State<EventList> {
           Icons.arrow_back,
         ),
         onPressed: () {
-          Navigator.pop(context);
+          _parentPage.eventList = _eventsList;
+          Navigator.pop(context, _parentPage);
         },
       ),
       actions: <Widget>[
