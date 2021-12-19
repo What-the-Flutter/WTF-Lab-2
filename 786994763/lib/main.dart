@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+import 'add_page_route.dart';
 import 'styles.dart';
 import 'subject_route.dart';
 
@@ -21,6 +22,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => const ChatJournal(title: 'Chat Journal'),
         EventList.routeName: (context) => EventList(),
+        PageInput.routeName: (context) => PageInput(),
       },
     );
   }
@@ -37,12 +39,12 @@ class ChatJournal extends StatefulWidget {
 class _ChatJournalState extends State<ChatJournal> {
   int _selectedIndex = -1;
 
-  final _acsentColor = const Color(0xff86BB8B);
+  final _accentColor = const Color(0xff86BB8B);
 
-  final _categorySubtitleText = 'No Events. Click to create one.';
+  final _pageSubtitleText = 'No Events. Click to create one.';
 
-  final _categoryTitles = <String>['Travel', 'Family', 'Sports'];
-  final _categoryIcons = [
+  final _pageTitles = <String>['Travel', 'Family', 'Sports'];
+  final _pageIcons = [
     Icons.flight_takeoff,
     Icons.chair,
     Icons.sports_basketball
@@ -51,30 +53,7 @@ class _ChatJournalState extends State<ChatJournal> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(
-            Icons.menu,
-            color: Colors.amber[50],
-          ),
-          onPressed: () {},
-          tooltip: 'Open Menu',
-        ),
-        centerTitle: true,
-        title: _titleHomePage,
-        actions: [
-          Container(
-            child: IconButton(
-              icon: const Icon(
-                Icons.dark_mode,
-                size: 30,
-              ),
-              onPressed: () {},
-            ),
-            padding: const EdgeInsets.only(right: 6),
-          )
-        ],
-      ),
+      appBar: _homeAppBar,
       body: Column(
         children: [
           _questionaryBot,
@@ -88,15 +67,34 @@ class _ChatJournalState extends State<ChatJournal> {
       ),
       backgroundColor: Colors.blueGrey,
       bottomNavigationBar: _bottomNavBar,
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(
-          Icons.add,
-          size: 36,
-          color: Color(0xff49664c),
+      floatingActionButton: _fabAddNewPage,
+    );
+  }
+
+  AppBar get _homeAppBar {
+    return AppBar(
+      leading: IconButton(
+        icon: Icon(
+          Icons.menu,
+          color: Colors.amber[50],
         ),
-        backgroundColor: _acsentColor,
         onPressed: () {},
+        tooltip: 'Open Menu',
       ),
+      centerTitle: true,
+      title: _titleHomePage,
+      actions: [
+        Container(
+          child: IconButton(
+            icon: const Icon(
+              Icons.dark_mode,
+              size: 30,
+            ),
+            onPressed: () {},
+          ),
+          padding: const EdgeInsets.only(right: 6),
+        )
+      ],
     );
   }
 
@@ -125,38 +123,23 @@ class _ChatJournalState extends State<ChatJournal> {
     return Padding(
       child: Container(
         decoration: BoxDecoration(
-          color: _acsentColor.withOpacity(0.85),
+          color: _accentColor.withOpacity(0.85),
           borderRadius: BorderRadius.circular(15),
         ),
         child: Center(
           child: GestureDetector(
             onTap: () {},
-            child: RichText(
-              text: const TextSpan(
-                children: [
-                  WidgetSpan(
-                    child: Padding(
-                      padding: EdgeInsets.only(right: 16),
-                      child: Icon(
-                        Icons.flutter_dash,
-                        color: Color(0xff49664c),
-                      ),
-                    ),
-                  ),
-                  TextSpan(
-                    text: 'Questionary Bot',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xff49664c),
-                    ),
-                  ),
-                ],
+            child: const Text(
+              'Questionary Bot',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Color(0xff49664c),
               ),
             ),
           ),
         ),
-        height: 50,
+        height: 60,
       ),
       padding: const EdgeInsets.only(top: 20, right: 36, left: 36),
     );
@@ -167,32 +150,53 @@ class _ChatJournalState extends State<ChatJournal> {
       separatorBuilder: (context, index) => const Divider(
         thickness: 2,
       ),
-      itemCount: _categoryTitles.length,
+      itemCount: _pageTitles.length,
       itemBuilder: (context, index) {
         return ListTile(
           onTap: () {
             void setState() => _selectedIndex = index;
-            Navigator.pushNamed(context, EventList.routeName,
-                arguments: _categoryTitles[index]);
+            Navigator.pushNamed(
+              context,
+              EventList.routeName,
+              arguments: _pageTitles[index],
+            );
           },
           selected: index == _selectedIndex,
-          selectedTileColor: _acsentColor,
+          selectedTileColor: _accentColor,
           contentPadding: const EdgeInsets.only(left: 36),
           title: Text(
-            _categoryTitles[index],
+            _pageTitles[index],
             style: categoryTitleStyle,
           ),
           leading: CircleAvatar(
             child: Icon(
-              _categoryIcons[index],
+              _pageIcons[index],
               size: 28,
             ),
             radius: 28,
           ),
           subtitle: Text(
-            _categorySubtitleText,
+            _pageSubtitleText,
             style: categorySubtitleStyle,
           ),
+        );
+      },
+    );
+  }
+
+  Widget get _fabAddNewPage {
+    return FloatingActionButton(
+      child: const Icon(
+        Icons.add,
+        size: 36,
+        color: Color(0xff49664c),
+      ),
+      backgroundColor: _accentColor,
+      onPressed: () {
+        Navigator.pushNamed(
+          context,
+          PageInput.routeName,
+          arguments: _pageTitles,
         );
       },
     );

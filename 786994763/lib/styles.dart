@@ -15,6 +15,13 @@ const eventTimeStyle = TextStyle(
   color: Color(0xff4c4c4c),
 );
 
+const pageInputHintStyle = TextStyle(
+  fontWeight: FontWeight.bold,
+  color: Colors.black,
+  fontSize: 24,
+  height: 3,
+);
+
 const borderStyle = OutlineInputBorder(
   borderSide: BorderSide(color: Colors.transparent),
 );

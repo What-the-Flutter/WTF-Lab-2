@@ -28,12 +28,6 @@ class _EventListState extends State<EventList> {
   final String _aboutRoute =
       'Add your first event to this page by entering some text in the textbox below and hitting the send button. Long tap the send button to align the event in the opposite direction. Tap on the bookmark icon on the top right corner to show the bookmarked events only.';
 
-  @override
-  void dispose() {
-    _textInputController.dispose();
-    super.dispose();
-  }
-
   void _addEvent() {
     print('selectedIndex: $_selectedIndex');
     if (_selectedIndex != -1) {
