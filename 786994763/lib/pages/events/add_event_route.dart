@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../models/event.dart';
-import 'models/page.dart';
-import 'styles.dart';
+import '../../models/event.dart';
+import '../../models/page.dart';
+import '../../styles.dart';
+import 'const_widgets.dart';
+import 'stateless_widgets_events_page.dart';
 
 class EventList extends StatefulWidget {
   static const routeName = '/events_route';
 
   EventList({Key? key}) : super(key: key);
+  static String title = '';
 
   @override
   _EventListState createState() => _EventListState();
@@ -21,7 +24,6 @@ class _EventListState extends State<EventList> {
 
   List<Event> _eventsList = [];
   List<Event> _favouriteEventsList = [];
-  String _title = '';
   late PageInfo _parentPage;
   int _amountSelectedEvents = 0;
   bool _validateText = false;
@@ -31,7 +33,6 @@ class _EventListState extends State<EventList> {
       'Add your first event to this page by entering some text in the textbox below and hitting the send button. Long tap the send button to align the event in the opposite direction. Tap on the bookmark icon on the top right corner to show the bookmarked events only.';
 
   void _addEvent() {
-    print('selectedIndex: $_selectedIndex');
     if (_selectedIndex != -1) {
       if (_eventsList[_selectedIndex].isEditing == true) {
         _confirmEditingEvent();
@@ -58,11 +59,11 @@ class _EventListState extends State<EventList> {
         if (item.isSelected == true) {
           _textInputController.text = item.content;
           item.isEditing = true;
-          print('${item.content} + ${item.isEditing}');
         }
       }
       _textInputController.selection = TextSelection.fromPosition(
-          TextPosition(offset: _textInputController.text.length));
+        TextPosition(offset: _textInputController.text.length),
+      );
     });
   }
 
@@ -135,7 +136,11 @@ class _EventListState extends State<EventList> {
 
   void _showFavourites() {
     setState(() {
-      _isFavouritesOn ? _isFavouritesOn = false : _isFavouritesOn = true;
+      if (_isFavouritesOn) {
+        _isFavouritesOn = false;
+      } else {
+        _isFavouritesOn = true;
+      }
 
       if (_favouriteEventsList.isEmpty) return;
       _favouriteEventsList.sort((a, b) => a.date.compareTo(b.date));
@@ -162,12 +167,23 @@ class _EventListState extends State<EventList> {
     }
   }
 
+  void _backButton() {
+    if (_eventsList.isEmpty) {
+      Navigator.pop(context, _parentPage);
+    }
+    _parentPage.eventList = _eventsList;
+    _parentPage.lastEditTime = _parentPage.eventList.last.date;
+    Navigator.pop(context, _parentPage);
+  }
+
   @override
   Widget build(BuildContext context) {
-    //print((ModalRoute.of(context)!.settings.arguments as PageInfo).title);
     _parentPage = ModalRoute.of(context)!.settings.arguments as PageInfo;
-    _title = _parentPage.title;
-    if (_parentPage.eventList.isNotEmpty) _eventsList = _parentPage.eventList;
+    EventList.title = _parentPage.title;
+    if (_parentPage.eventList.isNotEmpty && _isFavouritesOn == false) {
+      _eventsList = _parentPage.eventList;
+    }
+
     return MaterialApp(
       home: Scaffold(
         appBar: _isAnyItemSelected() ? _eventSelectedAppBar : _defaultAppBar,
@@ -208,9 +224,7 @@ class _EventListState extends State<EventList> {
             _countSelectedEvents();
           });
         },
-        icon: const Icon(
-          Icons.cancel,
-        ),
+        icon: iconCancel,
       ),
       title: Text(
         '$_amountSelectedEvents',
@@ -231,16 +245,12 @@ class _EventListState extends State<EventList> {
         _amountSelectedEvents == 1
             ? IconButton(
                 onPressed: _editEvent,
-                icon: const Icon(
-                  Icons.edit,
-                ),
+                icon: iconEdit,
               )
             : Container(),
         IconButton(
           onPressed: _copyEvent,
-          icon: const Icon(
-            Icons.copy,
-          ),
+          icon: iconCopy,
         ),
         IconButton(
           onPressed: () {
@@ -249,9 +259,7 @@ class _EventListState extends State<EventList> {
               builder: (var context) => _deleteAlertDilog,
             );
           },
-          icon: const Icon(
-            Icons.delete,
-          ),
+          icon: iconDelete,
         ),
       ],
     );
@@ -262,10 +270,7 @@ class _EventListState extends State<EventList> {
       children: [
         IconButton(
           onPressed: _confirmEditingEvent,
-          icon: const Icon(
-            Icons.check,
-            size: 28,
-          ),
+          icon: iconCheck,
         )
       ],
     );
@@ -276,37 +281,21 @@ class _EventListState extends State<EventList> {
       backgroundColor: Colors.indigo,
       centerTitle: true,
       title: Text(
-        _title,
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 20,
-          color: Colors.amber[50],
-        ),
+        EventList.title,
+        style: titlePageStyle,
       ),
       leading: IconButton(
-        icon: const Icon(
-          Icons.arrow_back,
-        ),
-        onPressed: () {
-          _parentPage.eventList = _eventsList;
-          Navigator.pop(context, _parentPage);
-        },
+        icon: iconArrowBack,
+        onPressed: _backButton,
       ),
       actions: <Widget>[
         IconButton(
           onPressed: () {},
-          icon: const Icon(Icons.search),
+          icon: iconSearch,
         ),
         IconButton(
           onPressed: _showFavourites,
-          icon: _isFavouritesOn
-              ? const Icon(
-                  Icons.favorite_rounded,
-                  color: Color(0xffFC0A54),
-                )
-              : const Icon(
-                  Icons.favorite_outline,
-                ),
+          icon: _isFavouritesOn ? favouriteIcon : favouriteIconOutlined,
         ),
       ],
     );
@@ -315,16 +304,14 @@ class _EventListState extends State<EventList> {
   Widget get _routeBody {
     return Column(
       children: <Widget>[
-        _eventsList.isNotEmpty ? _messagesWidget : _noMessageWidget,
+        _eventsList.isNotEmpty ? _messagesWidget : const NoEventsWidget(),
         Align(
           alignment: Alignment.bottomCenter,
           child: Row(
             children: <Widget>[
               IconButton(
                 onPressed: () {},
-                icon: const Icon(
-                  Icons.bubble_chart,
-                ),
+                icon: iconBubbleChart,
               ),
               Expanded(
                 child: SizedBox(
@@ -333,9 +320,7 @@ class _EventListState extends State<EventList> {
               ),
               IconButton(
                 onPressed: _addEvent,
-                icon: const Icon(
-                  Icons.send,
-                ),
+                icon: iconSendEvent,
               ),
             ],
           ),
@@ -356,12 +341,7 @@ class _EventListState extends State<EventList> {
       ),
       decoration: InputDecoration(
         errorText: _validateText ? "Event can't be empty!" : null,
-        errorStyle: TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 20,
-          foreground: Paint()..color = Colors.white,
-          background: Paint()..color = Colors.red,
-        ),
+        errorStyle: inputErrorStyle,
         enabledBorder: borderStyle,
         focusedBorder: borderStyle,
         hintText: 'Type your events',
@@ -370,8 +350,6 @@ class _EventListState extends State<EventList> {
       ),
     );
   }
-
-  //разбить на отдельные виджеты
 
   Widget get _messagesWidget {
     return Expanded(
@@ -458,82 +436,8 @@ class _EventListState extends State<EventList> {
             style: eventTimeStyle,
           ),
         ),
-        _eventsList[index].isFavourite ? _eventFavourite : _emptyContainer,
-        _eventsList[index].isEdited ? _eventEdited : _emptyContainer,
-      ],
-    );
-  }
-
-  Widget get _eventEdited {
-    return Container(
-      height: 34,
-      child: const Icon(Icons.edit, size: 18),
-      padding: const EdgeInsets.only(left: 4),
-    );
-  }
-
-  Widget get _eventFavourite {
-    return Container(
-      height: 34,
-      child: const Icon(
-        Icons.favorite_rounded,
-        size: 18,
-        color: Color(0xffFC0A54),
-      ),
-      padding: const EdgeInsets.only(left: 6),
-    );
-  }
-
-  Widget get _emptyContainer {
-    return Container(
-      height: 34,
-    );
-  }
-
-  Widget get _noMessageWidget {
-    return Expanded(
-      child: Align(
-        alignment: Alignment.topCenter,
-        child: Padding(
-          padding: const EdgeInsets.only(top: 30),
-          child: Container(
-            decoration: BoxDecoration(
-              color: _accentColor.withOpacity(0.8),
-              borderRadius: BorderRadius.circular(15),
-            ),
-            height: 260,
-            width: 330,
-            padding: const EdgeInsets.all(10),
-            child: _defaultText,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget get _defaultText {
-    return Column(
-      children: [
-        Text(
-          'This is page where you can track everything about "$_title" !',
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-          textAlign: TextAlign.center,
-        ),
-        Padding(
-          child: Text(
-            '$_aboutRoute',
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w400,
-              color: Color(0xff323232),
-            ),
-            textAlign: TextAlign.center,
-          ),
-          padding: const EdgeInsets.only(top: 20),
-        ),
+        _eventsList[index].isFavourite ? eventFavourite : emptyContainer,
+        _eventsList[index].isEdited ? eventEdited : emptyContainer,
       ],
     );
   }

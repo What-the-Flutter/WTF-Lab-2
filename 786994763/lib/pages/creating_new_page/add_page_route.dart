@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'models/adding_page.dart';
-import 'models/page.dart';
-import 'styles.dart';
+import '../../models/adding_page.dart';
+import '../../models/page.dart';
+import '../../styles.dart';
 
 class PageInput extends StatefulWidget {
   static const routeName = '/add_page_route';
@@ -110,6 +110,7 @@ class _PageInputState extends State<PageInput> {
       width: 320,
       padding: const EdgeInsets.only(top: 20),
       child: TextField(
+        maxLength: 20,
         onChanged: (var stub) {
           setState(() {});
         },

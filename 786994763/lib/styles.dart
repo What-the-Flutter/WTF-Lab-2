@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 
+TextStyle titlePageStyle = TextStyle(
+  fontWeight: FontWeight.bold,
+  fontSize: 20,
+  color: Colors.amber[50],
+);
+
 const categoryTitleStyle = TextStyle(
   fontSize: 24,
   fontWeight: FontWeight.bold,
@@ -24,4 +30,11 @@ const pageInputHintStyle = TextStyle(
 
 const borderStyle = OutlineInputBorder(
   borderSide: BorderSide(color: Colors.transparent),
+);
+
+TextStyle inputErrorStyle = TextStyle(
+  fontWeight: FontWeight.bold,
+  fontSize: 20,
+  foreground: Paint()..color = Colors.white,
+  background: Paint()..color = Colors.red,
 );

@@ -8,7 +8,9 @@ class PageInfo {
   late DateTime createdTime;
   late DateTime lastEditTime;
   List<Event> eventList = [];
+  List<Event> favEventsList = [];
   bool isPinned = false;
+  bool isSelected = false;
 
   PageInfo(this.title, this.icon, this.createdTime, this.lastEditTime);
 }
