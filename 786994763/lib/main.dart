@@ -1,12 +1,11 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 
-import '../../models/page.dart';
-import '../../styles.dart';
-import '../creating_new_page/add_page_route.dart';
-import '../events/add_event_route.dart';
-import 'bottom_nav_bar.dart';
+import 'models/page.dart';
+import 'pages/creating_new_page/add_page_route.dart';
+import 'pages/events/add_event_route.dart';
+import 'pages/home/bottom_nav_bar.dart';
+import 'pages/home/page_listtile.dart';
+import 'styles.dart';
 
 void main() {
   runApp(const MyApp());
@@ -40,14 +39,14 @@ class ChatJournal extends StatefulWidget {
 
 class _ChatJournalState extends State<ChatJournal> {
   final _accentColor = const Color(0xff86BB8B);
-  int _selectedIndex = -1;
   List<PageInfo> _pagesList = [];
 
-  void _addEvents(int index) async {
+  Future _addEvents(int index) async {
     await Navigator.pushNamed(context, EventList.routeName,
         arguments: _pagesList[index]);
     _pagesList.sort((a, b) => a.lastEditTime.compareTo(b.lastEditTime));
     _pagesList = _pagesList.reversed.toList();
+    print('closed');
     setState(() {});
   }
 
@@ -64,7 +63,6 @@ class _ChatJournalState extends State<ChatJournal> {
   }
 
   void _addNewPage() async {
-    print('kekew');
     final result = await Navigator.pushNamed(
       context,
       PageInput.routeName,
@@ -131,41 +129,11 @@ class _ChatJournalState extends State<ChatJournal> {
         context,
         index,
       ) {
-        return ListTile(
-          onTap: () {
-            void setState() => _selectedIndex = index;
-            _addEvents(index);
-          },
-          onLongPress: () => _toggleSelection(index),
-          selected: index == _selectedIndex,
-          selectedTileColor: Colors.green,
-          contentPadding: const EdgeInsets.only(left: 26),
-          trailing: _pagesList[index].eventList.isNotEmpty
-              ? Container(
-                  child: Text(
-                    '${_pagesList[index].eventList.last.date.hour}:'
-                    '${_pagesList[index].eventList.last.date.minute}',
-                  ),
-                  padding: const EdgeInsets.only(right: 14),
-                )
-              : const Text(''),
-          title: Text(
-            _pagesList[index].title,
-            style: categoryTitleStyle,
-          ),
-          leading: CircleAvatar(
-            child: _pagesList[index].icon,
-            radius: 28,
-          ),
-          subtitle: _pagesList[index].eventList.isNotEmpty
-              ? Text(
-                  _pagesList[index].eventList.last.content,
-                  style: categorySubtitleStyle,
-                )
-              : Text(
-                  _pagesList[index].subtitle,
-                  style: categorySubtitleStyle,
-                ),
+        return PageListTile(
+          onTap: _addEvents,
+          index: index,
+          toggleSelection: _toggleSelection,
+          pagesList: _pagesList,
         );
       },
     );

@@ -3,9 +3,12 @@ import 'package:flutter/services.dart';
 
 import '../../models/event.dart';
 import '../../models/page.dart';
-import '../../styles.dart';
+import 'app_bars/default_appbar.dart';
+import 'app_bars/selected_event_appbar.dart';
 import 'const_widgets.dart';
-import 'stateless_widgets_events_page.dart';
+import 'event_listtile.dart';
+import 'no_events_widget.dart';
+import 'textfiled_widget.dart';
 
 class EventList extends StatefulWidget {
   static const routeName = '/events_route';
@@ -20,7 +23,6 @@ class EventList extends StatefulWidget {
 class _EventListState extends State<EventList> {
   static const _accentColor = Color(0xff86BB8B);
   final _textInputController = TextEditingController();
-  int _selectedIndex = -1;
 
   List<Event> _eventsList = [];
   List<Event> _favouriteEventsList = [];
@@ -28,14 +30,17 @@ class _EventListState extends State<EventList> {
   int _amountSelectedEvents = 0;
   bool _validateText = false;
   bool _isFavouritesOn = false;
+  int _selectedIndex = -1;
 
-  final String _aboutRoute =
-      'Add your first event to this page by entering some text in the textbox below and hitting the send button. Long tap the send button to align the event in the opposite direction. Tap on the bookmark icon on the top right corner to show the bookmarked events only.';
+  final String _aboutRoute = '''
+  Add your first event to this page by entering some text in the textbox below and
+  hitting the send button. Long tap the send button to align the event in the opposite
+  direction. Tap on the bookmark icon on the top right corner to show the bookmarked events only.''';
 
-  void _addEvent() {
-    if (_selectedIndex != -1) {
-      if (_eventsList[_selectedIndex].isEditing == true) {
-        _confirmEditingEvent();
+  void _addEvent(int index) {
+    if (index != -1) {
+      if (_eventsList[index].isEditing == true) {
+        _confirmEditingEvent(index);
         return;
       }
     }
@@ -79,7 +84,6 @@ class _EventListState extends State<EventList> {
       }
       Navigator.pop(context);
       setState(_countSelectedEvents);
-      _selectedIndex = -1;
     });
   }
 
@@ -123,12 +127,12 @@ class _EventListState extends State<EventList> {
     result == 0 ? _amountSelectedEvents = -1 : _amountSelectedEvents = result;
   }
 
-  void _confirmEditingEvent() {
+  void _confirmEditingEvent(int index) {
     setState(() {
-      _eventsList[_selectedIndex].content = _textInputController.text;
-      _eventsList[_selectedIndex].isEditing = false;
-      _eventsList[_selectedIndex].isEdited = true;
-      _eventsList[_selectedIndex].isSelected = false;
+      _eventsList[index].content = _textInputController.text;
+      _eventsList[index].isEditing = false;
+      _eventsList[index].isEdited = true;
+      _eventsList[index].isSelected = false;
       _textInputController.text = '';
       _countSelectedEvents();
     });
@@ -152,10 +156,12 @@ class _EventListState extends State<EventList> {
   }
 
   void _eventTap(int index) {
+    _selectedIndex = index;
     if (_amountSelectedEvents > 0) {
       _eventsList[index].isSelected
           ? _eventsList[index].isSelected = false
           : _eventsList[index].isSelected = true;
+      setState(_countSelectedEvents);
     } else {
       if (_eventsList[index].isFavourite) {
         _favouriteEventsList.remove(_eventsList[index]);
@@ -164,6 +170,7 @@ class _EventListState extends State<EventList> {
         _favouriteEventsList.add(_eventsList[index]);
         _eventsList[index].isFavourite = true;
       }
+      setState(_countSelectedEvents);
     }
   }
 
@@ -172,8 +179,14 @@ class _EventListState extends State<EventList> {
       Navigator.pop(context, _parentPage);
     }
     _parentPage.eventList = _eventsList;
+    _parentPage.favEventsList = _favouriteEventsList;
     _parentPage.lastEditTime = _parentPage.eventList.last.date;
     Navigator.pop(context, _parentPage);
+  }
+
+  @override
+  void setState(VoidCallback fn) {
+    super.setState(fn);
   }
 
   @override
@@ -183,121 +196,32 @@ class _EventListState extends State<EventList> {
     if (_parentPage.eventList.isNotEmpty && _isFavouritesOn == false) {
       _eventsList = _parentPage.eventList;
     }
+    if (_parentPage.favEventsList.isNotEmpty) {
+      _favouriteEventsList = _parentPage.favEventsList;
+    }
 
     return MaterialApp(
       home: Scaffold(
-        appBar: _isAnyItemSelected() ? _eventSelectedAppBar : _defaultAppBar,
+        appBar: _isAnyItemSelected()
+            ? EventSelectedAppBar(
+                eventsList: _eventsList,
+                selectedIndex: _selectedIndex,
+                amountSelectedEvents: _amountSelectedEvents,
+                countSelectedEvents: _countSelectedEvents,
+                removeEvent: _removeEvent,
+                confirmEditingEvent: _confirmEditingEvent,
+                copyEvent: _copyEvent,
+                editEvent: _editEvent,
+                isEditing: _isEditing,
+              ) as PreferredSizeWidget
+            : DefaultAppBar(
+                backButton: _backButton,
+                showFavourites: _showFavourites,
+                isFavouritesOn: _isFavouritesOn,
+              ) as PreferredSizeWidget,
         body: _routeBody,
         backgroundColor: Colors.blueGrey,
       ),
-    );
-  }
-
-  AlertDialog get _deleteAlertDilog {
-    return AlertDialog(
-      title: const Text('Deleting events'),
-      content: Text(
-        'Are you sure you want to delete ${_amountSelectedEvents.toString()} selected events?',
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-        TextButton(
-          onPressed: _removeEvent,
-          child: const Text('OK'),
-        ),
-      ],
-    );
-  }
-
-  AppBar get _eventSelectedAppBar {
-    return AppBar(
-      leading: IconButton(
-        onPressed: () {
-          setState(() {
-            for (var item in _eventsList) {
-              item.isSelected = false;
-              item.isEditing = false;
-            }
-            _countSelectedEvents();
-          });
-        },
-        icon: iconCancel,
-      ),
-      title: Text(
-        '$_amountSelectedEvents',
-        textAlign: TextAlign.left,
-        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-      ),
-      actions: [
-        _isEditing()
-            ? _eventEditingAppBarOptions
-            : _eventsNotEditingAppBarOptions
-      ],
-    );
-  }
-
-  Row get _eventsNotEditingAppBarOptions {
-    return Row(
-      children: [
-        _amountSelectedEvents == 1
-            ? IconButton(
-                onPressed: _editEvent,
-                icon: iconEdit,
-              )
-            : Container(),
-        IconButton(
-          onPressed: _copyEvent,
-          icon: iconCopy,
-        ),
-        IconButton(
-          onPressed: () {
-            showDialog(
-              context: context,
-              builder: (var context) => _deleteAlertDilog,
-            );
-          },
-          icon: iconDelete,
-        ),
-      ],
-    );
-  }
-
-  Row get _eventEditingAppBarOptions {
-    return Row(
-      children: [
-        IconButton(
-          onPressed: _confirmEditingEvent,
-          icon: iconCheck,
-        )
-      ],
-    );
-  }
-
-  AppBar get _defaultAppBar {
-    return AppBar(
-      backgroundColor: Colors.indigo,
-      centerTitle: true,
-      title: Text(
-        EventList.title,
-        style: titlePageStyle,
-      ),
-      leading: IconButton(
-        icon: iconArrowBack,
-        onPressed: _backButton,
-      ),
-      actions: <Widget>[
-        IconButton(
-          onPressed: () {},
-          icon: iconSearch,
-        ),
-        IconButton(
-          onPressed: _showFavourites,
-          icon: _isFavouritesOn ? favouriteIcon : favouriteIconOutlined,
-        ),
-      ],
     );
   }
 
@@ -319,7 +243,7 @@ class _EventListState extends State<EventList> {
                 ),
               ),
               IconButton(
-                onPressed: _addEvent,
+                onPressed: () => _addEvent(_eventsList.length - 1),
                 icon: iconSendEvent,
               ),
             ],
@@ -329,25 +253,11 @@ class _EventListState extends State<EventList> {
     );
   }
 
-  TextField get _textFieldInput {
-    return TextField(
-      minLines: 1,
-      onSubmitted: (var stub) {
-        _addEvent();
-      },
+  Widget get _textFieldInput {
+    return CustomTextField(
+      onSubmitted: () => _addEvent(_eventsList.length - 1),
       controller: _textInputController,
-      style: const TextStyle(
-        fontSize: 20,
-      ),
-      decoration: InputDecoration(
-        errorText: _validateText ? "Event can't be empty!" : null,
-        errorStyle: inputErrorStyle,
-        enabledBorder: borderStyle,
-        focusedBorder: borderStyle,
-        hintText: 'Type your events',
-        fillColor: const Color(0xffe5e5e5),
-        filled: true,
-      ),
+      validateText: _validateText,
     );
   }
 
@@ -360,85 +270,18 @@ class _EventListState extends State<EventList> {
           bottom: 10,
         ),
         itemBuilder: (context, index) {
-          return GestureDetector(
-            onTap: () {
-              _eventTap(index);
-              setState(_countSelectedEvents);
-            },
-            onLongPress: () {
-              setState(() {
-                _eventsList[index].isSelected = true;
-                _selectedIndex = index;
-                _countSelectedEvents();
-              });
-            },
-            child: Container(
-              padding: const EdgeInsets.only(
-                left: 14,
-                right: 46,
-                top: 6,
-                bottom: 6,
-              ),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Stack(
-                  alignment: Alignment.bottomLeft,
-                  children: [
-                    _eventLayout(index),
-                    _eventModificatorsLayout(index),
-                  ],
-                ),
-              ),
-            ),
+          return EventListTile(
+            index: index,
+            getTimeFromDate: _getTimeFromDate,
+            eventList: _eventsList,
+            onTap: _eventTap,
+            countSelectedEvents: _countSelectedEvents,
+            setState: setState,
+            selectedIndex: _selectedIndex,
           );
         },
         itemCount: _eventsList.length,
       ),
-    );
-  }
-
-  Widget _eventLayout(int index) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(
-        minWidth: 106,
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          color: _eventsList[index].isSelected
-              ? const Color(0xff6b956f)
-              : _accentColor,
-          borderRadius: BorderRadius.circular(15),
-        ),
-        padding: const EdgeInsets.only(
-          top: 10,
-          right: 15,
-          left: 15,
-          bottom: 24,
-        ),
-        child: Text(
-          _eventsList[index].content,
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-      ),
-    );
-  }
-
-  Widget _eventModificatorsLayout(int index) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        Container(
-          padding: const EdgeInsets.only(left: 15),
-          child: Text(
-            _getTimeFromDate(
-              _eventsList[index].date,
-            ),
-            style: eventTimeStyle,
-          ),
-        ),
-        _eventsList[index].isFavourite ? eventFavourite : emptyContainer,
-        _eventsList[index].isEdited ? eventEdited : emptyContainer,
-      ],
     );
   }
 }
