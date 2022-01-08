@@ -4,6 +4,7 @@ import 'models/page.dart';
 import 'pages/creating_new_page/add_page_route.dart';
 import 'pages/events/add_event_route.dart';
 import 'pages/home/bottom_nav_bar.dart';
+import 'pages/home/bottom_sheet.dart';
 import 'pages/home/page_listtile.dart';
 import 'styles.dart';
 
@@ -60,6 +61,11 @@ class _ChatJournalState extends State<ChatJournal> {
         print('not selected');
       }
     });
+    showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return CustomBottomSheet();
+        });
   }
 
   void _addNewPage() async {

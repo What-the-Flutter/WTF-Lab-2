@@ -4,19 +4,22 @@ import '../../../styles.dart';
 import '../add_event_route.dart';
 import '../const_widgets.dart';
 
-class DefaultAppBar extends StatelessWidget {
-  final Function backButton;
-  final Function showFavourites;
+class DefaultAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final Function() backButtonClick;
+  final Function() showFavourites;
   final bool isFavouritesOn;
   const DefaultAppBar({
     Key? key,
-    required this.backButton,
+    required this.backButtonClick,
     required this.showFavourites,
     required this.isFavouritesOn,
   }) : super(key: key);
 
   @override
-  AppBar build(BuildContext context) {
+  Size get preferredSize => const Size.fromHeight(50);
+
+  @override
+  Widget build(BuildContext context) {
     return AppBar(
       backgroundColor: Colors.indigo,
       centerTitle: true,
@@ -26,7 +29,7 @@ class DefaultAppBar extends StatelessWidget {
       ),
       leading: IconButton(
         icon: iconArrowBack,
-        onPressed: backButton(),
+        onPressed: backButtonClick,
       ),
       actions: <Widget>[
         IconButton(
@@ -34,7 +37,7 @@ class DefaultAppBar extends StatelessWidget {
           icon: iconSearch,
         ),
         IconButton(
-          onPressed: showFavourites(),
+          onPressed: showFavourites,
           icon: isFavouritesOn ? favouriteIcon : favouriteIconOutlined,
         ),
       ],

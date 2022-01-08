@@ -20,9 +20,7 @@ class PageListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      onTap: () {
-        onTap(index);
-      },
+      onTap: () => onTap(index),
       onLongPress: () => toggleSelection(index),
       contentPadding: const EdgeInsets.only(left: 26),
       trailing: pagesList[index].eventList.isNotEmpty

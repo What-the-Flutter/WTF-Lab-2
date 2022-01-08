@@ -2,51 +2,50 @@ import 'package:flutter/material.dart';
 import '../../../models/event.dart';
 import '../const_widgets.dart';
 
-class EventSelectedAppBar extends StatefulWidget {
+class EventSelectedAppBar extends StatefulWidget
+    implements PreferredSizeWidget {
   final List<Event> eventsList;
-  final int selectedIndex;
   final int amountSelectedEvents;
-  final Function countSelectedEvents;
-  final Function removeEvent;
-  final Function confirmEditingEvent;
-  final Function copyEvent;
-  final Function editEvent;
-  final Function isEditing;
+  final Function() countSelectedEvents;
+  final Function() removeEvent;
+  final Function() getSelectedItem;
+  final Function() copyEvent;
+  final Function() editEvent;
+  final Function() isEditing;
+  final Function() cancelClick;
+  final Function() cancelRemoving;
   const EventSelectedAppBar({
     Key? key,
     required this.eventsList,
-    required this.selectedIndex,
     required this.amountSelectedEvents,
     required this.countSelectedEvents,
     required this.removeEvent,
-    required this.confirmEditingEvent,
+    required this.getSelectedItem,
     required this.copyEvent,
     required this.editEvent,
     required this.isEditing,
+    required this.cancelClick,
+    required this.cancelRemoving,
   }) : super(key: key);
 
   @override
   _EventSelectedAppBarState createState() => _EventSelectedAppBarState();
+
+  @override
+  Size get preferredSize => const Size.fromHeight(50);
 }
 
 class _EventSelectedAppBarState extends State<EventSelectedAppBar> {
   @override
   Widget build(BuildContext context) {
     return AppBar(
+      backgroundColor: Colors.indigo,
       leading: IconButton(
-        onPressed: () {
-          setState(() {
-            for (var item in widget.eventsList) {
-              item.isSelected = false;
-              item.isEditing = false;
-            }
-            widget.countSelectedEvents();
-          });
-        },
+        onPressed: widget.cancelClick,
         icon: iconCancel,
       ),
       title: Text(
-        '$widget.amountSelectedEvents',
+        '${widget.amountSelectedEvents}',
         textAlign: TextAlign.left,
         style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
       ),
@@ -63,12 +62,12 @@ class _EventSelectedAppBarState extends State<EventSelectedAppBar> {
       children: [
         widget.amountSelectedEvents == 1
             ? IconButton(
-                onPressed: widget.editEvent(),
+                onPressed: widget.editEvent,
                 icon: iconEdit,
               )
             : Container(),
         IconButton(
-          onPressed: widget.copyEvent(),
+          onPressed: widget.copyEvent,
           icon: iconCopy,
         ),
         IconButton(
@@ -92,11 +91,11 @@ class _EventSelectedAppBarState extends State<EventSelectedAppBar> {
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.pop(context),
+          onPressed: widget.cancelRemoving,
           child: const Text('Cancel'),
         ),
         TextButton(
-          onPressed: widget.removeEvent(),
+          onPressed: widget.removeEvent,
           child: const Text('OK'),
         ),
       ],
@@ -107,9 +106,9 @@ class _EventSelectedAppBarState extends State<EventSelectedAppBar> {
     return Row(
       children: [
         IconButton(
-          onPressed: () => widget.confirmEditingEvent(widget.selectedIndex),
+          onPressed: widget.getSelectedItem,
           icon: iconCheck,
-        )
+        ),
       ],
     );
   }

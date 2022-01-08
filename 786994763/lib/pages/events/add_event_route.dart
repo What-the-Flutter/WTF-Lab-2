@@ -32,10 +32,11 @@ class _EventListState extends State<EventList> {
   bool _isFavouritesOn = false;
   int _selectedIndex = -1;
 
-  final String _aboutRoute = '''
-  Add your first event to this page by entering some text in the textbox below and
-  hitting the send button. Long tap the send button to align the event in the opposite
-  direction. Tap on the bookmark icon on the top right corner to show the bookmarked events only.''';
+  final String _aboutRoute =
+      'Add your first event to this page by entering some text in the textbox '
+      'below and hitting the send button. Long tap the send button to align '
+      'the event in the opposite direction. Tap on the bookmark icon on the '
+      'top right corner to show the bookmarked events only.';
 
   void _addEvent(int index) {
     if (index != -1) {
@@ -108,9 +109,8 @@ class _EventListState extends State<EventList> {
     return false;
   }
 
-  String _getTimeFromDate(DateTime date) {
-    return '${date.hour.toString()}:${date.minute.toString()}';
-  }
+  String _getTimeFromDate(DateTime date) =>
+      '${date.hour.toString()}:${date.minute.toString()}';
 
   bool _isAnyItemSelected() {
     for (var item in _eventsList) {
@@ -128,23 +128,29 @@ class _EventListState extends State<EventList> {
   }
 
   void _confirmEditingEvent(int index) {
-    setState(() {
-      _eventsList[index].content = _textInputController.text;
-      _eventsList[index].isEditing = false;
-      _eventsList[index].isEdited = true;
-      _eventsList[index].isSelected = false;
-      _textInputController.text = '';
-      _countSelectedEvents();
-    });
+    _eventsList[index].content = _textInputController.text;
+    _eventsList[index].isEditing = false;
+    _eventsList[index].isEdited = true;
+    _eventsList[index].isSelected = false;
+    _textInputController.text = '';
+    _countSelectedEvents();
+    setState(() {});
+  }
+
+  void _getOneSelectedEvent() {
+    var counter = 0;
+    for (var item in _eventsList) {
+      if (item.isSelected == true) {
+        _confirmEditingEvent(counter);
+        return;
+      }
+      counter++;
+    }
   }
 
   void _showFavourites() {
     setState(() {
-      if (_isFavouritesOn) {
-        _isFavouritesOn = false;
-      } else {
-        _isFavouritesOn = true;
-      }
+      (_isFavouritesOn) ? _isFavouritesOn = false : _isFavouritesOn = true;
 
       if (_favouriteEventsList.isEmpty) return;
       _favouriteEventsList.sort((a, b) => a.date.compareTo(b.date));
@@ -174,19 +180,24 @@ class _EventListState extends State<EventList> {
     }
   }
 
-  void _backButton() {
-    if (_eventsList.isEmpty) {
-      Navigator.pop(context, _parentPage);
+  void _cancelRemovingEvents() => Navigator.pop(context);
+
+  void _cancelClick() {
+    for (var item in _eventsList) {
+      item.isSelected = false;
+      item.isEditing = false;
     }
-    _parentPage.eventList = _eventsList;
-    _parentPage.favEventsList = _favouriteEventsList;
-    _parentPage.lastEditTime = _parentPage.eventList.last.date;
-    Navigator.pop(context, _parentPage);
+    _countSelectedEvents();
+    setState(() {});
   }
 
-  @override
-  void setState(VoidCallback fn) {
-    super.setState(fn);
+  void _backButtonClick() {
+    if (_eventsList.isNotEmpty) {
+      _parentPage.eventList = _eventsList;
+      _parentPage.favEventsList = _favouriteEventsList;
+      _parentPage.lastEditTime = _parentPage.eventList.last.date;
+    }
+    Navigator.pop(context, _parentPage);
   }
 
   @override
@@ -204,21 +215,22 @@ class _EventListState extends State<EventList> {
       home: Scaffold(
         appBar: _isAnyItemSelected()
             ? EventSelectedAppBar(
-                eventsList: _eventsList,
-                selectedIndex: _selectedIndex,
                 amountSelectedEvents: _amountSelectedEvents,
+                eventsList: _eventsList,
                 countSelectedEvents: _countSelectedEvents,
                 removeEvent: _removeEvent,
-                confirmEditingEvent: _confirmEditingEvent,
+                getSelectedItem: _getOneSelectedEvent,
                 copyEvent: _copyEvent,
                 editEvent: _editEvent,
                 isEditing: _isEditing,
-              ) as PreferredSizeWidget
+                cancelClick: _cancelClick,
+                cancelRemoving: _cancelRemovingEvents,
+              )
             : DefaultAppBar(
-                backButton: _backButton,
+                backButtonClick: _backButtonClick,
                 showFavourites: _showFavourites,
                 isFavouritesOn: _isFavouritesOn,
-              ) as PreferredSizeWidget,
+              ),
         body: _routeBody,
         backgroundColor: Colors.blueGrey,
       ),
