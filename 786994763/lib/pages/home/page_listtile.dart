@@ -44,6 +44,7 @@ class PageListTile extends StatelessWidget {
           ? Text(
               pagesList[index].eventList.last.content,
               style: categorySubtitleStyle,
+              maxLines: 2,
             )
           : Text(
               pagesList[index].subtitle,

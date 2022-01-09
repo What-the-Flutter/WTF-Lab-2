@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../models/adding_page.dart';
 import '../../models/page.dart';
 import '../../styles.dart';
+import '../home/bottom_sheet.dart';
 
 class PageInput extends StatefulWidget {
   static const routeName = '/add_page_route';
@@ -15,12 +16,24 @@ class PageInput extends StatefulWidget {
 class _PageInputState extends State<PageInput> {
   final List<NewPage> _pageIcons = [];
   final _titlePageController = TextEditingController();
-  late var _pagesList = [];
+  late List<PageInfo> _pagesList = [];
+  late int _index;
+  int counter = 0;
+  bool _isEditing = false;
+  late ScreenArguments _args;
   final _pageSubtitleText = 'No Events. Click to create one.';
 
   @override
   Widget build(BuildContext context) {
-    _pagesList = ModalRoute.of(context)!.settings.arguments as List<PageInfo>;
+    if (ModalRoute.of(context)!.settings.arguments is List<PageInfo>) {
+      _pagesList = ModalRoute.of(context)!.settings.arguments as List<PageInfo>;
+    } else {
+      _args = ModalRoute.of(context)!.settings.arguments as ScreenArguments;
+      _pagesList = _args.pagesList;
+      _index = _args.index;
+      _isEditing = _args.isEditing;
+    }
+
     if (_pageIcons.isEmpty) {
       _pageIcons.add(NewPage.selected(const Icon(Icons.cake), true));
       _pageIcons.add(NewPage(const Icon(Icons.chair)));
@@ -42,6 +55,17 @@ class _PageInputState extends State<PageInput> {
       _pageIcons.add(NewPage(const Icon(Icons.smoking_rooms)));
       _pageIcons.add(NewPage(const Icon(Icons.brush)));
       _pageIcons.add(NewPage(const Icon(Icons.pedal_bike)));
+    }
+
+    if (_isEditing && counter == 0) {
+      _titlePageController.text = _pagesList[_index].title;
+      for (var item in _pageIcons) {
+        if (item.icon.toString() == _pagesList[_index].icon.toString()) {
+          _clearSelectionIcons();
+          item.isSelected = true;
+        }
+      }
+      counter++;
     }
 
     return MaterialApp(
@@ -71,9 +95,27 @@ class _PageInputState extends State<PageInput> {
   }
 
   void _addNewPage() {
-    _pagesList.add(PageInfo(_titlePageController.text, _selectedPageIcon,
-        DateTime.now(), DateTime.now()));
-    Navigator.pop(context, _pagesList);
+    _pagesList.add(
+      PageInfo(
+        _titlePageController.text,
+        _selectedPageIcon,
+        DateTime.now(),
+        DateTime.now(),
+      ),
+    );
+    Navigator.pop(
+      context,
+      _pagesList,
+    );
+  }
+
+  void _editPage() {
+    _pagesList[_index].icon = _selectedPageIcon;
+    _pagesList[_index].title = _titlePageController.text;
+    Navigator.pop(
+      context,
+      _pagesList,
+    );
   }
 
   Widget get _homeWidget {
@@ -211,7 +253,7 @@ class _PageInputState extends State<PageInput> {
       height: 60,
       width: 60,
       child: FloatingActionButton(
-        onPressed: _addNewPage,
+        onPressed: _isEditing ? _editPage : _addNewPage,
         child: const Icon(
           Icons.check,
           size: 34,

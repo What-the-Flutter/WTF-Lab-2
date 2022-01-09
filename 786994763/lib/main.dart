@@ -47,25 +47,32 @@ class _ChatJournalState extends State<ChatJournal> {
         arguments: _pagesList[index]);
     _pagesList.sort((a, b) => a.lastEditTime.compareTo(b.lastEditTime));
     _pagesList = _pagesList.reversed.toList();
+    _pagesList.sort((a, b) {
+      if (b.isPinned) {
+        return 1;
+      } else {
+        return 0;
+      }
+    });
     print('closed');
     setState(() {});
   }
 
-  void _toggleSelection(int index) {
-    setState(() {
-      if (_pagesList[index].isSelected) {
-        _pagesList[index].isSelected = false;
-        print('selected');
-      } else {
-        _pagesList[index].isSelected = true;
-        print('not selected');
-      }
-    });
-    showModalBottomSheet(
+  void _toggleSelection(int index) async {
+    _pagesList[index].isSelected
+        ? _pagesList[index].isSelected = false
+        : _pagesList[index].isSelected = true;
+
+    await showModalBottomSheet(
         context: context,
         builder: (context) {
-          return CustomBottomSheet();
+          return CustomBottomSheet(
+            context: context,
+            pagesList: _pagesList,
+            index: index,
+          );
         });
+    setState(() {});
   }
 
   void _addNewPage() async {
@@ -76,7 +83,6 @@ class _ChatJournalState extends State<ChatJournal> {
     ) as List<PageInfo>;
     result.sort((a, b) => a.lastEditTime.compareTo(b.lastEditTime));
     _pagesList = result.reversed.toList();
-    print(_pagesList.first.title);
     setState(() {});
   }
 

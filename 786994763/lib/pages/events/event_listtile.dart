@@ -66,7 +66,10 @@ class EventListTile extends StatelessWidget {
           ),
           child: Text(
             eventList[index].content,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       );
