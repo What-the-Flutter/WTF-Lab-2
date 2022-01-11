@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
 class PageAction {
-  late String title;
-  late Icon icon;
+  late final String _title;
+  late final Icon _icon;
 
-  PageAction(this.title, this.icon);
+  String get getTitle => _title;
+  Icon get getIcon => _icon;
+
+  PageAction(this._title, this._icon);
 }

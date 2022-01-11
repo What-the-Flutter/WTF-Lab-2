@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 
-TextStyle titlePageStyle = TextStyle(
+TextStyle titlePageStyle = const TextStyle(
   fontWeight: FontWeight.bold,
   fontSize: 20,
-  color: Colors.amber[50],
 );
 
 const categoryTitleStyle = TextStyle(

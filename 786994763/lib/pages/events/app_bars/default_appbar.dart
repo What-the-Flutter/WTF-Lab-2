@@ -16,12 +16,12 @@ class DefaultAppBar extends StatelessWidget implements PreferredSizeWidget {
   }) : super(key: key);
 
   @override
-  Size get preferredSize => const Size.fromHeight(50);
+  Size get preferredSize => const Size.fromHeight(56);
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: Colors.indigo,
+      backgroundColor: const Color(0xff7289da),
       centerTitle: true,
       title: Text(
         EventList.title,

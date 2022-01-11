@@ -1,30 +1,38 @@
 import 'package:flutter/material.dart';
 
+import '../../models/themes.dart';
+import '../../theme_widget.dart';
 import 'add_event_route.dart';
 
 class NoEventsWidget extends StatelessWidget {
-  const NoEventsWidget({Key? key}) : super(key: key);
+  final BuildContext context;
+  const NoEventsWidget({
+    Key? key,
+    required this.context,
+  }) : super(key: key);
 
-  static const _accentColor = Color(0xff86BB8B);
   final String _aboutRoute =
       'Add your first event to this page by entering some text in the textbox below and hitting the send button. Long tap the send button to align the event in the opposite direction. Tap on the bookmark icon on the top right corner to show the bookmarked events only.';
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Align(
-        alignment: Alignment.topCenter,
-        child: Padding(
-          padding: const EdgeInsets.only(top: 30),
-          child: Container(
-            decoration: BoxDecoration(
-              color: _accentColor.withOpacity(0.8),
-              borderRadius: BorderRadius.circular(15),
+    return ThemeWidget(
+      initialThemeKey: ThemeKeys.light,
+      child: Expanded(
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 30),
+            child: Container(
+              decoration: BoxDecoration(
+                color: const Color(0xff7289da),
+                borderRadius: BorderRadius.circular(15),
+              ),
+              height: 280,
+              width: 330,
+              padding: const EdgeInsets.all(10),
+              child: _defaultText,
             ),
-            height: 280,
-            width: 330,
-            padding: const EdgeInsets.all(10),
-            child: _defaultText,
           ),
         ),
       ),
@@ -47,12 +55,12 @@ class NoEventsWidget extends StatelessWidget {
             '$_aboutRoute',
             style: const TextStyle(
               fontSize: 18,
-              fontWeight: FontWeight.w400,
-              color: Color(0xff323232),
             ),
             textAlign: TextAlign.center,
           ),
-          padding: const EdgeInsets.only(top: 20),
+          padding: const EdgeInsets.only(
+            top: 20,
+          ),
         ),
       ],
     );

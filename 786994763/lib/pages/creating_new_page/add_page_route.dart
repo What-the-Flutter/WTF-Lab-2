@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../models/adding_page.dart';
 import '../../models/page.dart';
+import '../../models/page_icon.dart';
 import '../../styles.dart';
 import '../home/bottom_sheet.dart';
 
@@ -60,7 +60,7 @@ class _PageInputState extends State<PageInput> {
     if (_isEditing && counter == 0) {
       _titlePageController.text = _pagesList[_index].title;
       for (var item in _pageIcons) {
-        if (item.icon.toString() == _pagesList[_index].icon.toString()) {
+        if (item.getIcon.toString() == _pagesList[_index].icon.toString()) {
           _clearSelectionIcons();
           item.isSelected = true;
         }
@@ -89,9 +89,9 @@ class _PageInputState extends State<PageInput> {
 
   Icon get _selectedPageIcon {
     for (var item in _pageIcons) {
-      if (item.isSelected) return item.icon;
+      if (item.isSelected) return item.getIcon;
     }
-    return _pageIcons.first.icon;
+    return _pageIcons.first.getIcon;
   }
 
   void _addNewPage() {
@@ -120,6 +120,7 @@ class _PageInputState extends State<PageInput> {
 
   Widget get _homeWidget {
     return Scaffold(
+      backgroundColor: Theme.of(context).primaryColor,
       body: _titleBody,
       floatingActionButton: _titlePageController.text.isEmpty
           ? _buttonCancelAddingPage
@@ -136,9 +137,9 @@ class _PageInputState extends State<PageInput> {
           ),
           child: Column(
             children: [
-              const Text(
+              Text(
                 'Create a new Page',
-                style: categoryTitleStyle,
+                style: Theme.of(context).textTheme.titleLarge,
               ),
               _textFiled,
               _gridViewIcons,
@@ -169,7 +170,7 @@ class _PageInputState extends State<PageInput> {
           ),
           enabledBorder: borderStyle,
           focusedBorder: borderStyle,
-          fillColor: Colors.blueGrey,
+          fillColor: Theme.of(context).colorScheme.secondary,
           filled: true,
         ),
       ),
@@ -193,12 +194,12 @@ class _PageInputState extends State<PageInput> {
                     height: 70,
                     width: 70,
                     decoration: BoxDecoration(
-                      color: Colors.indigo,
+                      color: Theme.of(context).colorScheme.secondary,
                       borderRadius: BorderRadius.circular(35),
                     ),
                     child: IconButton(
                       iconSize: 36,
-                      icon: _pageIcons[index].icon,
+                      icon: _pageIcons[index].getIcon,
                       color: Colors.white,
                       onPressed: () => _selectPageIcon(index),
                     ),
@@ -219,13 +220,13 @@ class _PageInputState extends State<PageInput> {
         top: 42,
         left: 42,
       ),
-      child: const CircleAvatar(
+      child: CircleAvatar(
         radius: 14,
         backgroundColor: Colors.green,
         child: CircleAvatar(
           radius: 12,
-          backgroundColor: Colors.black,
-          child: Icon(
+          backgroundColor: Theme.of(context).primaryColorDark,
+          child: const Icon(
             Icons.check,
             color: Colors.green,
           ),
@@ -239,6 +240,8 @@ class _PageInputState extends State<PageInput> {
       height: 60,
       width: 60,
       child: FloatingActionButton(
+        backgroundColor: Theme.of(context).colorScheme.secondary,
+        foregroundColor: Theme.of(context).primaryColorDark,
         onPressed: () => Navigator.pop(context, _pagesList),
         child: const Icon(
           Icons.clear,
@@ -253,6 +256,8 @@ class _PageInputState extends State<PageInput> {
       height: 60,
       width: 60,
       child: FloatingActionButton(
+        backgroundColor: Theme.of(context).colorScheme.secondary,
+        foregroundColor: Theme.of(context).primaryColorDark,
         onPressed: _isEditing ? _editPage : _addNewPage,
         child: const Icon(
           Icons.check,

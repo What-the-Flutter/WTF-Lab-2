@@ -21,7 +21,6 @@ class EventList extends StatefulWidget {
 }
 
 class _EventListState extends State<EventList> {
-  static const _accentColor = Color(0xff86BB8B);
   final _textInputController = TextEditingController();
 
   List<Event> _eventsList = [];
@@ -232,7 +231,7 @@ class _EventListState extends State<EventList> {
                 isFavouritesOn: _isFavouritesOn,
               ),
         body: _routeBody,
-        backgroundColor: Colors.blueGrey,
+        backgroundColor: Theme.of(context).primaryColor,
       ),
     );
   }
@@ -240,7 +239,11 @@ class _EventListState extends State<EventList> {
   Widget get _routeBody {
     return Column(
       children: <Widget>[
-        _eventsList.isNotEmpty ? _messagesWidget : const NoEventsWidget(),
+        _eventsList.isNotEmpty
+            ? _messagesWidget
+            : NoEventsWidget(
+                context: context,
+              ),
         Align(
           alignment: Alignment.bottomCenter,
           child: Row(
@@ -248,6 +251,7 @@ class _EventListState extends State<EventList> {
               IconButton(
                 onPressed: () {},
                 icon: iconBubbleChart,
+                color: const Color(0xff7289da),
               ),
               Expanded(
                 child: SizedBox(
@@ -257,6 +261,7 @@ class _EventListState extends State<EventList> {
               IconButton(
                 onPressed: () => _addEvent(_eventsList.length - 1),
                 icon: iconSendEvent,
+                color: const Color(0xff7289da),
               ),
             ],
           ),

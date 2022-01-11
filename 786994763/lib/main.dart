@@ -1,25 +1,32 @@
 import 'package:flutter/material.dart';
 
 import 'models/page.dart';
+import 'models/themes.dart';
 import 'pages/creating_new_page/add_page_route.dart';
 import 'pages/events/add_event_route.dart';
 import 'pages/home/bottom_nav_bar.dart';
 import 'pages/home/bottom_sheet.dart';
+import 'pages/home/delete_bottom_sheet.dart';
 import 'pages/home/page_listtile.dart';
-import 'styles.dart';
+import 'theme_widget.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ThemeWidget(
+      key: UniqueKey(),
+      initialThemeKey: ThemeKeys.light,
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(primarySwatch: Colors.indigo),
+      theme: ThemeWidget.of(context),
       initialRoute: '/',
       routes: {
         '/': (context) => ChatJournal(title: 'Chat Journal'),
@@ -43,8 +50,11 @@ class _ChatJournalState extends State<ChatJournal> {
   List<PageInfo> _pagesList = [];
 
   Future _addEvents(int index) async {
-    await Navigator.pushNamed(context, EventList.routeName,
-        arguments: _pagesList[index]);
+    await Navigator.pushNamed(
+      context,
+      EventList.routeName,
+      arguments: _pagesList[index],
+    );
     _pagesList.sort((a, b) => a.lastEditTime.compareTo(b.lastEditTime));
     _pagesList = _pagesList.reversed.toList();
     _pagesList.sort((a, b) {
@@ -54,24 +64,35 @@ class _ChatJournalState extends State<ChatJournal> {
         return 0;
       }
     });
-    print('closed');
     setState(() {});
   }
 
-  void _toggleSelection(int index) async {
-    _pagesList[index].isSelected
-        ? _pagesList[index].isSelected = false
-        : _pagesList[index].isSelected = true;
+  void _toggleSelection(int _index) async {
+    _pagesList[_index].isSelected
+        ? _pagesList[_index].isSelected = false
+        : _pagesList[_index].isSelected = true;
 
-    await showModalBottomSheet(
+    var result = await showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return CustomBottomSheet(
+          context: context,
+          pagesList: _pagesList,
+          index: _index,
+        );
+      },
+    );
+    if (result is ScreenArguments) {
+      await showModalBottomSheet(
         context: context,
         builder: (context) {
-          return CustomBottomSheet(
-            context: context,
+          return DeleteConfirmationBottomSheet(
             pagesList: _pagesList,
-            index: index,
+            index: _index,
           );
-        });
+        },
+      );
+    }
     setState(() {});
   }
 
@@ -121,7 +142,7 @@ class _ChatJournalState extends State<ChatJournal> {
           ),
         ],
       ),
-      backgroundColor: Colors.blueGrey,
+      backgroundColor: Theme.of(context).primaryColor,
       bottomNavigationBar: const BottomNavBar(),
       floatingActionButton: _fabAddNewPage,
     );
@@ -153,10 +174,11 @@ class _ChatJournalState extends State<ChatJournal> {
 
   AppBar get _homeAppBar {
     return AppBar(
+      backgroundColor: Theme.of(context).colorScheme.secondary,
       leading: IconButton(
         icon: Icon(
           Icons.menu,
-          color: Colors.amber[50],
+          color: Theme.of(context).primaryColor,
         ),
         onPressed: () {},
         tooltip: 'Open Menu',
@@ -166,11 +188,12 @@ class _ChatJournalState extends State<ChatJournal> {
       actions: [
         Container(
           child: IconButton(
-            icon: const Icon(
+            icon: Icon(
               Icons.dark_mode,
               size: 30,
+              color: Theme.of(context).primaryColor,
             ),
-            onPressed: () {},
+            onPressed: () => _swtichTheme(context, ThemeKeys.dark),
           ),
           padding: const EdgeInsets.only(right: 6),
         )
@@ -192,7 +215,7 @@ class _ChatJournalState extends State<ChatJournal> {
             ),
           ),
         ],
-        style: titlePageStyle,
+        style: Theme.of(context).textTheme.titleMedium,
       ),
     );
   }
@@ -201,37 +224,41 @@ class _ChatJournalState extends State<ChatJournal> {
     return Padding(
       child: Container(
         decoration: BoxDecoration(
-          color: _accentColor.withOpacity(0.85),
+          color: Theme.of(context).colorScheme.secondary,
           borderRadius: BorderRadius.circular(15),
         ),
         child: Center(
           child: GestureDetector(
             onTap: () {},
-            child: const Text(
+            child: Text(
               'Questionary Bot',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Color(0xff49664c),
-              ),
+              style: Theme.of(context).textTheme.titleMedium,
             ),
           ),
         ),
         height: 60,
       ),
-      padding: const EdgeInsets.only(top: 20, right: 36, left: 36),
+      padding: const EdgeInsets.only(
+        top: 20,
+        right: 36,
+        left: 36,
+      ),
     );
   }
 
   Widget get _fabAddNewPage {
     return FloatingActionButton(
-      child: const Icon(
+      child: Icon(
         Icons.add,
         size: 36,
-        color: Color(0xff49664c),
+        color: Theme.of(context).primaryColorDark,
       ),
-      backgroundColor: _accentColor,
+      backgroundColor: Theme.of(context).colorScheme.secondary,
       onPressed: _addNewPage,
     );
+  }
+
+  void _swtichTheme(BuildContext buildContext, ThemeKeys key) {
+    ThemeWidget.instanceOf(buildContext).setTheme(key);
   }
 }

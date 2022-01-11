@@ -28,17 +28,20 @@ class PageListTile extends StatelessWidget {
               child: Text(
                 '${pagesList[index].eventList.last.date.hour}:'
                 '${pagesList[index].eventList.last.date.minute}',
+                style: Theme.of(context).textTheme.bodySmall,
               ),
               padding: const EdgeInsets.only(right: 14),
             )
           : const Text(''),
       title: Text(
         pagesList[index].title,
-        style: categoryTitleStyle,
+        style: Theme.of(context).textTheme.bodyMedium,
       ),
       leading: CircleAvatar(
         child: pagesList[index].icon,
         radius: 28,
+        backgroundColor: Theme.of(context).colorScheme.secondary,
+        foregroundColor: Theme.of(context).primaryColor,
       ),
       subtitle: pagesList[index].eventList.isNotEmpty
           ? Text(

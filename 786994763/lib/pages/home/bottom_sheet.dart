@@ -16,6 +16,11 @@ class ScreenArguments {
     this.pagesList,
     this.isEditing,
   );
+
+  ScreenArguments.removePage(
+    this.pagesList,
+    this.isEditing,
+  );
 }
 
 class CustomBottomSheet extends StatelessWidget {
@@ -82,34 +87,35 @@ class CustomBottomSheet extends StatelessWidget {
       child: Column(
         children: [
           ListTile(
-            leading: _actions[0].icon,
+            leading: _actions[0].getIcon,
             title: Text(
-              _actions[0].title,
+              _actions[0].getTitle,
               style: categorySubtitleStyle,
             ),
             onTap: _showPageInfo,
           ),
           ListTile(
-            leading: _actions[1].icon,
+            leading: _actions[1].getIcon,
             title: Text(
-              _actions[1].title,
+              _actions[1].getTitle,
               style: categorySubtitleStyle,
             ),
           ),
           ListTile(
-            leading: _actions[2].icon,
+            leading: _actions[2].getIcon,
             title: Text(
-              _actions[2].title,
+              _actions[2].getTitle,
               style: categorySubtitleStyle,
             ),
             onTap: _editPageInfo,
           ),
           ListTile(
-            leading: _actions[3].icon,
+            leading: _actions[3].getIcon,
             title: Text(
-              _actions[3].title,
+              _actions[3].getTitle,
               style: categorySubtitleStyle,
             ),
+            onTap: _removePage,
           ),
         ],
       ),
@@ -128,5 +134,15 @@ class CustomBottomSheet extends StatelessWidget {
     await Navigator.pushNamed(context, PageInput.routeName,
         arguments: ScreenArguments(index, pagesList, true));
     Navigator.pop(context);
+  }
+
+  void _removePage() {
+    Navigator.pop(
+      context,
+      ScreenArguments.removePage(
+        pagesList,
+        false,
+      ),
+    );
   }
 }

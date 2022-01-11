@@ -54,8 +54,8 @@ class EventListTile extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             color: eventList[index].isSelected
-                ? const Color(0xff6b956f)
-                : _accentColor,
+                ? const Color(0xff687dc5)
+                : const Color(0xff859ef7),
             borderRadius: BorderRadius.circular(15),
           ),
           padding: const EdgeInsets.only(

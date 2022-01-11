@@ -32,14 +32,14 @@ class EventSelectedAppBar extends StatefulWidget
   _EventSelectedAppBarState createState() => _EventSelectedAppBarState();
 
   @override
-  Size get preferredSize => const Size.fromHeight(50);
+  Size get preferredSize => const Size.fromHeight(56);
 }
 
 class _EventSelectedAppBarState extends State<EventSelectedAppBar> {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: Colors.indigo,
+      backgroundColor: const Color(0xff7289da),
       leading: IconButton(
         onPressed: widget.cancelClick,
         icon: iconCancel,
