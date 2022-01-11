@@ -39,7 +39,7 @@ class DeleteConfirmationBottomSheet extends StatelessWidget {
 
     return Container(
       height: 230,
-      color: Colors.white,
+      color: Theme.of(context).primaryColor,
       padding: const EdgeInsets.only(
         left: 20,
         top: 20,
@@ -64,7 +64,7 @@ class DeleteConfirmationBottomSheet extends StatelessWidget {
             leading: _actions[0].getIcon,
             title: Text(
               _actions[0].getTitle,
-              style: categorySubtitleStyle,
+              style: Theme.of(context).textTheme.bodySmall,
             ),
             onTap: _deletePage,
           ),
@@ -72,7 +72,7 @@ class DeleteConfirmationBottomSheet extends StatelessWidget {
             leading: _actions[1].getIcon,
             title: Text(
               _actions[1].getTitle,
-              style: categorySubtitleStyle,
+              style: Theme.of(context).textTheme.bodySmall,
             ),
             onTap: () => Navigator.pop(context),
           ),

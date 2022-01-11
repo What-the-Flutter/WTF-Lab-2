@@ -43,6 +43,7 @@ class ThemeWidget extends StatefulWidget {
 
 class _ThemeWidgetState extends State<ThemeWidget> {
   late ThemeData _theme;
+  bool currentTheme = true;
 
   ThemeData get getTheme => _theme;
 
@@ -52,8 +53,12 @@ class _ThemeWidgetState extends State<ThemeWidget> {
     super.initState();
   }
 
-  void setTheme(ThemeKeys value) =>
-      setState(() => _theme = Themes.getThemeByKey(value));
+  void setTheme(ThemeKeys value) {
+    currentTheme
+        ? setState(() => _theme = Themes.getThemeByKey(ThemeKeys.dark))
+        : setState(() => _theme = Themes.getThemeByKey(ThemeKeys.light));
+    currentTheme ? currentTheme = false : currentTheme = true;
+  }
 
   @override
   Widget build(BuildContext context) {

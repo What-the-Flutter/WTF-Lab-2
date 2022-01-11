@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../models/page.dart';
 import '../../models/pages_actions.dart';
-import '../../styles.dart';
 import '../creating_new_page/add_page_route.dart';
 import 'info_alertdialog.dart';
 
@@ -90,7 +89,7 @@ class CustomBottomSheet extends StatelessWidget {
             leading: _actions[0].getIcon,
             title: Text(
               _actions[0].getTitle,
-              style: categorySubtitleStyle,
+              style: Theme.of(context).textTheme.bodySmall,
             ),
             onTap: _showPageInfo,
           ),
@@ -98,14 +97,14 @@ class CustomBottomSheet extends StatelessWidget {
             leading: _actions[1].getIcon,
             title: Text(
               _actions[1].getTitle,
-              style: categorySubtitleStyle,
+              style: Theme.of(context).textTheme.bodySmall,
             ),
           ),
           ListTile(
             leading: _actions[2].getIcon,
             title: Text(
               _actions[2].getTitle,
-              style: categorySubtitleStyle,
+              style: Theme.of(context).textTheme.bodySmall,
             ),
             onTap: _editPageInfo,
           ),
@@ -113,7 +112,7 @@ class CustomBottomSheet extends StatelessWidget {
             leading: _actions[3].getIcon,
             title: Text(
               _actions[3].getTitle,
-              style: categorySubtitleStyle,
+              style: Theme.of(context).textTheme.bodySmall,
             ),
             onTap: _removePage,
           ),
@@ -125,14 +124,23 @@ class CustomBottomSheet extends StatelessWidget {
   void _showPageInfo() {
     showDialog(
       context: context,
-      builder: (var context) =>
-          InfoPageAlertDialog(index: index, pagesList: pagesList),
+      builder: (var context) => InfoPageAlertDialog(
+        index: index,
+        pagesList: pagesList,
+      ),
     );
   }
 
   void _editPageInfo() async {
-    await Navigator.pushNamed(context, PageInput.routeName,
-        arguments: ScreenArguments(index, pagesList, true));
+    await Navigator.pushNamed(
+      context,
+      PageInput.routeName,
+      arguments: ScreenArguments(
+        index,
+        pagesList,
+        true,
+      ),
+    );
     Navigator.pop(context);
   }
 

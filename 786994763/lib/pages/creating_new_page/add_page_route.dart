@@ -132,19 +132,20 @@ class _PageInputState extends State<PageInput> {
     return Align(
       alignment: Alignment.topCenter,
       child: Padding(
-          padding: const EdgeInsets.only(
-            top: 80,
-          ),
-          child: Column(
-            children: [
-              Text(
-                'Create a new Page',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              _textFiled,
-              _gridViewIcons,
-            ],
-          )),
+        padding: const EdgeInsets.only(
+          top: 80,
+        ),
+        child: Column(
+          children: [
+            Text(
+              'Create a new Page',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            _textFiled,
+            _gridViewIcons,
+          ],
+        ),
+      ),
     );
   }
 
@@ -186,29 +187,32 @@ class _PageInputState extends State<PageInput> {
         ),
         child: GridView.count(
           crossAxisCount: 4,
-          children: List.generate(_pageIcons.length, (index) {
-            return UnconstrainedBox(
-              child: Stack(
-                children: [
-                  Container(
-                    height: 70,
-                    width: 70,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.secondary,
-                      borderRadius: BorderRadius.circular(35),
+          children: List.generate(
+            _pageIcons.length,
+            (index) {
+              return UnconstrainedBox(
+                child: Stack(
+                  children: [
+                    Container(
+                      height: 70,
+                      width: 70,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.secondary,
+                        borderRadius: BorderRadius.circular(35),
+                      ),
+                      child: IconButton(
+                        iconSize: 36,
+                        icon: _pageIcons[index].getIcon,
+                        color: Colors.white,
+                        onPressed: () => _selectPageIcon(index),
+                      ),
                     ),
-                    child: IconButton(
-                      iconSize: 36,
-                      icon: _pageIcons[index].getIcon,
-                      color: Colors.white,
-                      onPressed: () => _selectPageIcon(index),
-                    ),
-                  ),
-                  _pageIcons[index].isSelected ? _pageCheck : Container(),
-                ],
-              ),
-            );
-          }),
+                    _pageIcons[index].isSelected ? _pageCheck : Container(),
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ),
     );

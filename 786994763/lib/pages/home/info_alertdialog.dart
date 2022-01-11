@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../models/page.dart';
-import '../../styles.dart';
 
 class InfoPageAlertDialog extends StatelessWidget {
   final int index;
@@ -19,22 +18,22 @@ class InfoPageAlertDialog extends StatelessWidget {
         leading: pagesList[index].icon,
         title: Text(
           pagesList[index].title,
-          style: categoryTitleStyle,
+          style: Theme.of(context).textTheme.bodyMedium,
         ),
       ),
       content: Container(
-        height: 120,
+        height: 140,
         child: Padding(
           padding: const EdgeInsets.only(
             left: 20,
           ),
           child: Column(
             children: [
-              const Align(
+              Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
                   'Created',
-                  style: categorySubtitleStyle,
+                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ),
               Align(
@@ -45,17 +44,18 @@ class InfoPageAlertDialog extends StatelessWidget {
                   '${pagesList[index].createdTime.day} at '
                   '${pagesList[index].createdTime.hour}:'
                   '${pagesList[index].createdTime.minute}',
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
               ),
               Container(
                 padding: const EdgeInsets.only(
                   top: 34,
                 ),
-                child: const Align(
+                child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
                     'Last Event',
-                    style: categorySubtitleStyle,
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ),
               ),
@@ -67,8 +67,9 @@ class InfoPageAlertDialog extends StatelessWidget {
                   '${pagesList[index].lastEditTime.day} at '
                   '${pagesList[index].lastEditTime.hour}:'
                   '${pagesList[index].lastEditTime.minute}',
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
-              )
+              ),
             ],
           ),
         ),

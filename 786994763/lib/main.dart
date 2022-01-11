@@ -46,8 +46,8 @@ class ChatJournal extends StatefulWidget {
 }
 
 class _ChatJournalState extends State<ChatJournal> {
-  final _accentColor = const Color(0xff86BB8B);
   List<PageInfo> _pagesList = [];
+  bool _theme = true;
 
   Future _addEvents(int index) async {
     await Navigator.pushNamed(
@@ -193,7 +193,10 @@ class _ChatJournalState extends State<ChatJournal> {
               size: 30,
               color: Theme.of(context).primaryColor,
             ),
-            onPressed: () => _swtichTheme(context, ThemeKeys.dark),
+            onPressed: () => _swtichTheme(
+              context,
+              _theme ? ThemeKeys.dark : ThemeKeys.light,
+            ),
           ),
           padding: const EdgeInsets.only(right: 6),
         )
@@ -259,6 +262,7 @@ class _ChatJournalState extends State<ChatJournal> {
   }
 
   void _swtichTheme(BuildContext buildContext, ThemeKeys key) {
-    ThemeWidget.instanceOf(buildContext).setTheme(key);
+    setState(() => ThemeWidget.instanceOf(buildContext).setTheme(key));
+    _theme ? _theme = false : _theme = true;
   }
 }
