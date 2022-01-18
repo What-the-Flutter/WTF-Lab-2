@@ -10,13 +10,11 @@ class FirstScreen extends StatefulWidget {
 
 class _FirstScreenState extends State<FirstScreen> {
   int _selectedIndex = 0;
-  List<MyEventGroup> myEventGroups = [MyEventGroup(const Icon(Icons.card_travel), 'Travel'), MyEventGroup(const Icon(Icons.family_restroom), 'Family'), MyEventGroup(const Icon(Icons.sports_basketball), 'Sports')];
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
+  List<MyEventGroup> myEventGroups = [
+    MyEventGroup(const Icon(Icons.card_travel), 'Travel'),
+    MyEventGroup(const Icon(Icons.family_restroom), 'Family'),
+    MyEventGroup(const Icon(Icons.sports_basketball), 'Sports')
+  ];
 
   Column _scaffoldBody() {
     return Column(
@@ -65,68 +63,36 @@ class _FirstScreenState extends State<FirstScreen> {
     );
   }
 
-  ListView _eventGroupList() {
-    return ListView.builder(scrollDirection: Axis.vertical,
- itemCount: myEventGroups.length, itemBuilder: (context, index) {
-return Column(children: [ListTile(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute<void>(
-                builder: (BuildContext context) => EventsList('Travel'),
-              ),
-            );
-          },
-          title:Text(myEventGroups[index].text),
-          subtitle: const Text('No Events. Click to create one.'),
-          leading: myEventGroups[index].icon,
-        ), const Divider()],); 
-        //const Divider(),
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
     });
-    // )(
-    //   scrollDirection: Axis.vertical,
-    //   children: <Widget>[
-    //     const Divider(),
-    //     ListTile(
-    //       onTap: () {
-    //         Navigator.push(
-    //           context,
-    //           MaterialPageRoute<void>(
-    //             builder: (BuildContext context) => EventsList('Travel'),
-    //           ),
-    //         );
-    //       },
-    //       title: const Text('Travel'),
-    //       subtitle: const Text('No Events. Click to create one.'),
-    //       leading: const Icon(Icons.card_travel),
-    //     ),
-    //     const Divider(),
-    //     ListTile(
-    //       onTap: () {Navigator.push(
-    //           context,
-    //           MaterialPageRoute<void>(
-    //             builder: (BuildContext context) => EventsList('Family'),
-    //           ),
-    //         );},
-    //       title: const Text('Family'),
-    //       subtitle: const Text('No Events. Click to create one.'),
-    //       leading: const Icon(Icons.family_restroom),
-    //     ),
-    //     const Divider(),
-    //     ListTile(
-    //       onTap: () {Navigator.push(
-    //           context,
-    //           MaterialPageRoute<void>(
-    //             builder: (BuildContext context) => EventsList('Sports'),
-    //           ),
-    //         );},
-    //       title: const Text('Sports'),
-    //       subtitle: const Text('No Events. Click to create one.'),
-    //       leading: const Icon(Icons.sports_basketball),
-    //     ),
-    //     const Divider(),
-    //   ],
-    // );
+  }
+
+  ListView _eventGroupList() {
+    return ListView.builder(
+        scrollDirection: Axis.vertical,
+        itemCount: myEventGroups.length,
+        itemBuilder: (context, index) {
+          return Column(
+            children: [
+              ListTile(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (BuildContext context) => EventsList('Travel'),
+                    ),
+                  );
+                },
+                title: Text(myEventGroups[index].text),
+                subtitle: const Text('No Events. Click to create one.'),
+                leading: myEventGroups[index].icon,
+              ),
+              const Divider()
+            ],
+          );
+        });
   }
 
   BottomNavigationBar _navigationBar() {
