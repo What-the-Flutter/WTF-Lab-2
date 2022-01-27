@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
-import 'package:image_picker/image_picker.dart';
 
-enum MyState { viewMod, selectionMod, editingMod, chosensMod }
+enum States { viewMod, selectionMod, editingMod, chosensMod }
 
 class EventsList extends StatefulWidget {
-  const EventsList(this.title, {Key? key}) : super(key: key);
   final String title;
+
+  const EventsList(this.title, {Key? key}) : super(key: key);
 
   @override
   _EventsListState createState() => _EventsListState();
@@ -16,10 +15,10 @@ class EventsList extends StatefulWidget {
 class _EventsListState extends State<EventsList> {
   List<Event> listOfEvents = [];
   final _textFieldController = TextEditingController();
-  var _formIsEmpty = true;
-  var currentState = MyState.values[0];
-  var indexEditing = -1;
-  var numberOfPicked = 0;
+  bool _formIsEmpty = true;
+  States _currentState = States.values[0];
+  int _indexEditing = -1;
+  int _numberOfPicked = 0;
 
   @override
   void initState() {
@@ -39,20 +38,16 @@ class _EventsListState extends State<EventsList> {
     super.dispose();
   }
 
-  void stateSetter() {
-    setState(() {});
-  }
-
   @override
   Widget build(BuildContext context) {
-    if (currentState == MyState.selectionMod) {
-      numberOfPicked == 0 ? currentState = MyState.viewMod : null;
+    if (_currentState == States.selectionMod) {
+      _numberOfPicked == 0 ? _currentState = States.viewMod : null;
     }
-    if (currentState == MyState.viewMod) {
-      listOfEvents.forEach((element) {
+    if (_currentState == States.viewMod) {
+      for (var element in listOfEvents) {
         element.isPick = false;
-      });
-      numberOfPicked = 0;
+      }
+      _numberOfPicked = 0;
     }
     return Scaffold(
       appBar: _appBar(),
@@ -80,7 +75,7 @@ class _EventsListState extends State<EventsList> {
                             ),
                             Center(
                               child: Text(
-                                "Add your first event to ${widget.title} page by entering some text in the text below and hitting the send button. Long tap the send button to allign the event in the opposite direction. Tap on the bookmark icon on the top right corner to show the bookbark events only.",
+                                "Add your first event to ${widget.title} page by entering some text in the text below and hitting the send button. Long tap the send button to allign the event in the opposite direction. Tap on the bookmark icon on the top right corner to show the bookbark events only.", //форматирование текста для ИДЕ
                                 style: const TextStyle(
                                     color: Colors.black38, fontSize: 16),
                               ),
@@ -95,7 +90,7 @@ class _EventsListState extends State<EventsList> {
               child: ListView.builder(
                 itemCount: listOfEvents.length,
                 itemBuilder: (context, index) {
-                  if (currentState == MyState.chosensMod) {
+                  if (_currentState == States.chosensMod) {
                     if (!listOfEvents[index].isChosen) {
                       return const SizedBox();
                     }
@@ -110,15 +105,15 @@ class _EventsListState extends State<EventsList> {
                           maxWidth: 300,
                         ),
                         child: GestureDetector(
-                          onTap: currentState == MyState.selectionMod
+                          onTap: _currentState == States.selectionMod
                               ? () {
                                   setState(() {
                                     if (listOfEvents[index].isPick == true) {
                                       listOfEvents[index].isPick = false;
-                                      numberOfPicked--;
+                                      _numberOfPicked--;
                                     } else {
                                       listOfEvents[index].isPick = true;
-                                      numberOfPicked++;
+                                      _numberOfPicked++;
                                     }
                                   });
                                 }
@@ -129,12 +124,12 @@ class _EventsListState extends State<EventsList> {
                                         : listOfEvents[index].isChosen = true;
                                   });
                                 },
-                          onLongPress: currentState == MyState.viewMod
+                          onLongPress: _currentState == States.viewMod
                               ? () {
                                   setState(() {
                                     listOfEvents[index].isPick = true;
-                                    numberOfPicked++;
-                                    currentState = MyState.selectionMod;
+                                    _numberOfPicked++;
+                                    _currentState = States.selectionMod;
                                   });
                                 }
                               : null,
@@ -146,13 +141,13 @@ class _EventsListState extends State<EventsList> {
                               borderRadius: BorderRadius.circular(15),
                             ),
                             child: Padding(
-                              padding: EdgeInsets.all(8.0),
+                              padding: const EdgeInsets.all(8.0),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     listOfEvents[index].text,
-                                    style: TextStyle(color: Colors.black),
+                                    style: const TextStyle(color: Colors.black),
                                   ),
                                   const SizedBox(
                                     height: 2,
@@ -171,7 +166,7 @@ class _EventsListState extends State<EventsList> {
                                         listOfEvents[index].isChosen
                                             ? const Icon(Icons.bookmark,
                                                 color: Colors.yellow)
-                                            : SizedBox(),
+                                            : const SizedBox(),
                                       ],
                                     ),
                                   )
@@ -190,10 +185,10 @@ class _EventsListState extends State<EventsList> {
               children: [
                 IconButton(
                   onPressed:
-                      currentState == MyState.selectionMod ? null : () {},
+                      _currentState == States.selectionMod ? null : () {},
                   icon: Icon(
                     Icons.radar,
-                    color: !(currentState == MyState.selectionMod)
+                    color: !(_currentState == States.selectionMod)
                         ? null
                         : Colors.grey[600],
                   ),
@@ -201,7 +196,7 @@ class _EventsListState extends State<EventsList> {
                 Expanded(
                   child: TextField(
                     enabled:
-                        currentState == MyState.selectionMod ? false : true,
+                        _currentState == States.selectionMod ? false : true,
                     controller: _textFieldController,
                     keyboardType: TextInputType.multiline,
                     minLines: 1,
@@ -225,30 +220,28 @@ class _EventsListState extends State<EventsList> {
   IconButton _fieldButton() {
     if (_formIsEmpty) {
       return IconButton(
-        onPressed: currentState == MyState.selectionMod ? null : () {},
+        onPressed: _currentState == States.selectionMod ? null : () {},
         icon: Icon(
           Icons.camera,
           color:
-              !(currentState == MyState.selectionMod) ? null : Colors.grey[600],
+              !(_currentState == States.selectionMod) ? null : Colors.grey[600],
         ),
       );
     } else {
       return IconButton(
-        onPressed: currentState == MyState.selectionMod
+        onPressed: _currentState == States.selectionMod
             ? null
-            : currentState == MyState.editingMod
+            : _currentState == States.editingMod
                 ? () {
-                    setState(
-                      () {
-                        listOfEvents[indexEditing].text =
-                            _textFieldController.text;
-                        listOfEvents[indexEditing].isPick = false;
-                        numberOfPicked = 0;
-                        indexEditing = -1;
-                        _textFieldController.clear();
-                        currentState = MyState.viewMod;
-                      },
-                    );
+                    setState(() {
+                      listOfEvents[_indexEditing].text =
+                          _textFieldController.text;
+                      listOfEvents[_indexEditing].isPick = false;
+                      _numberOfPicked = 0;
+                      _indexEditing = -1;
+                      _textFieldController.clear();
+                      _currentState = States.viewMod;
+                    });
                   }
                 : () {
                     setState(
@@ -263,42 +256,41 @@ class _EventsListState extends State<EventsList> {
         icon: Icon(
           Icons.send,
           color:
-              !(currentState == MyState.selectionMod) ? null : Colors.grey[600],
+              !(_currentState == States.selectionMod) ? null : Colors.grey[600],
         ),
       );
     }
   }
 
   AppBar _appBar() {
-    switch (currentState) {
-      case MyState.selectionMod:
+    switch (_currentState) {
+      case States.selectionMod:
         return AppBar(
           leading: IconButton(
-            onPressed: () {
-              setState(() {
-                for (var item in listOfEvents) {
-                  item.isPick = false;
-                }
-                numberOfPicked = 0;
-              });
-            },
+            onPressed: () =>
+                setState(() {
+              for (var item in listOfEvents) {
+                item.isPick = false;
+              }
+              _numberOfPicked = 0;
+            }),
             icon: const Icon(Icons.close),
           ),
-          title: Text("$numberOfPicked"),
+          title: Text("$_numberOfPicked"),
           actions: [
             IconButton(
               onPressed: () {},
               icon: const Icon(Icons.send_to_mobile),
             ),
-            numberOfPicked == 1
+            _numberOfPicked == 1
                 ? IconButton(
                     onPressed: () {
                       setState(() {
-                        currentState = MyState.editingMod;
-                        indexEditing = listOfEvents
+                        _currentState = States.editingMod;
+                        _indexEditing = listOfEvents
                             .indexWhere((element) => element.isPick);
                         _textFieldController.text =
-                            listOfEvents[indexEditing].text;
+                            listOfEvents[_indexEditing].text;
                       });
                     },
                     icon: const Icon(Icons.edit),
@@ -313,7 +305,7 @@ class _EventsListState extends State<EventsList> {
                       content: Text('text copied'),
                     ),
                   );
-                  currentState = MyState.viewMod;
+                  _currentState = States.viewMod;
                 });
               },
               icon: const Icon(Icons.copy),
@@ -321,14 +313,15 @@ class _EventsListState extends State<EventsList> {
             IconButton(
               onPressed: () {
                 setState(() {
-                  listOfEvents.forEach((element) {
+                  for (var element in listOfEvents) {
                     if (element.isPick) {
                       element.isChosen == true
                           ? element.isChosen = false
                           : element.isChosen = true;
                     }
-                  });
-                  numberOfPicked = 0;
+                  }
+
+                  _numberOfPicked = 0;
                 });
               },
               icon: const Icon(Icons.bookmark_border),
@@ -339,7 +332,7 @@ class _EventsListState extends State<EventsList> {
                   () {
                     showModalBottomSheet(
                       context: context,
-                      builder: (builder) => Container(
+                      builder: (builder) => SizedBox(
                         height: 200,
                         child: Center(
                           child: Column(
@@ -355,7 +348,7 @@ class _EventsListState extends State<EventsList> {
                               Padding(
                                 padding: const EdgeInsets.all(10.0),
                                 child: Text(
-                                  'Are you sure you want delete the $numberOfPicked selected events?',
+                                  'Are you sure you want delete the $_numberOfPicked selected events?',
                                 ),
                               ),
                               TextButton(
@@ -372,7 +365,7 @@ class _EventsListState extends State<EventsList> {
                                     setState(() {
                                       listOfEvents.removeWhere(
                                           (element) => element.isPick == true);
-                                      numberOfPicked = 0;
+                                      _numberOfPicked = 0;
                                       Navigator.pop(context);
                                     });
                                   }),
@@ -402,16 +395,15 @@ class _EventsListState extends State<EventsList> {
             ),
           ],
         );
-      case MyState.editingMod:
+      case States.editingMod:
         return AppBar(
           leading: IconButton(
             onPressed: () {
               setState(() {
-                currentState = MyState.viewMod;
-                listOfEvents[indexEditing].isPick = false;
-                numberOfPicked = 0;
+                _currentState = States.viewMod;
+                listOfEvents[_indexEditing].isPick = false;
+                _numberOfPicked = 0;
               });
-              ;
             },
             icon: const Icon(Icons.close),
           ),
@@ -436,12 +428,12 @@ class _EventsListState extends State<EventsList> {
             IconButton(
               onPressed: () {
                 setState(() {
-                  currentState == MyState.chosensMod
-                      ? currentState = MyState.viewMod
-                      : currentState = MyState.chosensMod;
+                  _currentState == States.chosensMod
+                      ? _currentState = States.viewMod
+                      : _currentState = States.chosensMod;
                 });
               },
-              icon: currentState == MyState.chosensMod
+              icon: _currentState == States.chosensMod
                   ? const Icon(Icons.bookmark, color: Colors.yellow)
                   : const Icon(Icons.bookmark_border),
             ),
@@ -452,20 +444,20 @@ class _EventsListState extends State<EventsList> {
 
   String _textAssembly() {
     String assembledText = '';
-    listOfEvents.forEach((element) {
+    for (var element in listOfEvents) {
       if (element.isPick == true) {
         assembledText += element.text;
         assembledText += '\n';
       }
-    });
+    }
     return assembledText;
   }
 }
 
 class Event {
   Event(this.text) : time = DateTime.now();
+  late final DateTime time;
   bool isPick = false;
   bool isChosen = false;
   String text;
-  late final DateTime time;
 }
