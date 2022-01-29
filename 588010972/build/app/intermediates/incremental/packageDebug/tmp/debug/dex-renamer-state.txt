@@ -1,0 +1,4 @@
+#Sat Jan 29 15:31:55 MSK 2022
+base.0=B\:\\FLUTTER_COURSE\\WTF-Lab-2\\588010972\\build\\app\\intermediates\\dex\\debug\\mergeDexDebug\\classes.dex
+renamed.0=classes.dex
+path.0=classes.dex
