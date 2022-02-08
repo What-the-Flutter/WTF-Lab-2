@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'event_screen.dart';
 import 'inherited_main.dart';
 import 'task.dart';
 
@@ -178,6 +179,15 @@ class _State extends State<CollectionPages> {
                     subtitle: Text(InheritedMain.of(context)!
                         .tasks[currentIndex]
                         .lastEvent),
+                    onTap: () {
+                      var title =
+                          InheritedMain.of(context)!.tasks[currentIndex].header;
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  EventDialog(titleTask: title)));
+                    },
                   );
                 }
 
