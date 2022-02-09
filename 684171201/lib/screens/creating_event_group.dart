@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_5/main.dart';
-import 'package:flutter_application_5/screens/home_screen.dart';
+
+import '../main.dart';
+
+import 'home_screen.dart';
 
 enum MyState { creatingMod, editingMod }
 
@@ -14,7 +16,7 @@ class CreatingPage extends StatefulWidget {
 
 class _CreatingPageState extends State<CreatingPage> {
   int chosenIndex = -1;
-  var currentState = MyState.values[0];
+  MyState currentState = MyState.values[0];
   final _formController = TextEditingController();
   bool _formIsEmpty = true;
   bool isNotCorrectData = true;
@@ -35,10 +37,7 @@ class _CreatingPageState extends State<CreatingPage> {
     });
   }
 
-  @override
-  dispose() {
-    super.dispose();
-  }
+
 
   Scaffold creatingScaffold() {
     switch (currentState) {
@@ -73,7 +72,7 @@ class _CreatingPageState extends State<CreatingPage> {
                               crossAxisSpacing: 20,
                               mainAxisSpacing: 20),
                       itemCount: availableIcons.length,
-                      itemBuilder: (BuildContext context, index) {
+                      itemBuilder: (context, index) {
                         return GestureDetector(
                           onTap: () {
                             setState(() {
@@ -104,7 +103,7 @@ class _CreatingPageState extends State<CreatingPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute<void>(
-                          builder: (BuildContext context) => const FirstScreen(),
+                          builder: (context) => const FirstScreen(),
                         ),
                       );
                     });
@@ -121,7 +120,7 @@ class _CreatingPageState extends State<CreatingPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute<void>(
-                          builder: (BuildContext context) => const FirstScreen(),
+                          builder: (context) => const FirstScreen(),
                         ),
                       );
                     });
@@ -161,7 +160,7 @@ class _CreatingPageState extends State<CreatingPage> {
                               crossAxisSpacing: 20,
                               mainAxisSpacing: 20),
                       itemCount: availableIcons.length,
-                      itemBuilder: (BuildContext context, index) {
+                      itemBuilder: (context, index) {
                         return GestureDetector(
                           onTap: () {
                             setState(() {
@@ -192,7 +191,7 @@ class _CreatingPageState extends State<CreatingPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute<void>(
-                          builder: (BuildContext context) => const FirstScreen(),
+                          builder: (context) => const FirstScreen(),
                         ),
                       );
                     });
@@ -209,7 +208,7 @@ class _CreatingPageState extends State<CreatingPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute<void>(
-                          builder: (BuildContext context) => const FirstScreen(),
+                          builder: (context) => const FirstScreen(),
                         ),
                       );
                     });

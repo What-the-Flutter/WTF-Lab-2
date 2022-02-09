@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_5/main.dart';
+import '../main.dart';
 import 'creating_event_group.dart';
 import 'event_groups.dart';
 
-var listOfDaysOfTheWeek = <String>[
+List<String> listOfDaysOfTheWeek = <String>[
   'Monday',
   'Tuesday',
   'Wednesday',
@@ -23,9 +23,9 @@ class FirstScreen extends StatefulWidget {
 class _FirstScreenState extends State<FirstScreen> {
   int _selectedIndex = 0;
 
-  sortEventGroups(List<EventGroup> currentGroupList) {
-    List<EventGroup> pinnedGroup = [];
-    List<EventGroup> notPinnedGroup = [];
+  void sortEventGroups(List<EventGroup> currentGroupList) {
+    var pinnedGroup = <EventGroup>[];
+    var notPinnedGroup = <EventGroup>[];
 
     for (var element in currentGroupList) {
       element.isPinned ? pinnedGroup.add(element) : notPinnedGroup.add(element);
@@ -34,9 +34,11 @@ class _FirstScreenState extends State<FirstScreen> {
   }
 
   Column _scaffoldBody() {
-    bool isSomethingPinned = false;
+    var isSomethingPinned = false;
     for (var item in eventGroups) {
-      item.isPinned ? isSomethingPinned = true : null;
+      if (item.isPinned) {
+        isSomethingPinned = true;
+      }
     }
     return Column(
       children: [
@@ -107,11 +109,7 @@ class _FirstScreenState extends State<FirstScreen> {
                     children: [
                       const Text('Created'),
                       Text(
-                          listOfDaysOfTheWeek[eventGroups[index].time.weekday] +
-                              ' at ' +
-                              eventGroups[index].time.hour.toString() +
-                              ":" +
-                              eventGroups[index].time.minute.toString())
+                          '${listOfDaysOfTheWeek[eventGroups[index].time.weekday]} at ${eventGroups[index].time.hour.toString()}:${eventGroups[index].time.minute.toString()}')
                     ],
                   ),
                 ),
@@ -142,7 +140,7 @@ class _FirstScreenState extends State<FirstScreen> {
     Navigator.push(
       context,
       MaterialPageRoute<void>(
-        builder: (BuildContext context) => CreatingPage(chosenPage: index),
+        builder: (context) => CreatingPage(chosenPage: index),
       ),
     );
   }
@@ -221,7 +219,7 @@ class _FirstScreenState extends State<FirstScreen> {
     Navigator.push(
       context,
       MaterialPageRoute<void>(
-        builder: (BuildContext context) => EventsList(eventGroups[index].text),
+        builder: (context) => EventsList(eventGroups[index].text),
       ),
     );
   }
@@ -310,7 +308,7 @@ class _FirstScreenState extends State<FirstScreen> {
           Navigator.push(
             context,
             MaterialPageRoute<void>(
-              builder: (BuildContext context) => const CreatingPage(),
+              builder: (context) => const CreatingPage(),
             ),
           );
         },

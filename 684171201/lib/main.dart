@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_5/screens/home_screen.dart';
+import 'screens/home_screen.dart';
 
-var themeData = ThemeData(
+ThemeData themeData = ThemeData(
   brightness: Brightness.light,
   primarySwatch: Colors.teal,
 );
 
-var themeDark = ThemeData(
+ThemeData themeDark = ThemeData(
   brightness: Brightness.dark,
 );
 
-var themeLight = ThemeData(
+ThemeData themeLight = ThemeData(
   brightness: Brightness.light,
   primarySwatch: Colors.teal,
 );
