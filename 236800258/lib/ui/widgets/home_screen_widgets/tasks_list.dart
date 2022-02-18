@@ -1,8 +1,46 @@
 import 'package:flutter/material.dart';
 
 import '../../../entities/task.dart';
+import '../../../navigation/route_names.dart';
 import '../../../utils/constants/colors.dart';
-import '../../navigation/app_navigation.dart';
+
+class TasksList extends StatelessWidget {
+  TasksList({Key? key}) : super(key: key);
+
+  final List<Task> _tasks = [
+    Task(icon: const Icon(Icons.airplane_ticket), title: 'Travel'),
+    Task(icon: const Icon(Icons.home), title: 'Family'),
+    Task(icon: const Icon(Icons.sports_football), title: 'Sports'),
+    Task(icon: const Icon(Icons.ac_unit), title: 'Snowflake'),
+    Task(icon: const Icon(Icons.airplane_ticket), title: 'Travel'),
+    Task(icon: const Icon(Icons.home), title: 'Family'),
+    Task(icon: const Icon(Icons.sports_football), title: 'Sports'),
+    Task(icon: const Icon(Icons.ac_unit), title: 'Snowflake'),
+    Task(icon: const Icon(Icons.airplane_ticket), title: 'Travel'),
+    Task(icon: const Icon(Icons.home), title: 'Family'),
+    Task(icon: const Icon(Icons.sports_football), title: 'Sports'),
+    Task(icon: const Icon(Icons.ac_unit), title: 'Snowflake'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: ListView.separated(
+        itemCount: _tasks.length,
+        itemBuilder: (context, i) {
+          return _createListItem(
+            itemIcon: _tasks[i].icon,
+            itemName: _tasks[i].title,
+            context: context,
+          );
+        },
+        separatorBuilder: (context, i) {
+          return const SizedBox(height: 8);
+        },
+      ),
+    );
+  }
+}
 
 class _OnHoverListTile extends StatefulWidget {
   final Widget Function(bool isHovered) builder;
@@ -57,42 +95,4 @@ Widget _createListItem({
       );
     },
   );
-}
-
-class TasksList extends StatelessWidget {
-  TasksList({Key? key}) : super(key: key);
-
-  final List<Task> _tasks = [
-    Task(icon: const Icon(Icons.airplane_ticket), title: 'Travel'),
-    Task(icon: const Icon(Icons.home), title: 'Family'),
-    Task(icon: const Icon(Icons.sports_football), title: 'Sports'),
-    Task(icon: const Icon(Icons.ac_unit), title: 'Snowflake'),
-    Task(icon: const Icon(Icons.airplane_ticket), title: 'Travel'),
-    Task(icon: const Icon(Icons.home), title: 'Family'),
-    Task(icon: const Icon(Icons.sports_football), title: 'Sports'),
-    Task(icon: const Icon(Icons.ac_unit), title: 'Snowflake'),
-    Task(icon: const Icon(Icons.airplane_ticket), title: 'Travel'),
-    Task(icon: const Icon(Icons.home), title: 'Family'),
-    Task(icon: const Icon(Icons.sports_football), title: 'Sports'),
-    Task(icon: const Icon(Icons.ac_unit), title: 'Snowflake'),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: ListView.separated(
-        itemCount: _tasks.length,
-        itemBuilder: (context, i) {
-          return _createListItem(
-            itemIcon: _tasks[i].icon,
-            itemName: _tasks[i].title,
-            context: context,
-          );
-        },
-        separatorBuilder: (context, i) {
-          return const SizedBox(height: 8);
-        },
-      ),
-    );
-  }
 }

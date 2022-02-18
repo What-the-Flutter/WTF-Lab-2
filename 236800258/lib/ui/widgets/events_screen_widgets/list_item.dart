@@ -41,7 +41,10 @@ class _ListItemState extends State<ListItem> {
           },
           child: Container(
             constraints: BoxConstraints.loose(
-              Size(MediaQuery.of(context).size.width / 2, double.infinity),
+              Size(
+                MediaQuery.of(context).size.width / 2,
+                double.infinity,
+              ),
             ),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
@@ -62,7 +65,10 @@ class _ListItemState extends State<ListItem> {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(date, style: Theme.of(context).textTheme.caption),
+                    Text(
+                      date,
+                      style: Theme.of(context).textTheme.caption,
+                    ),
                     if (widget.event.isSelected)
                       const Icon(
                         Icons.check,

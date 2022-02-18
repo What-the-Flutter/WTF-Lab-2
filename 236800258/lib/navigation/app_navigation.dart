@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../screens/events_screen.dart';
-import '../screens/main_screen.dart';
-
-abstract class RouteNames {
-  static const mainScreen = 'main_screen';
-  static const messagesScreen = 'messages_screen';
-}
+import '../ui/screens/events_screen.dart';
+import '../ui/screens/main_screen.dart';
+import 'route_names.dart';
 
 class AppNavigation {
   static final routes = <String, Widget Function(BuildContext)>{

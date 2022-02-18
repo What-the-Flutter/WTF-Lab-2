@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../widgets/events_screen_widgets/event_screen_body.dart';
+import '../widgets/events_screen_widgets/events_screen_body.dart';
 
 class EventsScreen extends StatefulWidget {
   final String title;
@@ -11,7 +11,7 @@ class EventsScreen extends StatefulWidget {
 }
 
 class _EventsScreenState extends State<EventsScreen> {
-  bool isFavoriteShown = false;
+  bool _isFavoriteShown = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,17 +22,17 @@ class _EventsScreenState extends State<EventsScreen> {
           IconButton(
             onPressed: () {
               setState(() {
-                isFavoriteShown = !isFavoriteShown;
+                _isFavoriteShown = !_isFavoriteShown;
               });
             },
-            icon: isFavoriteShown
+            icon: _isFavoriteShown
                 ? const Icon(Icons.favorite)
                 : const Icon(Icons.favorite_border_outlined),
           )
         ],
       ),
       body: EventsScreenBody(
-        isFavoriteShown: isFavoriteShown,
+        isFavoriteShown: _isFavoriteShown,
         taskName: widget.title,
       ),
     );
