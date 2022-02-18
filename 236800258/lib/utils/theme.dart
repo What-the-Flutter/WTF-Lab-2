@@ -13,5 +13,9 @@ class AppTheme {
       ),
     ),
     primaryColorDark: CustomColors.primaryDarkColor,
+    textTheme: const TextTheme(
+      bodyLarge: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
+      ),
+      iconTheme: const IconThemeData(color: CustomColors.lightIconColor)
   );
 }

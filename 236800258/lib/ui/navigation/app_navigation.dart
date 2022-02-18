@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../screens/events_screen.dart';
 import '../screens/main_screen.dart';
-import '../screens/messages_screen.dart';
 
 abstract class RouteNames {
   static const mainScreen = 'main_screen';
@@ -18,7 +18,7 @@ class AppNavigation {
       final arguments = settings.arguments;
       final taskTitle = arguments is String ? arguments : '';
       return MaterialPageRoute(
-        builder: (context) => MessagesScreen(title: taskTitle),
+        builder: (context) => EventsScreen(title: taskTitle),
       );
     } else {
       return MaterialPageRoute(
