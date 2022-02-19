@@ -1,41 +1,43 @@
 import 'package:flutter/material.dart';
 
-import '../../../entities/task.dart';
+import '../../../entities/group.dart';
 import '../../../navigation/route_names.dart';
 import '../../../utils/constants/colors.dart';
 
-class TasksList extends StatelessWidget {
-  TasksList({Key? key}) : super(key: key);
+class GroupsList extends StatelessWidget {
+  GroupsList({Key? key}) : super(key: key);
 
-  final List<Task> _tasks = [
-    Task(icon: const Icon(Icons.airplane_ticket), title: 'Travel'),
-    Task(icon: const Icon(Icons.home), title: 'Family'),
-    Task(icon: const Icon(Icons.sports_football), title: 'Sports'),
-    Task(icon: const Icon(Icons.ac_unit), title: 'Snowflake'),
-    Task(icon: const Icon(Icons.airplane_ticket), title: 'Travel'),
-    Task(icon: const Icon(Icons.home), title: 'Family'),
-    Task(icon: const Icon(Icons.sports_football), title: 'Sports'),
-    Task(icon: const Icon(Icons.ac_unit), title: 'Snowflake'),
-    Task(icon: const Icon(Icons.airplane_ticket), title: 'Travel'),
-    Task(icon: const Icon(Icons.home), title: 'Family'),
-    Task(icon: const Icon(Icons.sports_football), title: 'Sports'),
-    Task(icon: const Icon(Icons.ac_unit), title: 'Snowflake'),
+  final List<Group> _groups = [
+    Group(icon: const Icon(Icons.airplane_ticket), title: 'Travel'),
+    Group(icon: const Icon(Icons.home), title: 'Family'),
+    Group(icon: const Icon(Icons.sports_football), title: 'Sports'),
+    Group(icon: const Icon(Icons.ac_unit), title: 'Snowflake'),
+    Group(icon: const Icon(Icons.airplane_ticket), title: 'Travel'),
+    Group(icon: const Icon(Icons.home), title: 'Family'),
+    Group(icon: const Icon(Icons.sports_football), title: 'Sports'),
+    Group(icon: const Icon(Icons.ac_unit), title: 'Snowflake'),
+    Group(icon: const Icon(Icons.airplane_ticket), title: 'Travel'),
+    Group(icon: const Icon(Icons.home), title: 'Family'),
+    Group(icon: const Icon(Icons.sports_football), title: 'Sports'),
+    Group(icon: const Icon(Icons.ac_unit), title: 'Snowflake'),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
       child: ListView.separated(
-        itemCount: _tasks.length,
+        itemCount: _groups.length,
         itemBuilder: (context, i) {
           return _createListItem(
-            itemIcon: _tasks[i].icon,
-            itemName: _tasks[i].title,
+            itemIcon: _groups[i].icon,
+            itemName: _groups[i].title,
             context: context,
           );
         },
         separatorBuilder: (context, i) {
-          return const SizedBox(height: 8);
+          return Theme.of(context).brightness == Brightness.dark
+              ? const Divider(height: 1, thickness: 0.8)
+              : const SizedBox(height: 8);
         },
       ),
     );
@@ -88,7 +90,7 @@ Widget _createListItem({
         subtitle: const Text('No events. Click to create one.'),
         onTap: () {
           Navigator.of(context).pushNamed(
-            RouteNames.messagesScreen,
+            RouteNames.eventsScreen,
             arguments: itemName,
           );
         },

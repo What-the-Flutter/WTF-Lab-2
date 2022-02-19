@@ -33,7 +33,7 @@ class _EventsScreenState extends State<EventsScreen> {
       ),
       body: EventsScreenBody(
         isFavoriteShown: _isFavoriteShown,
-        taskName: widget.title,
+        groupName: widget.title,
       ),
     );
   }

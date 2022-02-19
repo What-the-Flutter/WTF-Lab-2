@@ -8,11 +8,11 @@ import 'page_introduction.dart';
 
 class EventsScreenBody extends StatefulWidget {
   final bool isFavoriteShown;
-  final String taskName;
+  final String groupName;
   EventsScreenBody({
     Key? key,
     required this.isFavoriteShown,
-    required this.taskName,
+    required this.groupName,
   }) : super(key: key);
 
   @override
@@ -59,7 +59,7 @@ class _EventsScreenBodyState extends State<EventsScreenBody> {
     final controller = TextEditingController();
     return Column(
       children: [
-        if (_events.isEmpty) PageIntroduction(taskName: widget.taskName),
+        if (_events.isEmpty) PageIntroduction(groupName: widget.groupName),
         if (selectedEvents.isNotEmpty)
           DeleteEventsButton(
             deleteEvents: deleteEvents,

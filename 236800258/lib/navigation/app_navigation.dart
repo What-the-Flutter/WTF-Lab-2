@@ -10,11 +10,11 @@ class AppNavigation {
   };
 
   static Route<Object> onGenerateRoute(RouteSettings settings) {
-    if (settings.name == RouteNames.messagesScreen) {
+    if (settings.name == RouteNames.eventsScreen) {
       final arguments = settings.arguments;
-      final taskTitle = arguments is String ? arguments : '';
+      final groupTitle = arguments is String ? arguments : '';
       return MaterialPageRoute(
-        builder: (context) => EventsScreen(title: taskTitle),
+        builder: (context) => EventsScreen(title: groupTitle),
       );
     } else {
       return MaterialPageRoute(

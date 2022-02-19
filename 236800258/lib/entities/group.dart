@@ -1,11 +1,11 @@
 
 import 'package:flutter/material.dart';
 
-class Task {
+class Group {
   final Icon icon;
   final String title;
   
-  Task({
+  Group({
     required this.icon,
     required this.title,
   });

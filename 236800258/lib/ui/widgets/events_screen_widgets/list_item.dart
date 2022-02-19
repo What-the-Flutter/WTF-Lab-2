@@ -49,8 +49,8 @@ class _ListItemState extends State<ListItem> {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
               color: isRight
-                  ? CustomColors.rightMessageColor
-                  : CustomColors.leftMessageColor,
+                  ? CustomColors.rightEventColor
+                  : CustomColors.leftEventColor,
             ),
             padding: const EdgeInsets.all(14),
             child: Column(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../utils/theme/theme_inherit.dart';
 import '../widgets/main_screen_widgets/main_screen_body.dart';
 import '../widgets/main_screen_widgets/main_screen_bottom_bar.dart';
 
@@ -31,7 +32,11 @@ class _MainScreenState extends State<MainScreen> {
         centerTitle: true,
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              setState(() {
+                ThemeInherit.of(context).changeTheme();
+              });
+            },
             icon: const Icon(Icons.invert_colors),
           ),
         ],
@@ -49,6 +54,3 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 }
-
-
-
