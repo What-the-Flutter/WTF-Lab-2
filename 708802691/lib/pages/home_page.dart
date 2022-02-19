@@ -1,5 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'events_chats.dart';
 
 class EventsList extends StatefulWidget {
   const EventsList({Key? key}) : super(key: key);
@@ -9,48 +9,41 @@ class EventsList extends StatefulWidget {
 }
 
 class _EventsListState extends State<EventsList> {
-  final events = [
-    'Travel',
-    'Work',
-    'Sports',
-    'Family',
-    'Travel',
-    'Work',
-    'Sports',
-    'Family',
-    'Travel',
-    'Work',
-    'Sports',
-    'Family',
-  ];
-  final icons = [
-    Icons.flight_takeoff_rounded,
-    Icons.home_repair_service_rounded,
-    Icons.sports_handball_rounded,
-    Icons.bedroom_child_rounded,
-    Icons.flight_takeoff_rounded,
-    Icons.home_repair_service_rounded,
-    Icons.sports_handball_rounded,
-    Icons.bedroom_child_rounded,
-    Icons.flight_takeoff_rounded,
-    Icons.home_repair_service_rounded,
-    Icons.sports_handball_rounded,
-    Icons.bedroom_child_rounded,
+  final List<Event> events = [
+    Event(icon: Icons.flight_takeoff_rounded, title: 'Travel', notes: [
+      Note(
+          content: 'Hello World!',
+          dateTime: DateTime.now(),
+          rightHanded: false),
+      Note(content: 'Please, no...!', dateTime: DateTime.now()),
+    ]),
+    Event(icon: Icons.home_repair_service_rounded, title: 'Work', notes: []),
+    Event(icon: Icons.sports_handball_rounded, title: 'Sports', notes: []),
+    Event(icon: Icons.bedroom_child_rounded, title: 'Family', notes: [])
   ];
 
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
       padding: const EdgeInsets.all(8),
-      itemCount: events.length + 1,
+      itemCount: events.length,
       itemBuilder: (context, index) {
-        if (index == 0) return const BotBox();
         return ListTile(
-          title: Text(events[index - 1]),
-          subtitle: const Text('No events. Click to create one.'),
+          title: Text(events[index].title),
+          subtitle: Text(events[index].lastNote.content),
           leading: Builder(
-            builder: (context) => Icon(icons[index - 1]),
+            builder: (context) => Icon(events[index].icon),
           ),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ChatList(
+                  event: events[index],
+                ),
+              ),
+            );
+          },
         );
       },
       separatorBuilder: (context, index) => const Divider(),
@@ -58,34 +51,6 @@ class _EventsListState extends State<EventsList> {
   }
 }
 
-class BotBox extends StatelessWidget {
-  const BotBox({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        height: 50,
-        width: 300,
-        decoration: BoxDecoration(
-            color: const Color.fromRGBO(216, 205, 176, 0.6),
-            border: Border.all(
-              color: const Color.fromRGBO(216, 205, 176, 0.6),
-            ),
-            borderRadius: const BorderRadius.all(Radius.circular(5))),
-        child: Expanded(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Icon(Icons.support_agent_rounded),
-                Text(' Questionnaire Bot')
-              ],
-            )),
-      ),
-    );
-  }
-}
 
 class HomeBody extends StatelessWidget {
   const HomeBody({Key? key}) : super(key: key);
@@ -101,15 +66,60 @@ class HomeBody extends StatelessWidget {
 }
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key, required this.title}) : super(key: key);
-
   final String title;
+
+  const HomePage({Key? key, required this.title}) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
+
+  BottomNavigationBar defaultBottomBar() {
+    return BottomNavigationBar(
+      type: BottomNavigationBarType.fixed,
+      backgroundColor: const Color.fromRGBO(135, 148, 192, 0.7),
+      showUnselectedLabels: true,
+      selectedItemColor: const Color.fromRGBO(231, 233, 238, 1),
+      unselectedItemColor: const Color.fromRGBO(28, 33, 53, 1),
+      selectedIconTheme: const IconThemeData(
+        color: Color.fromRGBO(231, 233, 238, 20),
+        size: 28,
+      ),
+      unselectedIconTheme: const IconThemeData(
+        color: Color.fromRGBO(28, 33, 53, 1),
+        size: 28,
+      ),
+      items: const [
+        BottomNavigationBarItem(
+          icon: Icon(
+            Icons.home_rounded,
+          ),
+          label: 'Home',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(
+            Icons.add_task_rounded,
+          ),
+          label: 'Daily',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(
+            Icons.map_rounded,
+          ),
+          label: 'Timeline',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(
+            Icons.navigation_rounded,
+          ),
+          label: 'Explore',
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -131,12 +141,14 @@ class _HomePageState extends State<HomePage> {
             );
           },
         ),
-        title: Expanded(
-            child: Center(
-                child: Text(
-          widget.title,
-          style: const TextStyle(color: Color.fromRGBO(28, 33, 53, 1)),
-        ))),
+        title: Center(
+          child: Text(
+            widget.title,
+            style: const TextStyle(
+              color: Color.fromRGBO(28, 33, 53, 1),
+            ),
+          ),
+        ),
         actions: [
           Builder(
             builder: (context) {
@@ -157,47 +169,7 @@ class _HomePageState extends State<HomePage> {
         onPressed: () {},
         child: const Icon(Icons.add_rounded),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: const Color.fromRGBO(135, 148, 192, 0.7),
-        showUnselectedLabels: true,
-        selectedItemColor: const Color.fromRGBO(231, 233, 238, 1),
-        unselectedItemColor: const Color.fromRGBO(28, 33, 53, 1),
-        selectedIconTheme: const IconThemeData(
-          color: Color.fromRGBO(231, 233, 238, 20),
-          size: 28,
-        ),
-        unselectedIconTheme: const IconThemeData(
-          color: Color.fromRGBO(28, 33, 53, 1),
-          size: 28,
-        ),
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.home_rounded,
-            ),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.add_task_rounded,
-            ),
-            label: 'Daily',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.map_rounded,
-            ),
-            label: 'Timeline',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.navigation_rounded,
-            ),
-            label: 'Explore',
-          ),
-        ],
-      ),
+      bottomNavigationBar: defaultBottomBar(),
     );
   }
 }

@@ -18,9 +18,3 @@ class ChatJournalApp extends StatelessWidget {
     );
   }
 }
-
-
-
-
-
-
