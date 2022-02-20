@@ -4,18 +4,27 @@ import '../../../entities/group.dart';
 import '../../../navigation/route_names.dart';
 import '../../../utils/constants/colors.dart';
 
-class GroupsList extends StatelessWidget {
-  GroupsList({Key? key}) : super(key: key);
+class GroupsList extends StatefulWidget {
+  final Group? newGroup;
+
+  GroupsList({Key? key, this.newGroup}) : super(key: key);
+
+  @override
+  State<GroupsList> createState() => _GroupsListState();
+}
+
+class _GroupsListState extends State<GroupsList> {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.newGroup != null) {
+      _groups.add(
+        Group(icon: widget.newGroup!.icon, title: widget.newGroup!.title),
+      );
+    }
+  }
 
   final List<Group> _groups = [
-    Group(icon: const Icon(Icons.airplane_ticket), title: 'Travel'),
-    Group(icon: const Icon(Icons.home), title: 'Family'),
-    Group(icon: const Icon(Icons.sports_football), title: 'Sports'),
-    Group(icon: const Icon(Icons.ac_unit), title: 'Snowflake'),
-    Group(icon: const Icon(Icons.airplane_ticket), title: 'Travel'),
-    Group(icon: const Icon(Icons.home), title: 'Family'),
-    Group(icon: const Icon(Icons.sports_football), title: 'Sports'),
-    Group(icon: const Icon(Icons.ac_unit), title: 'Snowflake'),
     Group(icon: const Icon(Icons.airplane_ticket), title: 'Travel'),
     Group(icon: const Icon(Icons.home), title: 'Family'),
     Group(icon: const Icon(Icons.sports_football), title: 'Sports'),

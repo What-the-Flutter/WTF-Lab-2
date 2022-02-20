@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../entities/group.dart';
 import '../../utils/theme/theme_inherit.dart';
 import '../widgets/main_screen_widgets/main_screen_body.dart';
 import '../widgets/main_screen_widgets/main_screen_bottom_bar.dart';
 
 class MainScreen extends StatefulWidget {
-  MainScreen({Key? key}) : super(key: key);
+  final Group? newGroup;
+  MainScreen({Key? key, this.newGroup}) : super(key: key);
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -41,10 +43,9 @@ class _MainScreenState extends State<MainScreen> {
           ),
         ],
       ),
-      body: MainScreenBody(pageIndex: _selectedIndex),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        child: const Icon(Icons.add),
+      body: MainScreenBody(
+        pageIndex: _selectedIndex,
+        newGroup: widget.newGroup,
       ),
       drawer: const Drawer(),
       bottomNavigationBar: MainScreenBottomBar(
