@@ -7,24 +7,34 @@ import '../ui/screens/main_screen.dart';
 import 'route_names.dart';
 
 class AppNavigation {
-  static final routes = <String, Widget Function(BuildContext)>{
-    RouteNames.createNewGroupScreen: (context) => const CreateNewGroupScreen(),
-  };
+  static final routes = <String, Widget Function(BuildContext)>{};
 
   static Route<Object> onGenerateRoute(RouteSettings settings) {
-    final arguments = settings.arguments;
+    final _arguments = settings.arguments;
     switch (settings.name) {
       case RouteNames.eventsScreen:
-        final groupTitle = arguments is String ? arguments : '';
+        final _groupTitle = _arguments is String ? _arguments : '';
         return MaterialPageRoute(
-          builder: (context) => EventsScreen(title: groupTitle),
+          builder: (context) => EventsScreen(title: _groupTitle),
         );
 
       case RouteNames.mainScreen:
-        final newGroup = arguments is Group ? arguments : null;
+        final _group = _arguments is Group ? _arguments : null;
+        final _newGroup =
+            _group != null && _group.editingIndex == null ? _group : null;
+        final _editedGroup =
+            _group != null && _group.editingIndex != null ? _group : null;
         return MaterialPageRoute(
           builder: (context) => MainScreen(
-            newGroup: newGroup,
+            newGroup: _newGroup,
+            editedGroup: _editedGroup,
+          ),
+        );
+      case RouteNames.createNewGroupScreen:
+        final _editingGroup = _arguments is Group ? _arguments : null;
+        return MaterialPageRoute(
+          builder: (context) => CreateNewGroupScreen(
+            editingGroup: _editingGroup,
           ),
         );
       default:

@@ -4,7 +4,9 @@ import '../../../entities/group.dart';
 import '../../../navigation/route_names.dart';
 
 class InputTitleTextField extends StatefulWidget {
-  InputTitleTextField({Key? key}) : super(key: key);
+  final Group? editingGroup;
+
+  InputTitleTextField({Key? key, this.editingGroup}) : super(key: key);
 
   @override
   State<InputTitleTextField> createState() => _InputTitleTextFieldState();
@@ -20,13 +22,52 @@ class _InputTitleTextFieldState extends State<InputTitleTextField> {
     Icon(Icons.airplanemode_active),
     Icon(Icons.drive_eta),
     Icon(Icons.store),
+    Icon(Icons.airplane_ticket),
     Icon(Icons.videogame_asset_sharp),
     Icon(Icons.wc),
     Icon(Icons.account_box),
     Icon(Icons.monetization_on_outlined),
     Icon(Icons.add_shopping_cart),
+    Icon(Icons.ac_unit),
+    Icon(Icons.sports_football),
   ];
   Icon? _selectedIcon;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.editingGroup != null) {
+      _controller.text = widget.editingGroup!.title;
+      _selectedIcon = _groupsIcons
+          .firstWhere((el) => el.icon == widget.editingGroup!.icon.icon);
+    }
+  }
+
+  void onAddButtonPresed() {
+    if (_controller.text.isNotEmpty && _selectedIcon != null) {
+      Navigator.of(context).popAndPushNamed(
+        RouteNames.mainScreen,
+        arguments: Group(
+          icon: _selectedIcon!,
+          title: _controller.text,
+        ),
+      );
+    }
+  }
+
+  void onEditButtonPresed() {
+    if (_controller.text.isNotEmpty && _selectedIcon != null) {
+      Navigator.of(context).popAndPushNamed(
+        RouteNames.mainScreen,
+        arguments: Group(
+          icon: _selectedIcon!,
+          title: _controller.text,
+          editingIndex: widget.editingGroup!.editingIndex,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     _controller.selection = TextSelection.fromPosition(
@@ -55,19 +96,11 @@ class _InputTitleTextFieldState extends State<InputTitleTextField> {
               const Size(500, 60),
             ),
             child: AspectRatio(
-              aspectRatio: 21/3,
+              aspectRatio: 21 / 3,
               child: ElevatedButton(
-                onPressed: _controller.text.isNotEmpty && _selectedIcon != null
-                    ? () {
-                        Navigator.of(context).popAndPushNamed(
-                          RouteNames.mainScreen,
-                          arguments: Group(
-                            icon: _selectedIcon!,
-                            title: _controller.text,
-                          ),
-                        );
-                      }
-                    : null,
+                onPressed: widget.editingGroup != null
+                    ? onEditButtonPresed
+                    : onAddButtonPresed,
                 child: const Text('Submit'),
                 style: ButtonStyle(
                   shape: MaterialStateProperty.all(

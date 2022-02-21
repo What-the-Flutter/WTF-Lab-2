@@ -7,7 +7,13 @@ import '../widgets/main_screen_widgets/main_screen_bottom_bar.dart';
 
 class MainScreen extends StatefulWidget {
   final Group? newGroup;
-  MainScreen({Key? key, this.newGroup}) : super(key: key);
+  final Group? editedGroup;
+
+  MainScreen({
+    Key? key,
+    this.newGroup,
+  required  this.editedGroup,
+  }) : super(key: key);
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -46,6 +52,7 @@ class _MainScreenState extends State<MainScreen> {
       body: MainScreenBody(
         pageIndex: _selectedIndex,
         newGroup: widget.newGroup,
+        editedGroup: widget.editedGroup,
       ),
       drawer: const Drawer(),
       bottomNavigationBar: MainScreenBottomBar(

@@ -3,12 +3,17 @@ import 'package:flutter/material.dart';
 import '../../../navigation/route_names.dart';
 
 class NewGroupAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const NewGroupAppBar({Key? key}) : super(key: key);
+  final bool isEditing;
+
+  const NewGroupAppBar({
+    Key? key,
+    required this.isEditing,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      title: const Text('Create new group'),
+      title: isEditing ? const Text('Edit Group') : const Text('Create new group'),
       centerTitle: true,
       leading: IconButton(
         onPressed: () {

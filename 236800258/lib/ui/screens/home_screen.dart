@@ -7,7 +7,13 @@ import '../widgets/home_screen_widgets/groups_list.dart';
 
 class HomeScreen extends StatelessWidget {
   final Group? newGroup;
-  const HomeScreen({Key? key, this.newGroup}) : super(key: key);
+  final Group? editedGroup;
+
+  const HomeScreen({
+    Key? key,
+   required this.newGroup,
+    required this.editedGroup,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -23,13 +29,17 @@ class HomeScreen extends StatelessWidget {
                   ? Colors.white
                   : null,
             ),
-            GroupsList(newGroup: newGroup),
+            GroupsList(
+              newGroup: newGroup,
+              editedGroup: editedGroup,
+            ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.of(context).popAndPushNamed(RouteNames.createNewGroupScreen);
+          Navigator.of(context)
+              .popAndPushNamed(RouteNames.createNewGroupScreen);
         },
         child: const Icon(Icons.add),
       ),

@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../../../entities/group.dart';
-import '../../../navigation/route_names.dart';
-import '../../../utils/constants/colors.dart';
+import 'create_list_item.dart';
 
 class GroupsList extends StatefulWidget {
   final Group? newGroup;
-
-  GroupsList({Key? key, this.newGroup}) : super(key: key);
+  final Group? editedGroup;
+  GroupsList({Key? key, this.newGroup, this.editedGroup}) : super(key: key);
 
   @override
   State<GroupsList> createState() => _GroupsListState();
@@ -22,6 +21,10 @@ class _GroupsListState extends State<GroupsList> {
         Group(icon: widget.newGroup!.icon, title: widget.newGroup!.title),
       );
     }
+    if (widget.editedGroup != null) {
+      _groups[widget.editedGroup!.editingIndex!] =
+          widget.editedGroup!.copyWith(editingIndex: null);
+    }
   }
 
   final List<Group> _groups = [
@@ -31,16 +34,22 @@ class _GroupsListState extends State<GroupsList> {
     Group(icon: const Icon(Icons.ac_unit), title: 'Snowflake'),
   ];
 
+  void onDeleteItem(int index) {
+    _groups.removeAt(index);
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Expanded(
       child: ListView.separated(
         itemCount: _groups.length,
         itemBuilder: (context, i) {
-          return _createListItem(
-            itemIcon: _groups[i].icon,
-            itemName: _groups[i].title,
+          return createListItem(
+            currentGroup: _groups[i],
             context: context,
+            onDeleteItem: onDeleteItem,
+            index: i,
           );
         },
         separatorBuilder: (context, i) {
@@ -51,59 +60,4 @@ class _GroupsListState extends State<GroupsList> {
       ),
     );
   }
-}
-
-class _OnHoverListTile extends StatefulWidget {
-  final Widget Function(bool isHovered) builder;
-  _OnHoverListTile({Key? key, required this.builder}) : super(key: key);
-
-  @override
-  State<_OnHoverListTile> createState() => _OnHoverListTileState();
-}
-
-class _OnHoverListTileState extends State<_OnHoverListTile> {
-  bool isHovered = false;
-
-  void onEntered(bool isHovered) {
-    setState(() {
-      this.isHovered = isHovered;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (event) => onEntered(true),
-      onExit: (event) => onEntered(false),
-      child: widget.builder(isHovered),
-    );
-  }
-}
-
-Widget _createListItem({
-  required Icon itemIcon,
-  required String itemName,
-  required BuildContext context,
-}) {
-  return _OnHoverListTile(
-    builder: (isHovered) {
-      final theme = Theme.of(context).listTileTheme;
-      return ListTile(
-        tileColor: isHovered == true
-            ? CustomColors.onListTileHovered
-            : theme.tileColor,
-        leading: CircleAvatar(
-          child: itemIcon,
-        ),
-        title: Text(itemName),
-        subtitle: const Text('No events. Click to create one.'),
-        onTap: () {
-          Navigator.of(context).pushNamed(
-            RouteNames.eventsScreen,
-            arguments: itemName,
-          );
-        },
-      );
-    },
-  );
 }
