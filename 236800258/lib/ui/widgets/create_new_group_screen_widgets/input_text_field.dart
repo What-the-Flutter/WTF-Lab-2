@@ -14,6 +14,7 @@ class InputTitleTextField extends StatefulWidget {
 
 class _InputTitleTextFieldState extends State<InputTitleTextField> {
   final _controller = TextEditingController();
+  Icon? _selectedIcon;
   final List<Icon> _groupsIcons = const [
     Icon(Icons.account_balance_rounded),
     Icon(Icons.zoom_in_rounded),
@@ -31,7 +32,6 @@ class _InputTitleTextFieldState extends State<InputTitleTextField> {
     Icon(Icons.ac_unit),
     Icon(Icons.sports_football),
   ];
-  Icon? _selectedIcon;
 
   @override
   void initState() {
@@ -39,7 +39,7 @@ class _InputTitleTextFieldState extends State<InputTitleTextField> {
     if (widget.editingGroup != null) {
       _controller.text = widget.editingGroup!.title;
       _selectedIcon = _groupsIcons
-          .firstWhere((el) => el.icon == widget.editingGroup!.icon.icon);
+          .firstWhere((el) => el.icon == widget.editingGroup!.groupIcon.icon);
     }
   }
 
@@ -48,8 +48,10 @@ class _InputTitleTextFieldState extends State<InputTitleTextField> {
       Navigator.of(context).popAndPushNamed(
         RouteNames.mainScreen,
         arguments: Group(
-          icon: _selectedIcon!,
+          groupIcon: _selectedIcon!,
           title: _controller.text,
+          createdAt: DateTime.now(),
+          editedAt: DateTime.now(),
         ),
       );
     }
@@ -60,9 +62,11 @@ class _InputTitleTextFieldState extends State<InputTitleTextField> {
       Navigator.of(context).popAndPushNamed(
         RouteNames.mainScreen,
         arguments: Group(
-          icon: _selectedIcon!,
+          groupIcon: _selectedIcon!,
           title: _controller.text,
           editingIndex: widget.editingGroup!.editingIndex,
+          createdAt: widget.editingGroup!.createdAt,
+          editedAt: DateTime.now(),
         ),
       );
     }

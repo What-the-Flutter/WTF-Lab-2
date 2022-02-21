@@ -3,6 +3,58 @@ import 'package:flutter/material.dart';
 import '../../../entities/group.dart';
 import '../../../navigation/route_names.dart';
 import '../../../utils/constants/colors.dart';
+import 'home_screen_bottom_sheet.dart';
+
+Widget createListItem({
+  required Group currentGroup,
+  required int currentIndex,
+  required BuildContext context,
+  required void Function(Group) onInfoPressed,
+  required void Function(Group) onPinPressed,
+  required void Function() onArchivePressed,
+  required void Function(Group, int) onEditPressed,
+  required void Function(int) onDeletePressed,
+}) {
+  return _OnHoverListTile(
+    builder: (isHovered) {
+      final theme = Theme.of(context).listTileTheme;
+      return ListTile(
+        onLongPress: () {
+          showModalBottomSheet(
+            context: context,
+            builder: (context) {
+              return HomeScreenBottomSheet(
+                currentIndex: currentIndex,
+                currentGroup: currentGroup,
+                onInfoPressed: onInfoPressed,
+                onPinPressed: onPinPressed,
+                onArchivePressed: onArchivePressed,
+                onEditPressed: onEditPressed,
+                onDeletePressed: onDeletePressed,
+              );
+            },
+          );
+        },
+        tileColor: isHovered == true
+            ? CustomColors.onListTileHovered
+            : theme.tileColor,
+        leading: CircleAvatar(
+          child: currentGroup.groupIcon,
+        ),
+        trailing:
+            currentGroup.isPinned ? const Icon(Icons.push_pin_rounded) : null,
+        title: Text(currentGroup.title),
+        subtitle: const Text('No events. Click to create one.'),
+        onTap: () {
+          Navigator.of(context).pushNamed(
+            RouteNames.eventsScreen,
+            arguments: currentGroup.title,
+          );
+        },
+      );
+    },
+  );
+}
 
 class _OnHoverListTile extends StatefulWidget {
   final Widget Function(bool isHovered) builder;
@@ -29,93 +81,4 @@ class _OnHoverListTileState extends State<_OnHoverListTile> {
       child: widget.builder(isHovered),
     );
   }
-}
-
-Widget _createBottomSheetItem({
-  required Icon icon,
-  required String title,
-  required void Function() onTap,
-}) {
-  return Padding(
-    padding: const EdgeInsets.all(5),
-    child: ListTile(
-      onTap: onTap,
-      leading: icon,
-      title: Text(title),
-    ),
-  );
-}
-
-Widget createListItem({
-  required Group currentGroup,
-  required BuildContext context,
-  required Function onDeleteItem,
-  required int index,
-}) {
-  return _OnHoverListTile(
-    builder: (isHovered) {
-      final theme = Theme.of(context).listTileTheme;
-      return ListTile(
-        onLongPress: () {
-          showModalBottomSheet(
-            context: context,
-            builder: (context) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _createBottomSheetItem(
-                    icon: const Icon(Icons.info),
-                    title: 'Info',
-                    onTap: () {},
-                  ),
-                  _createBottomSheetItem(
-                    icon: const Icon(Icons.push_pin),
-                    title: 'Pin',
-                    onTap: () {},
-                  ),
-                  _createBottomSheetItem(
-                    icon: const Icon(Icons.archive),
-                    title: 'Archive',
-                    onTap: () {},
-                  ),
-                  _createBottomSheetItem(
-                    icon: const Icon(Icons.edit),
-                    title: 'Edit',
-                    onTap: () {
-                      Navigator.of(context).pushNamed(
-                        RouteNames.createNewGroupScreen,
-                        arguments: currentGroup.copyWith(editingIndex: index),
-                      );
-                    },
-                  ),
-                  _createBottomSheetItem(
-                    icon: const Icon(Icons.delete),
-                    title: 'Delete',
-                    onTap: () {
-                      onDeleteItem(index);
-                      Navigator.pop(context);
-                    },
-                  ),
-                ],
-              );
-            },
-          );
-        },
-        tileColor: isHovered == true
-            ? CustomColors.onListTileHovered
-            : theme.tileColor,
-        leading: CircleAvatar(
-          child: currentGroup.icon,
-        ),
-        title: Text(currentGroup.title),
-        subtitle: const Text('No events. Click to create one.'),
-        onTap: () {
-          Navigator.of(context).pushNamed(
-            RouteNames.eventsScreen,
-            arguments: currentGroup.title,
-          );
-        },
-      );
-    },
-  );
 }
