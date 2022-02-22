@@ -9,17 +9,34 @@ class EventsList extends StatefulWidget {
 }
 
 class _EventsListState extends State<EventsList> {
+  final errorTime = '24:00';
   final List<Event> events = [
-    Event(icon: Icons.flight_takeoff_rounded, title: 'Travel', notes: [
-      Note(
-          content: 'Hello World!',
-          dateTime: DateTime.now(),
-          rightHanded: false),
-      Note(content: 'Please, no...!', dateTime: DateTime.now()),
-    ]),
-    Event(icon: Icons.home_repair_service_rounded, title: 'Work', notes: []),
-    Event(icon: Icons.sports_handball_rounded, title: 'Sports', notes: []),
-    Event(icon: Icons.bedroom_child_rounded, title: 'Family', notes: [])
+    Event(
+      icon: Icons.flight_takeoff_rounded,
+      title: 'Travel',
+      notes: [
+        Note(
+            content: 'Hello World!',
+            dateTime: DateTime.now(),
+            rightHanded: false),
+        Note(content: 'Please, no...!', dateTime: DateTime.now()),
+      ],
+    ),
+    Event(
+      icon: Icons.home_repair_service_rounded,
+      title: 'Work',
+      notes: [],
+    ),
+    Event(
+      icon: Icons.sports_handball_rounded,
+      title: 'Sports',
+      notes: [],
+    ),
+    Event(
+      icon: Icons.bedroom_child_rounded,
+      title: 'Family',
+      notes: [],
+    )
   ];
 
   @override
@@ -27,30 +44,33 @@ class _EventsListState extends State<EventsList> {
     return ListView.separated(
       padding: const EdgeInsets.all(8),
       itemCount: events.length,
-      itemBuilder: (context, index) {
-        return ListTile(
-          title: Text(events[index].title),
-          subtitle: Text(events[index].lastNote.content),
-          leading: Builder(
-            builder: (context) => Icon(events[index].icon),
+      itemBuilder: (context, index) => ListTile(
+        hoverColor: const Color.fromRGBO(216, 205, 176, 0.4),
+        title: Text(events[index].title),
+        subtitle: Text(events[index].lastNote.content),
+        leading: Builder(
+          builder: (context) => Icon(events[index].icon),
+        ),
+        trailing: (events[index].lastNote.time == errorTime)
+            ? const SizedBox(
+                width: 1,
+              )
+            : Text(events[index].lastNote.time),
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) {
+              return ChatList(
+                event: events[index],
+              );
+            },
           ),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ChatList(
-                  event: events[index],
-                ),
-              ),
-            );
-          },
-        );
-      },
+        ),
+      ),
       separatorBuilder: (context, index) => const Divider(),
     );
   }
 }
-
 
 class HomeBody extends StatelessWidget {
   const HomeBody({Key? key}) : super(key: key);
@@ -58,8 +78,8 @@ class HomeBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: [
-        const Expanded(child: EventsList()),
+      children: const [
+        Expanded(child: EventsList()),
       ],
     );
   }
@@ -75,7 +95,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
   BottomNavigationBar defaultBottomBar() {
     return BottomNavigationBar(
       type: BottomNavigationBarType.fixed,

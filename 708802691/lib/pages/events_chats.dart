@@ -2,29 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
+import 'favorites.dart';
+
 class Note {
   late final DateTime _dateTime;
-  late String _content;
-  late bool _isFavorite = false;
-  late bool _isSelected = false;
+  late String content;
+  late bool isFavorite = false;
+  late bool isSelected = false;
   late final bool _rightHanded;
 
-  Note({required dateTime, required content, rightHanded = true})
+  Note({required dateTime, required this.content, rightHanded = true})
       : _dateTime = dateTime,
-        _content = content,
         _rightHanded = rightHanded;
-
-  String get content {
-    return _content;
-  }
-
-  bool get isFavorite {
-    return _isFavorite;
-  }
-
-  bool get isSelected {
-    return _isSelected;
-  }
 
   bool get rightHanded {
     return _rightHanded;
@@ -32,18 +21,6 @@ class Note {
 
   String get time {
     return DateFormat('kk:mm').format(_dateTime).toString();
-  }
-
-  set content(String newContent) {
-    _content = newContent;
-  }
-
-  set isFavorite(bool newMark) {
-    _isFavorite = newMark;
-  }
-
-  set isSelected(bool newMark) {
-    _isSelected = newMark;
   }
 }
 
@@ -72,7 +49,7 @@ class Event {
   Note get lastNote {
     if (_notes.isEmpty) {
       return Note(
-          dateTime: DateTime.now(), content: 'No events. Click to create one.');
+          dateTime: DateTime(2022), content: 'No events. Click to create one.');
     }
     return _notes[_notes.length - 1];
   }
@@ -85,21 +62,22 @@ class DefaultBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: Column(children: [
-        Container(
-          margin: const EdgeInsets.only(top: 10, bottom: 20),
-          alignment: Alignment.topCenter,
-          padding: const EdgeInsets.symmetric(vertical: 5.0),
-          height: 190,
-          width: 300,
-          decoration: BoxDecoration(
-            color: const Color.fromRGBO(216, 205, 176, 0.6),
-            border: Border.all(
+      child: Column(
+        children: [
+          Container(
+            margin: const EdgeInsets.only(top: 10, bottom: 20),
+            alignment: Alignment.topCenter,
+            padding: const EdgeInsets.symmetric(vertical: 5.0),
+            height: 190,
+            width: 300,
+            decoration: BoxDecoration(
               color: const Color.fromRGBO(216, 205, 176, 0.6),
+              border: Border.all(
+                color: const Color.fromRGBO(216, 205, 176, 0.6),
+              ),
+              borderRadius: const BorderRadius.all(Radius.circular(10)),
             ),
-            borderRadius: const BorderRadius.all(Radius.circular(10)),
-          ),
-          child: Column(
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 SizedBox(
@@ -118,10 +96,12 @@ class DefaultBody extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                 ),
-              ]),
-        ),
-        Expanded(child: Container()),
-      ]),
+              ],
+            ),
+          ),
+          Expanded(child: Container()),
+        ],
+      ),
     );
   }
 }
@@ -166,9 +146,7 @@ class _ChatListState extends State<ChatList> {
 
   void addNote(Note newNote) {
     noteController.clear();
-    setState(() {
-      event.notes.add(newNote);
-    });
+    setState(() => event.notes.add(newNote));
   }
 
   void cancelEditingMode() {
@@ -180,9 +158,7 @@ class _ChatListState extends State<ChatList> {
   }
 
   void changeNote(String newContent, int index) {
-    setState(() {
-      event.notes[index].content = newContent;
-    });
+    setState(() => event.notes[index].content = newContent);
     noteController.clear();
     cancelEditingMode();
   }
@@ -192,11 +168,7 @@ class _ChatListState extends State<ChatList> {
       event.notes[index].isSelected = false;
     }
     selected.clear();
-    setState(
-      () {
-        selectingMode = false;
-      },
-    );
+    setState(() => selectingMode = false);
   }
 
   void _selectingMode(int index) {
@@ -210,9 +182,8 @@ class _ChatListState extends State<ChatList> {
       event.notes[index].isSelected = true;
     }
 
-    setState(() {
-      (selected.isNotEmpty) ? selectingMode = true : selectingMode = false;
-    });
+    setState(() =>
+        (selected.isNotEmpty) ? selectingMode = true : selectingMode = false);
   }
 
   Stack noteField() {
@@ -288,7 +259,7 @@ class _ChatListState extends State<ChatList> {
                       cancelEditingMode();
                     }
                   },
-                )
+                ),
               ],
             ),
           ),
@@ -339,7 +310,14 @@ class _ChatListState extends State<ChatList> {
                 Icons.star_rounded,
                 color: Color.fromRGBO(28, 33, 53, 1),
               ),
-              onPressed: () {},
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Favorites(
+                    event: event,
+                  ),
+                ),
+              ),
             );
           },
         ),
@@ -458,56 +436,57 @@ class _ChatListState extends State<ChatList> {
                             ? Alignment.topLeft
                             : Alignment.topRight),
                         child: Container(
-                            constraints: const BoxConstraints(
-                              maxWidth: 200,
-                            ),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
-                              color: noteColor(index),
-                            ),
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  event.notes[index].content,
-                                  style: const TextStyle(fontSize: 15),
-                                ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    (event.notes[index].isSelected)
-                                        ? const Icon(
-                                            Icons.check_rounded,
-                                            size: 20,
-                                            color: Colors.black,
-                                          )
-                                        : const SizedBox(
-                                            width: 0.2,
-                                          ),
-                                    Text(
-                                      event.notes[index].time,
-                                      style: const TextStyle(fontSize: 11),
-                                      textAlign: TextAlign.start,
-                                    ),
-                                    const SizedBox(
-                                      width: 8,
-                                    ),
-                                    (event.notes[index].isFavorite)
-                                        ? const Icon(
-                                            Icons.star_rounded,
-                                            size: 20,
-                                            color: Color.fromRGBO(
-                                                216, 205, 176, 0.9),
-                                          )
-                                        : const SizedBox(
-                                            width: 0.2,
-                                          ),
-                                  ],
-                                ),
-                              ],
-                            )),
+                          constraints: const BoxConstraints(
+                            maxWidth: 200,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            color: noteColor(index),
+                          ),
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                event.notes[index].content,
+                                style: const TextStyle(fontSize: 15),
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  (event.notes[index].isSelected)
+                                      ? const Icon(
+                                          Icons.check_rounded,
+                                          size: 20,
+                                          color: Colors.black,
+                                        )
+                                      : const SizedBox(
+                                          width: 0.2,
+                                        ),
+                                  Text(
+                                    event.notes[index].time,
+                                    style: const TextStyle(fontSize: 11),
+                                    textAlign: TextAlign.start,
+                                  ),
+                                  const SizedBox(
+                                    width: 8,
+                                  ),
+                                  (event.notes[index].isFavorite)
+                                      ? const Icon(
+                                          Icons.star_rounded,
+                                          size: 20,
+                                          color: Color.fromRGBO(
+                                              216, 205, 176, 0.9),
+                                        )
+                                      : const SizedBox(
+                                          width: 0.2,
+                                        ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                     onLongPress: () => _editNote(index),
