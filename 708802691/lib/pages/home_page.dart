@@ -16,10 +16,14 @@ class _EventsListState extends State<EventsList> {
       title: 'Travel',
       notes: [
         Note(
-            content: 'Hello World!',
-            dateTime: DateTime.now(),
-            rightHanded: false),
-        Note(content: 'Please, no...!', dateTime: DateTime.now()),
+          content: 'Hello World!',
+          dateTime: DateTime.now(),
+          rightHanded: false,
+        ),
+        Note(
+          content: 'Please, no...!',
+          dateTime: DateTime.now(),
+        ),
       ],
     ),
     Event(
@@ -79,7 +83,9 @@ class HomeBody extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: const [
-        Expanded(child: EventsList()),
+        Expanded(
+          child: EventsList(),
+        ),
       ],
     );
   }

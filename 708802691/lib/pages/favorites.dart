@@ -11,7 +11,7 @@ class Favorites extends StatefulWidget {
 }
 
 class _FavoritesState extends State<Favorites> {
-  late Event event;
+  Event event;
   late final favorites = favoriteNotes(event.notes);
 
   _FavoritesState({required this.event});

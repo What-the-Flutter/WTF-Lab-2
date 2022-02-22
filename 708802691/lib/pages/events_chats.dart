@@ -5,11 +5,11 @@ import 'package:intl/intl.dart';
 import 'favorites.dart';
 
 class Note {
-  late final DateTime _dateTime;
-  late String content;
-  late bool isFavorite = false;
-  late bool isSelected = false;
-  late final bool _rightHanded;
+  final DateTime _dateTime;
+  String content;
+  bool isFavorite = false;
+  bool isSelected = false;
+  final bool _rightHanded;
 
   Note({required dateTime, required this.content, rightHanded = true})
       : _dateTime = dateTime,
@@ -49,7 +49,9 @@ class Event {
   Note get lastNote {
     if (_notes.isEmpty) {
       return Note(
-          dateTime: DateTime(2022), content: 'No events. Click to create one.');
+        dateTime: DateTime(2022),
+        content: 'No events. Click to create one.',
+      );
     }
     return _notes[_notes.length - 1];
   }
@@ -57,6 +59,7 @@ class Event {
 
 class DefaultBody extends StatelessWidget {
   final String title;
+
   const DefaultBody({Key? key, required this.title}) : super(key: key);
 
   @override
@@ -75,7 +78,9 @@ class DefaultBody extends StatelessWidget {
               border: Border.all(
                 color: const Color.fromRGBO(216, 205, 176, 0.6),
               ),
-              borderRadius: const BorderRadius.all(Radius.circular(10)),
+              borderRadius: const BorderRadius.all(
+                Radius.circular(10),
+              ),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -91,7 +96,7 @@ class DefaultBody extends StatelessWidget {
                 SizedBox(
                   width: 250,
                   child: Text(
-                    'Add your first event to $title page by entering some text in the text box below and hitting the send button. Long tap the send button to align the event in opposite direction. Tap on the bookmark icon on the top right corner to show the bookmarked events only.',
+                    'Add your first event to $title page by entering some text )in the text box below and hitting the send button. Long tap the send button to align the event in opposite direction. Tap on the bookmark icon on the top right corner to show the bookmarked events only.',
                     style: const TextStyle(fontSize: 14, color: Colors.black26),
                     textAlign: TextAlign.center,
                   ),
@@ -99,7 +104,9 @@ class DefaultBody extends StatelessWidget {
               ],
             ),
           ),
-          Expanded(child: Container()),
+          Expanded(
+            child: Container(),
+          ),
         ],
       ),
     );
@@ -108,6 +115,7 @@ class DefaultBody extends StatelessWidget {
 
 class ChatList extends StatefulWidget {
   final Event event;
+
   const ChatList({Key? key, required this.event}) : super(key: key);
 
   @override
@@ -119,29 +127,33 @@ class _ChatListState extends State<ChatList> {
   bool editingMode = false;
   bool selectingMode = false;
   int? editingIndex;
-  late Event event;
+  Event event;
   TextEditingController noteController = TextEditingController();
 
   _ChatListState({required this.event});
 
   void _editNote(int index) {
-    setState(() {
-      cancelSelectingMode();
-      noteController.clear();
-      noteController.text = event.notes[index].content;
-      editingMode = true;
-      editingIndex = index;
-    });
+    setState(
+      () {
+        cancelSelectingMode();
+        noteController.clear();
+        noteController.text = event.notes[index].content;
+        editingMode = true;
+        editingIndex = index;
+      },
+    );
   }
 
   void _changeMark(List<int> indexes) {
-    setState(() {
-      for (var index in indexes) {
-        (event.notes[index].isFavorite)
-            ? event.notes[index].isFavorite = false
-            : event.notes[index].isFavorite = true;
-      }
-    });
+    setState(
+      () {
+        for (var index in indexes) {
+          (event.notes[index].isFavorite)
+              ? event.notes[index].isFavorite = false
+              : event.notes[index].isFavorite = true;
+        }
+      },
+    );
   }
 
   void addNote(Note newNote) {
@@ -150,15 +162,19 @@ class _ChatListState extends State<ChatList> {
   }
 
   void cancelEditingMode() {
-    setState(() {
-      noteController.clear();
-      editingMode = false;
-      editingIndex = null;
-    });
+    setState(
+      () {
+        noteController.clear();
+        editingMode = false;
+        editingIndex = null;
+      },
+    );
   }
 
   void changeNote(String newContent, int index) {
-    setState(() => event.notes[index].content = newContent);
+    setState(
+      () => event.notes[index].content = newContent,
+    );
     noteController.clear();
     cancelEditingMode();
   }
@@ -168,12 +184,13 @@ class _ChatListState extends State<ChatList> {
       event.notes[index].isSelected = false;
     }
     selected.clear();
-    setState(() => selectingMode = false);
+    setState(
+      () => selectingMode = false,
+    );
   }
 
   void _selectingMode(int index) {
     cancelEditingMode();
-
     if (event.notes[index].isSelected) {
       selected.remove(index);
       event.notes[index].isSelected = false;
@@ -181,9 +198,9 @@ class _ChatListState extends State<ChatList> {
       selected.add(index);
       event.notes[index].isSelected = true;
     }
-
-    setState(() =>
-        (selected.isNotEmpty) ? selectingMode = true : selectingMode = false);
+    setState(
+      () => (selected.isNotEmpty) ? selectingMode = true : selectingMode = false,
+    );
   }
 
   Stack noteField() {
@@ -218,15 +235,19 @@ class _ChatListState extends State<ChatList> {
                     controller: noteController,
                     keyboardType: TextInputType.multiline,
                     decoration: const InputDecoration(
-                        hintText: 'Write note...',
-                        hintStyle: TextStyle(color: Colors.black54),
-                        border: InputBorder.none),
+                      hintText: 'Write note...',
+                      hintStyle: TextStyle(color: Colors.black54),
+                      border: InputBorder.none,
+                    ),
                   ),
                 ),
                 (editingMode)
                     ? IconButton(
                         onPressed: cancelEditingMode,
-                        icon: const Icon(Icons.cancel_rounded))
+                        icon: const Icon(
+                          Icons.cancel_rounded,
+                        ),
+                      )
                     : const SizedBox(
                         width: 15,
                       ),
@@ -238,10 +259,13 @@ class _ChatListState extends State<ChatList> {
                   onTap: () {
                     if (noteController.text.isNotEmpty) {
                       (!editingMode)
-                          ? addNote(Note(
-                              dateTime: DateTime.now(),
-                              content: noteController.text,
-                              rightHanded: true))
+                          ? addNote(
+                              Note(
+                                dateTime: DateTime.now(),
+                                content: noteController.text,
+                                rightHanded: true,
+                              ),
+                            )
                           : changeNote(noteController.text, editingIndex!);
                     } else if (noteController.text.isEmpty && editingMode) {
                       cancelEditingMode();
@@ -250,11 +274,17 @@ class _ChatListState extends State<ChatList> {
                   onLongPress: () {
                     if (noteController.text.isNotEmpty) {
                       (!editingMode)
-                          ? addNote(Note(
-                              dateTime: DateTime.now(),
-                              content: noteController.text,
-                              rightHanded: false))
-                          : changeNote(noteController.text, editingIndex!);
+                          ? addNote(
+                              Note(
+                                dateTime: DateTime.now(),
+                                content: noteController.text,
+                                rightHanded: false,
+                              ),
+                            )
+                          : changeNote(
+                              noteController.text,
+                              editingIndex!,
+                            );
                     } else if (noteController.text.isEmpty && editingMode) {
                       cancelEditingMode();
                     }
@@ -380,9 +410,7 @@ class _ChatListState extends State<ChatList> {
     if (event.notes[index].isSelected && selectingMode == true) {
       return Colors.lightGreen[200];
     }
-    return (event.notes[index].rightHanded
-        ? Colors.grey.shade200
-        : Colors.blue[200]);
+    return (event.notes[index].rightHanded ? Colors.grey.shade200 : Colors.blue[200]);
   }
 
   void deleteNotes() {
@@ -409,7 +437,11 @@ class _ChatListState extends State<ChatList> {
       copiedNotes += event.notes[index].content;
       copiedNotes += '\n';
     }
-    Clipboard.setData(ClipboardData(text: copiedNotes));
+    Clipboard.setData(
+      ClipboardData(
+        text: copiedNotes,
+      ),
+    );
     cancelSelectingMode();
   }
 
@@ -429,8 +461,7 @@ class _ChatListState extends State<ChatList> {
                 itemBuilder: (context, index) {
                   return GestureDetector(
                     child: Container(
-                      padding: const EdgeInsets.only(
-                          left: 14, right: 14, top: 10, bottom: 10),
+                      padding: const EdgeInsets.only(left: 14, right: 14, top: 10, bottom: 10),
                       child: Align(
                         alignment: (event.notes[index].rightHanded
                             ? Alignment.topLeft
@@ -476,8 +507,7 @@ class _ChatListState extends State<ChatList> {
                                       ? const Icon(
                                           Icons.star_rounded,
                                           size: 20,
-                                          color: Color.fromRGBO(
-                                              216, 205, 176, 0.9),
+                                          color: Color.fromRGBO(216, 205, 176, 0.9),
                                         )
                                       : const SizedBox(
                                           width: 0.2,
