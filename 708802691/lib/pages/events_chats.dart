@@ -119,7 +119,7 @@ class ChatList extends StatefulWidget {
   const ChatList({Key? key, required this.event}) : super(key: key);
 
   @override
-  _ChatListState createState() => _ChatListState(event: event);
+  _ChatListState createState() => _ChatListState();
 }
 
 class _ChatListState extends State<ChatList> {
@@ -127,10 +127,9 @@ class _ChatListState extends State<ChatList> {
   bool editingMode = false;
   bool selectingMode = false;
   int? editingIndex;
-  Event event;
+  late Event event = widget.event;
   TextEditingController noteController = TextEditingController();
 
-  _ChatListState({required this.event});
 
   void _editNote(int index) {
     setState(

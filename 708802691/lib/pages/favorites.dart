@@ -7,14 +7,12 @@ class Favorites extends StatefulWidget {
   const Favorites({Key? key, required this.event}) : super(key: key);
 
   @override
-  _FavoritesState createState() => _FavoritesState(event: event);
+  _FavoritesState createState() => _FavoritesState();
 }
 
 class _FavoritesState extends State<Favorites> {
-  Event event;
-  late final favorites = favoriteNotes(event.notes);
+  late final favorites = favoriteNotes(widget.event.notes);
 
-  _FavoritesState({required this.event});
 
   List<Note> favoriteNotes(List<Note> allNotes) {
     var favoriteNotes = <Note>[];
@@ -42,7 +40,7 @@ class _FavoritesState extends State<Favorites> {
         title: Expanded(
           child: Center(
             child: Text(
-              event.title,
+              widget.event.title,
               style: const TextStyle(
                 color: Color.fromRGBO(28, 33, 53, 1),
               ),

@@ -9,7 +9,7 @@ class EventsList extends StatefulWidget {
 }
 
 class _EventsListState extends State<EventsList> {
-  final errorTime = '24:00';
+  final _errorTime = '24:00';
   final List<Event> events = [
     Event(
       icon: Icons.flight_takeoff_rounded,
@@ -55,7 +55,7 @@ class _EventsListState extends State<EventsList> {
         leading: Builder(
           builder: (context) => Icon(events[index].icon),
         ),
-        trailing: (events[index].lastNote.time == errorTime)
+        trailing: (events[index].lastNote.time == _errorTime)
             ? const SizedBox(
                 width: 1,
               )
