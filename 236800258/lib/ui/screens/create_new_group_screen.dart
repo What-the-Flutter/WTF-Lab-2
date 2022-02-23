@@ -14,12 +14,12 @@ class CreateNewGroupScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var isEditing = false;
+    var _isEditing = false;
     if (editingGroup != null) {
-      isEditing = true;
+      _isEditing = true;
     }
     return Scaffold(
-      appBar: NewGroupAppBar(isEditing: isEditing),
+      appBar: NewGroupAppBar(isEditing: _isEditing),
       body: InputTitleTextField(editingGroup: editingGroup),
     );
   }

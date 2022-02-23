@@ -54,16 +54,12 @@ class HomeScreenBottomSheet extends StatelessWidget {
       BottomSheetContent(
         icon: const Icon(Icons.info),
         title: 'Info',
-        onTap: () {
-          onInfoPressed(currentGroup);
-        },
+        onTap: () => onInfoPressed(currentGroup),
       ),
       BottomSheetContent(
         icon: const Icon(Icons.push_pin),
         title: 'Pin/Unpin',
-        onTap: () {
-          onPinPressed(currentGroup);
-        },
+        onTap: () => onPinPressed(currentGroup),
       ),
       BottomSheetContent(
         icon: const Icon(Icons.archive),
@@ -73,29 +69,26 @@ class HomeScreenBottomSheet extends StatelessWidget {
       BottomSheetContent(
         icon: const Icon(Icons.edit),
         title: 'Edit',
-        onTap: () {
-          onEditPressed(currentGroup, currentIndex);
-        },
+        onTap: () => onEditPressed(currentGroup, currentIndex),
       ),
       BottomSheetContent(
         icon: const Icon(Icons.delete),
         title: 'Delete',
-        onTap: () {
-          onDeletePressed(currentIndex);
-        },
+        onTap: () => onDeletePressed(currentIndex),
       ),
     ];
 
     return ListView.builder(
-        shrinkWrap: true,
-        itemCount: _contentList.length,
-        itemBuilder: (context, index) {
-          final current = _contentList[index];
-          return BottomSheetItem(
-            icon: current.icon,
-            title: current.title,
-            onTap: current.onTap,
-          );
-        });
+      shrinkWrap: true,
+      itemCount: _contentList.length,
+      itemBuilder: (context, index) {
+        final current = _contentList[index];
+        return BottomSheetItem(
+          icon: current.icon,
+          title: current.title,
+          onTap: current.onTap,
+        );
+      },
+    );
   }
 }

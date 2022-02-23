@@ -11,12 +11,12 @@ class MainScreenBody extends StatelessWidget {
   final Group? editedGroup;
   final int pageIndex;
 
-  const MainScreenBody(
-      {Key? key,
-      required this.pageIndex,
-      required this.newGroup,
-      required this.editedGroup})
-      : super(key: key);
+  const MainScreenBody({
+    Key? key,
+    required this.pageIndex,
+    required this.newGroup,
+    required this.editedGroup,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

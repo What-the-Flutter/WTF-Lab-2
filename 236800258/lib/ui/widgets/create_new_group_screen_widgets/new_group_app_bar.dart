@@ -13,14 +13,12 @@ class NewGroupAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      title: isEditing ? const Text('Edit Group') : const Text('Create new group'),
+      title:
+          isEditing ? const Text('Edit Group') : const Text('Create new group'),
       centerTitle: true,
       leading: IconButton(
-        onPressed: () {
-          Navigator.of(context).popAndPushNamed(
-            RouteNames.mainScreen,
-          );
-        },
+        onPressed: () =>
+            Navigator.of(context).popAndPushNamed(RouteNames.mainScreen),
         icon: const Icon(Icons.arrow_back),
       ),
     );

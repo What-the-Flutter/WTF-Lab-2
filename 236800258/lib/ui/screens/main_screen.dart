@@ -12,7 +12,7 @@ class MainScreen extends StatefulWidget {
   MainScreen({
     Key? key,
     this.newGroup,
-  required  this.editedGroup,
+    required this.editedGroup,
   }) : super(key: key);
 
   @override

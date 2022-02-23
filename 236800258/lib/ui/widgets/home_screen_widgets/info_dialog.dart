@@ -14,33 +14,34 @@ class InfoDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SimpleDialog(
-        contentPadding: const EdgeInsets.all(10),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+      contentPadding: const EdgeInsets.all(10),
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          group.groupIcon,
+          const SizedBox(width: 10),
+          Text(group.title),
+        ],
+      ),
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            group.groupIcon,
-            const SizedBox(width: 10),
-            Text(group.title),
+            const Text('Created at: '),
+            Text(DateFormat.yMMMMEEEEd().format(group.createdAt)),
+            const SizedBox(height: 10),
+            const Text('Edited at: '),
+            Text(DateFormat.yMMMMEEEEd().format(group.editedAt)),
           ],
         ),
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Created at: '),
-              Text(DateFormat.yMMMMEEEEd().format(group.createdAt)),
-              const SizedBox(height: 10),
-              const Text('Edited at: '),
-              Text(DateFormat.yMMMMEEEEd().format(group.editedAt)),
-            ],
-          ),
-          const SizedBox(height: 10),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: const Text('Ok'),
-          )
-        ]);
+        const SizedBox(height: 10),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: const Text('Ok'),
+        )
+      ],
+    );
   }
 }

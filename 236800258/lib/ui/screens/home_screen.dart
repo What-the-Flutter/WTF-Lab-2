@@ -11,7 +11,7 @@ class HomeScreen extends StatelessWidget {
 
   const HomeScreen({
     Key? key,
-   required this.newGroup,
+    required this.newGroup,
     required this.editedGroup,
   }) : super(key: key);
 

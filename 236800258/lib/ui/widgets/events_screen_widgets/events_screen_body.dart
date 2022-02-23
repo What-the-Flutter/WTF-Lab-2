@@ -9,6 +9,7 @@ import 'page_introduction.dart';
 class EventsScreenBody extends StatefulWidget {
   final bool isFavoriteShown;
   final String groupName;
+
   EventsScreenBody({
     Key? key,
     required this.isFavoriteShown,
@@ -20,7 +21,7 @@ class EventsScreenBody extends StatefulWidget {
 }
 
 class _EventsScreenBodyState extends State<EventsScreenBody> {
-  final List<Event> _events = <Event>[];
+  final _events = <Event>[];
   final _editingText = '';
 
   void onEventSelected(Event event) {
@@ -78,5 +79,3 @@ class _EventsScreenBodyState extends State<EventsScreenBody> {
     );
   }
 }
-
-

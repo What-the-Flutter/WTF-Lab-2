@@ -45,12 +45,10 @@ Widget createListItem({
             currentGroup.isPinned ? const Icon(Icons.push_pin_rounded) : null,
         title: Text(currentGroup.title),
         subtitle: const Text('No events. Click to create one.'),
-        onTap: () {
-          Navigator.of(context).pushNamed(
-            RouteNames.eventsScreen,
-            arguments: currentGroup.title,
-          );
-        },
+        onTap: () => Navigator.of(context).pushNamed(
+          RouteNames.eventsScreen,
+          arguments: currentGroup.title,
+        ),
       );
     },
   );
@@ -58,7 +56,11 @@ Widget createListItem({
 
 class _OnHoverListTile extends StatefulWidget {
   final Widget Function(bool isHovered) builder;
-  _OnHoverListTile({Key? key, required this.builder}) : super(key: key);
+
+  _OnHoverListTile({
+    Key? key,
+    required this.builder,
+  }) : super(key: key);
 
   @override
   State<_OnHoverListTile> createState() => _OnHoverListTileState();
