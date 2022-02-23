@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 
 import 'screen.dart';
+import 'themes.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    CustomTheme(
+      themeData: MyThemes.lightTheme,
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -13,9 +19,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Chat Journal',
-      theme: ThemeData(
-        primarySwatch: Colors.green,
-      ),
+      theme: InheritedCustomTheme.of(context).themeData,
       home: const HomeScreen(),
       debugShowCheckedModeBanner: false,
     );

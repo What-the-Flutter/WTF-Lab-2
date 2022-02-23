@@ -26,6 +26,7 @@ linter:
     - valid_regexps
 
     #STYLE RULES
+    - lines_longer_than_80_chars
     - always_declare_return_types
     - always_require_non_null_named_parameters
     - annotate_overrides
