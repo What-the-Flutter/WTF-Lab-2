@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
 
-import '../widgets/main_screen_widgets/bottom_bar.dart';
+import '../../entities/group.dart';
+import '../../utils/theme/theme_inherit.dart';
 import '../widgets/main_screen_widgets/main_screen_body.dart';
+import '../widgets/main_screen_widgets/main_screen_bottom_bar.dart';
 
 class MainScreen extends StatefulWidget {
-  MainScreen({Key? key}) : super(key: key);
+  final Group? newGroup;
+  final Group? editedGroup;
+
+  MainScreen({
+    Key? key,
+    this.newGroup,
+    required this.editedGroup,
+  }) : super(key: key);
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -31,15 +40,19 @@ class _MainScreenState extends State<MainScreen> {
         centerTitle: true,
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              setState(() {
+                ThemeInherit.of(context).changeTheme();
+              });
+            },
             icon: const Icon(Icons.invert_colors),
           ),
         ],
       ),
-      body: MainScreenBody(pageIndex: _selectedIndex),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        child: const Icon(Icons.add),
+      body: MainScreenBody(
+        pageIndex: _selectedIndex,
+        newGroup: widget.newGroup,
+        editedGroup: widget.editedGroup,
       ),
       drawer: const Drawer(),
       bottomNavigationBar: MainScreenBottomBar(
@@ -49,6 +62,3 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 }
-
-
-

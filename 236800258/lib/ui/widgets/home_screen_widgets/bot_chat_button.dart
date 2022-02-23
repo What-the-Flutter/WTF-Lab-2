@@ -10,11 +10,15 @@ class BotChatButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.only(top: 16),
-      color: Colors.white,
+      color: Theme.of(context).brightness == Brightness.light
+          ? Colors.white
+          : null,
       child: TextButton(
         onPressed: () {},
         style: TextButton.styleFrom(
-          backgroundColor: CustomColors.botChatButtonColor,
+          backgroundColor: Theme.of(context).brightness == Brightness.light
+              ? CustomColors.botChatButtonColor
+              : CustomColors.darkBotChatButtonColor,
           minimumSize: const Size(double.infinity, 65),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
