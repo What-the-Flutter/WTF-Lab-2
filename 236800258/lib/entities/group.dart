@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 class Group implements Comparable {
   final int? editingIndex;
+  final DateTime createdAt;
   Icon groupIcon;
   String title;
   bool isPinned = false;
-  DateTime createdAt;
   DateTime editedAt;
 
   Group({

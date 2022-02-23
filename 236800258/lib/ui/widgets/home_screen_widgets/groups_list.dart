@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../../entities/group.dart';
 import '../../../navigation/route_names.dart';
@@ -109,11 +108,7 @@ class _GroupsListState extends State<GroupsList> {
 
   @override
   Widget build(BuildContext context) {
-    _groups.sort(
-      (a, b) => a.compareTo(
-        b,
-      ),
-    );
+    _groups.sort((a, b) => a.compareTo(b));
 
     return Expanded(
       child: ListView.separated(

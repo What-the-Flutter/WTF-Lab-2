@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 class PageIntroduction extends StatelessWidget {
   final String groupName;
 
-  const PageIntroduction({Key? key, required this.groupName}) : super(key: key);
+  const PageIntroduction({
+    Key? key,
+    required this.groupName,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

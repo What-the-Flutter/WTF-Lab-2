@@ -6,7 +6,10 @@ import '../../../navigation/route_names.dart';
 class InputTitleTextField extends StatefulWidget {
   final Group? editingGroup;
 
-  InputTitleTextField({Key? key, this.editingGroup}) : super(key: key);
+  InputTitleTextField({
+    Key? key,
+    this.editingGroup,
+  }) : super(key: key);
 
   @override
   State<InputTitleTextField> createState() => _InputTitleTextFieldState();

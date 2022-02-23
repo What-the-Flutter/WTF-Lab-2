@@ -11,6 +11,7 @@ class AppNavigation {
 
   static Route<Object> onGenerateRoute(RouteSettings settings) {
     final _arguments = settings.arguments;
+
     switch (settings.name) {
       case RouteNames.eventsScreen:
         final _groupTitle = _arguments is String ? _arguments : '';
@@ -30,6 +31,7 @@ class AppNavigation {
             editedGroup: _editedGroup,
           ),
         );
+
       case RouteNames.createNewGroupScreen:
         final _editingGroup = _arguments is Group ? _arguments : null;
         return MaterialPageRoute(
@@ -37,6 +39,7 @@ class AppNavigation {
             editingGroup: _editingGroup,
           ),
         );
+
       default:
         return MaterialPageRoute(
           builder: (_) => const Text('Navigation error'),
@@ -44,16 +47,3 @@ class AppNavigation {
     }
   }
 }
-
-
-    // if (settings.name == RouteNames.eventsScreen) {
-    //   final arguments = settings.arguments;
-    //   final groupTitle = arguments is String ? arguments : '';
-    //   return MaterialPageRoute(
-    //     builder: (context) => EventsScreen(title: groupTitle),
-    //   );
-    // } else {
-    //   return MaterialPageRoute(
-    //     builder: (_) => const Text('Navigation error'),
-    //   );
-    // }
