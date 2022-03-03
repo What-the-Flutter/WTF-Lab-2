@@ -5,9 +5,15 @@ class HoveredItem extends StatefulWidget {
   final String title;
   final String subtitle;
   final IconData icon;
+  final Container bottomSheet;
 
-  HoveredItem(this.title, this.subtitle, this.icon, {Key? key})
-      : super(key: key);
+  HoveredItem(
+    this.title,
+    this.subtitle,
+    this.icon,
+    this.bottomSheet, {
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _HoveredItemState();
@@ -18,19 +24,30 @@ class _HoveredItemState extends State<HoveredItem> {
 
   @override
   Widget build(BuildContext context) {
-    final color = isHovered ? Colors.red : Colors.black;
+    final color = Theme.of(context).hintColor;
     return GestureDetector(
       onTap: (() => {
             Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => EventPage(title: widget.title)))
+              context,
+              MaterialPageRoute(
+                builder: (context) => EventPage(title: widget.title),
+              ),
+            )
+          }),
+      onLongPress: (() => {
+            showModalBottomSheet(
+              context: context,
+              builder: (context) => widget.bottomSheet,
+            ),
           }),
       child: ListTile(
         title: Text(
           widget.title,
           style: TextStyle(
-              fontWeight: FontWeight.w500, fontSize: 23, color: color),
+            fontWeight: FontWeight.w500,
+            fontSize: 23,
+            color: color,
+          ),
         ),
         subtitle: Text(
           widget.subtitle,
@@ -40,7 +57,9 @@ class _HoveredItemState extends State<HoveredItem> {
           width: 60,
           height: 60,
           decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(40), color: Colors.grey),
+            borderRadius: BorderRadius.circular(40),
+            color: Theme.of(context).shadowColor,
+          ),
           child: Icon(
             widget.icon,
             color: Colors.white,
