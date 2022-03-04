@@ -5,12 +5,12 @@ class DefaultAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Function() backToPreviousScreen;
   final Function() screenBookMark;
 
-  const DefaultAppBar(
-      {Key? key,
-      required this.title,
-      required this.backToPreviousScreen,
-      required this.screenBookMark})
-      : super(key: key);
+  const DefaultAppBar({
+    Key? key,
+    required this.title,
+    required this.backToPreviousScreen,
+    required this.screenBookMark,
+  }) : super(key: key);
 
   @override
   Size get preferredSize => const Size.fromHeight(50);
@@ -30,15 +30,17 @@ class DefaultAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       actions: [
         const IconButton(
-            icon: Icon(
-              Icons.search,
-            ),
-            onPressed: null),
+          icon: Icon(
+            Icons.search,
+          ),
+          onPressed: null,
+        ),
         IconButton(
-            icon: const Icon(
-              Icons.bookmark_border,
-            ),
-            onPressed: screenBookMark)
+          icon: const Icon(
+            Icons.bookmark_border,
+          ),
+          onPressed: screenBookMark,
+        ),
       ],
     );
   }

@@ -71,19 +71,21 @@ class _EventDialogState extends State<EventDialog> {
   }
 
   void _selectElement(int index) {
-    setState(() {
-      _eventsList[index].isSelected
-          ? _eventsList[index].isSelected = false
-          : _eventsList[index].isSelected = true;
+    setState(
+      () {
+        _eventsList[index].isSelected
+            ? _eventsList[index].isSelected = false
+            : _eventsList[index].isSelected = true;
 
-      if (_eventsList[index].isSelected == true) {
-        numberOfSelectedItem++;
-        tappedEventIndex.add(index);
-      } else {
-        numberOfSelectedItem--;
-        tappedEventIndex.remove(index);
-      }
-    });
+        if (_eventsList[index].isSelected == true) {
+          numberOfSelectedItem++;
+          tappedEventIndex.add(index);
+        } else {
+          numberOfSelectedItem--;
+          tappedEventIndex.remove(index);
+        }
+      },
+    );
   }
 
   String _getTimeFromDate(DateTime date) {
@@ -91,14 +93,18 @@ class _EventDialogState extends State<EventDialog> {
   }
 
   void _closeEditMode() {
-    setState(() {
-      _eventsList.forEach((element) {
-        element.isSelected = false;
-      });
-      numberOfSelectedItem = 0;
-      editingController.text = '';
-      tappedEventIndex = [];
-    });
+    setState(
+      () {
+        _eventsList.forEach(
+          (element) {
+            element.isSelected = false;
+          },
+        );
+        numberOfSelectedItem = 0;
+        editingController.text = '';
+        tappedEventIndex = [];
+      },
+    );
   }
 
   void _copyEvent(int index) {
@@ -113,22 +119,26 @@ class _EventDialogState extends State<EventDialog> {
 
   void _createNewEvent() {
     if (editingController.value.text != '') {
-      setState(() {
-        var newEvent = Event(editingController.value.text, DateTime.now());
-        _eventsList.add(newEvent);
-        editingController.text = '';
-      });
+      setState(
+        () {
+          var newEvent = Event(editingController.value.text, DateTime.now());
+          _eventsList.add(newEvent);
+          editingController.text = '';
+        },
+      );
     }
   }
 
   void _editEvent() {
-    setState(() {
-      for (var item in _eventsList) {
-        if (item.isSelected) {
-          editingController.text = item.content;
+    setState(
+      () {
+        for (var item in _eventsList) {
+          if (item.isSelected) {
+            editingController.text = item.content;
+          }
         }
-      }
-    });
+      },
+    );
   }
 
   void _finalEditing(int index) {
@@ -139,15 +149,16 @@ class _EventDialogState extends State<EventDialog> {
   }
 
   void _deleteEvent(int index) {
-    setState(() {
-      _eventsList.removeAt(index);
-    });
+    setState(
+      () {
+        _eventsList.removeAt(index);
+      },
+    );
     _closeEditMode();
   }
 
   void _setToBookMark(int index) {
     setState(() {
-      // if(_favouriteEventsList.isNotEmpty){
       if (_eventsList[index].inBookMarks) {
         _favouriteEventsList.remove(_eventsList[index]);
         _eventsList[index].inBookMarks = false;
@@ -159,22 +170,25 @@ class _EventDialogState extends State<EventDialog> {
   }
 
   void _screenBookMarks() {
-    setState(() {
-      isBookMarkPage = !isBookMarkPage;
-      if (_favouriteEventsList.isEmpty) {
-        return;
-      } else {
-        var _temp = <Event>[];
-        _temp = _eventsList;
-        _eventsList = _favouriteEventsList;
-        _favouriteEventsList = _temp;
-      }
-    });
+    setState(
+      () {
+        isBookMarkPage = !isBookMarkPage;
+        if (_favouriteEventsList.isEmpty) {
+          return;
+        } else {
+          var _temp = <Event>[];
+          _temp = _eventsList;
+          _eventsList = _favouriteEventsList;
+          _favouriteEventsList = _temp;
+        }
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).backgroundColor,
       appBar: _isEditable()
           ? EditModeAppBar(
               index: tappedEventIndex.last,

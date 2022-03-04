@@ -9,16 +9,16 @@ class EditModeAppBar extends StatefulWidget implements PreferredSizeWidget {
   final Function() editionStart;
   final Function editionConfirm;
 
-  const EditModeAppBar(
-      {Key? key,
-      required this.index,
-      required this.chosenForEditEvent,
-      required this.copy,
-      required this.close,
-      required this.delete,
-      required this.editionStart,
-      required this.editionConfirm})
-      : super(key: key);
+  const EditModeAppBar({
+    Key? key,
+    required this.index,
+    required this.chosenForEditEvent,
+    required this.copy,
+    required this.close,
+    required this.delete,
+    required this.editionStart,
+    required this.editionConfirm,
+  }) : super(key: key);
 
   @override
   _EditModeAppBarState createState() => _EditModeAppBarState();
@@ -39,38 +39,45 @@ class _EditModeAppBarState extends State<EditModeAppBar> {
       ),
       title: Align(
         alignment: Alignment.center,
-        child: Text(widget.chosenForEditEvent.toString()),
+        child: Text(
+          widget.chosenForEditEvent.toString(),
+        ),
       ),
       actions: [
         const IconButton(
-            icon: Icon(
-              Icons.send,
-            ),
-            onPressed: null),
+          icon: Icon(
+            Icons.send,
+          ),
+          onPressed: null,
+        ),
         IconButton(
-            icon: const Icon(
-              Icons.edit,
-            ),
-            onPressed: widget.editionStart),
+          icon: const Icon(
+            Icons.edit,
+          ),
+          onPressed: widget.editionStart,
+        ),
         IconButton(
-            icon: const Icon(
-              Icons.copy,
-            ),
-            onPressed: () {
-              widget.copy(widget.index);
-            }),
+          icon: const Icon(
+            Icons.copy,
+          ),
+          onPressed: () {
+            widget.copy(widget.index);
+          },
+        ),
         const IconButton(
-            icon: Icon(
-              Icons.bookmark_border,
-            ),
-            onPressed: null),
+          icon: Icon(
+            Icons.bookmark_border,
+          ),
+          onPressed: null,
+        ),
         IconButton(
-            icon: const Icon(
-              Icons.delete,
-            ),
-            onPressed: () {
-              widget.delete(widget.index);
-            }),
+          icon: const Icon(
+            Icons.delete,
+          ),
+          onPressed: () {
+            widget.delete(widget.index);
+          },
+        ),
       ],
     );
   }

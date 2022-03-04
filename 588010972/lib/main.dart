@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
 import 'event_screen.dart';
+import 'info_page.dart';
 import 'inherited_main.dart';
 import 'task.dart';
+import 'task_creation_edit_screen.dart';
+import 'theme/app_theme.dart';
+import 'theme/custom_theme.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(CustomTheme(
+    key: UniqueKey(),
+    child: MyApp(),
+    themeName: ThemeName.light,
+  ));
 }
 
 class MyApp extends StatelessWidget {
@@ -15,6 +23,7 @@ class MyApp extends StatelessWidget {
       const Icon(
         Icons.airport_shuttle,
       ),
+      DateTime.now(),
     ),
     Task.all(
       'Family',
@@ -22,6 +31,7 @@ class MyApp extends StatelessWidget {
       const Icon(
         Icons.family_restroom_outlined,
       ),
+      DateTime.now(),
     ),
     Task.all(
       'Sports',
@@ -29,8 +39,11 @@ class MyApp extends StatelessWidget {
       const Icon(
         Icons.sports_football_outlined,
       ),
+      DateTime.now(),
     ),
   ];
+
+  MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -38,9 +51,7 @@ class MyApp extends StatelessWidget {
       tasks: defaultTask,
       child: MaterialApp(
         title: 'Chat Journal',
-        theme: ThemeData(
-          primarySwatch: Colors.teal,
-        ),
+        theme: CustomTheme.of(context),
         home: const CollectionPages(),
       ),
     );
@@ -57,6 +68,7 @@ class CollectionPages extends StatefulWidget {
 class _State extends State<CollectionPages> {
   int _selectedItem = 0;
   String _name = bottomName.first;
+  bool defaultTheme = true;
 
   static const List<String> bottomName = [
     'Home',
@@ -72,9 +84,14 @@ class _State extends State<CollectionPages> {
     });
   }
 
+  void _changeTheme(BuildContext buildContext, ThemeName themeName) {
+    CustomTheme.instanceOf(buildContext).changeTheme(themeName);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).backgroundColor,
       appBar: AppBar(
         title: Center(
           child: Text(_name),
@@ -83,17 +100,25 @@ class _State extends State<CollectionPages> {
           Icons.menu,
         ),
         actions: [
-          const IconButton(
-            icon: Icon(Icons.invert_colors),
-            onPressed: null,
-          )
+          IconButton(
+              icon: const Icon(Icons.invert_colors),
+              onPressed: () {
+                if (defaultTheme == true) {
+                  _changeTheme(context, ThemeName.dark);
+                } else {
+                  _changeTheme(context, ThemeName.light);
+                }
+              })
         ],
       ),
       body: _listWidgetForBody(context).elementAt(_selectedItem),
-      floatingActionButton: const FloatingActionButton(
-        onPressed: null,
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+              context, MaterialPageRoute(builder: (context) => NewTask()));
+        },
         backgroundColor: Colors.amber,
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: [
@@ -123,6 +148,158 @@ class _State extends State<CollectionPages> {
     );
   }
 
+  void _showPopupMenu(int indexItem, BuildContext buildContext) async {
+    await showMenu(
+      context: context,
+      position: const RelativeRect.fromLTRB(10, 350, 10, 400),
+      items: [
+        PopupMenuItem(
+          child: GestureDetector(
+            onTap: () {
+              var sendingTask = InheritedMain.of(context)!.tasks[indexItem];
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return InfoTask(task: sendingTask);
+                },
+              );
+            },
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.info,
+                ),
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
+                  child: Text(
+                    'Info',
+                  ),
+                ),
+                const Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(right: 160),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        PopupMenuItem(
+          child: GestureDetector(
+            onTap: () {},
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.add_alarm_outlined,
+                ),
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
+                  child: Text(
+                    'Pin/Unpin Page',
+                  ),
+                ),
+                const Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(right: 160),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        PopupMenuItem(
+          child: GestureDetector(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.archive,
+                ),
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
+                  child: Text(
+                    'Archive Page',
+                  ),
+                ),
+                const Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(right: 160),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        PopupMenuItem(
+          child: GestureDetector(
+            onTap: () {
+              var sendingTask = InheritedMain.of(context)!.tasks[indexItem];
+              print(InheritedMain.of(context)!.tasks.length);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (buildContext) => NewTask.edit(
+                    indexTask: indexItem,
+                    taskEditable: sendingTask,
+                  ),
+                ),
+              );
+            },
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.edit,
+                ),
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
+                  child: Text(
+                    'Edit Page',
+                  ),
+                ),
+                const Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(right: 160),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        PopupMenuItem(
+          child: GestureDetector(
+            onTap: () {
+              InheritedMain.of(context)!.tasks.removeAt(indexItem);
+              setState(() {});
+            },
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.delete,
+                ),
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
+                  child: Text(
+                    'Delete Page',
+                  ),
+                ),
+                const Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(right: 160),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+      elevation: 8.0,
+    );
+  }
+
   List<Widget> _listWidgetForBody(BuildContext buildContext) {
     return [
       Column(
@@ -130,16 +307,7 @@ class _State extends State<CollectionPages> {
           Container(
             margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 40),
             child: ElevatedButton(
-              style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all<Color>(
-                  Colors.tealAccent,
-                ),
-                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.0),
-                  ),
-                ),
-              ),
+              style: Theme.of(context).elevatedButtonTheme.style,
               onPressed: null,
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 2),
@@ -172,25 +340,31 @@ class _State extends State<CollectionPages> {
                 Widget _buildTile(int currentIndex) {
                   return ListTile(
                     title: Text(
-                        InheritedMain.of(context)!.tasks[currentIndex].header),
+                      InheritedMain.of(context)!.tasks[currentIndex].header,
+                      style: Theme.of(context).textTheme.subtitle1,
+                    ),
                     leading: InheritedMain.of(context)!
                         .tasks[currentIndex]
                         .leadingIcon,
-                    subtitle: Text(InheritedMain.of(context)!
-                        .tasks[currentIndex]
-                        .lastEvent),
+                    subtitle: Text(
+                      InheritedMain.of(context)!.tasks[currentIndex].lastEvent,
+                      style: Theme.of(context).textTheme.subtitle2,
+                    ),
                     onTap: () {
                       var title =
                           InheritedMain.of(context)!.tasks[currentIndex].header;
                       Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  EventDialog(titleTask: title)));
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => EventDialog(titleTask: title),
+                        ),
+                      );
+                    },
+                    onLongPress: () {
+                      _showPopupMenu(currentIndex, context);
                     },
                   );
                 }
-
                 return _buildTile(index);
               },
             ),

@@ -14,7 +14,8 @@ class EventTile extends StatelessWidget {
       required this.eventsList,
       required this.onTap,
       required this.onPressed,
-      required this.getTime})
+      required this.getTime,
+      })
       : super(key: key);
 
   @override
@@ -24,7 +25,7 @@ class EventTile extends StatelessWidget {
         children: [
           Container(
             padding: const EdgeInsets.only(left: 15),
-            child: Text(getTime(eventsList[index].datetime)),
+            child: Text(getTime(eventsList[index].datetime),),
           ),
           eventsList[index].inBookMarks
               ? const Icon(
@@ -93,7 +94,6 @@ class EventTile extends StatelessWidget {
           child: Stack(
             alignment: Alignment.bottomLeft,
             children: [
-              //Text(eventsList[index].content),
               _eventLine(),
               _downLine(),
             ],
