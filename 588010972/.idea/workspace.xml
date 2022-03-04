@@ -4,38 +4,8 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="50fbd971-15e2-411a-b14c-a7878787eeb6" name="Default Changelist" comment="seven task is done">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/data/icon_data.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/info_page.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/task_creation_edit_screen.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/theme/app_theme.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/theme/custom_theme.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/theme/inherited_custom_theme.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.dart_tool/flutter_build/910303b5c330fcb917618c0343116522/.filecache" beforeDir="false" afterPath="$PROJECT_DIR$/.dart_tool/flutter_build/910303b5c330fcb917618c0343116522/.filecache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.dart_tool/flutter_build/910303b5c330fcb917618c0343116522/app.dill" beforeDir="false" afterPath="$PROJECT_DIR$/.dart_tool/flutter_build/910303b5c330fcb917618c0343116522/app.dill" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.dart_tool/flutter_build/910303b5c330fcb917618c0343116522/kernel_snapshot.d" beforeDir="false" afterPath="$PROJECT_DIR$/.dart_tool/flutter_build/910303b5c330fcb917618c0343116522/kernel_snapshot.d" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.dart_tool/flutter_build/910303b5c330fcb917618c0343116522/kernel_snapshot.stamp" beforeDir="false" afterPath="$PROJECT_DIR$/.dart_tool/flutter_build/910303b5c330fcb917618c0343116522/kernel_snapshot.stamp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.dart_tool/package_config.json" beforeDir="false" afterPath="$PROJECT_DIR$/.dart_tool/package_config.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.packages" beforeDir="false" afterPath="$PROJECT_DIR$/.packages" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/app/intermediates/compressed_assets/debug/out/assets/flutter_assets/kernel_blob.bin.jar" beforeDir="false" afterPath="$PROJECT_DIR$/build/app/intermediates/compressed_assets/debug/out/assets/flutter_assets/kernel_blob.bin.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/app/intermediates/flutter/debug/flutter_assets/kernel_blob.bin" beforeDir="false" afterPath="$PROJECT_DIR$/build/app/intermediates/flutter/debug/flutter_assets/kernel_blob.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/app/intermediates/flutter/debug/flutter_build.d" beforeDir="false" afterPath="$PROJECT_DIR$/build/app/intermediates/flutter/debug/flutter_build.d" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/app/intermediates/incremental/packageDebug/tmp/debug/dex-renamer-state.txt" beforeDir="false" afterPath="$PROJECT_DIR$/build/app/intermediates/incremental/packageDebug/tmp/debug/dex-renamer-state.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/app/intermediates/merged_assets/debug/out/flutter_assets/kernel_blob.bin" beforeDir="false" afterPath="$PROJECT_DIR$/build/app/intermediates/merged_assets/debug/out/flutter_assets/kernel_blob.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/app/outputs/apk/debug/app-debug.apk" beforeDir="false" afterPath="$PROJECT_DIR$/build/app/outputs/apk/debug/app-debug.apk" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/app/outputs/flutter-apk/app-debug.apk" beforeDir="false" afterPath="$PROJECT_DIR$/build/app/outputs/flutter-apk/app-debug.apk" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/app/outputs/flutter-apk/app.apk" beforeDir="false" afterPath="$PROJECT_DIR$/build/app/outputs/flutter-apk/app.apk" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/app/outputs/flutter-apk/app.apk.sha1" beforeDir="false" afterPath="$PROJECT_DIR$/build/app/outputs/flutter-apk/app.apk.sha1" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/f872507f30e2ff2523f0f1d19160266e.cache.dill.track.dill" beforeDir="false" afterPath="$PROJECT_DIR$/build/f872507f30e2ff2523f0f1d19160266e.cache.dill.track.dill" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/app_bars/default_app_bar.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app_bars/default_app_bar.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/app_bars/edit_mode_app_bar.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app_bars/edit_mode_app_bar.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/event_list.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/event_list.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/event_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/event_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/inherited_main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/inherited_main.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/main.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/task.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/task.dart" afterDir="false" />
+    <list default="true" id="50fbd971-15e2-411a-b14c-a7878787eeb6" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/chat_journal.iml" beforeDir="false" afterPath="$PROJECT_DIR$/chat_journal.iml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -112,13 +82,21 @@
       <option name="project" value="LOCAL" />
       <updated>1644326623574</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="8 task is done">
+      <created>1646433880193</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1646433880193</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="task 6 done" />
     <MESSAGE value="six task is done" />
     <MESSAGE value="seven task is done" />
-    <option name="LAST_COMMIT_MESSAGE" value="seven task is done" />
+    <MESSAGE value="8 task is done" />
+    <option name="LAST_COMMIT_MESSAGE" value="8 task is done" />
   </component>
 </project>
