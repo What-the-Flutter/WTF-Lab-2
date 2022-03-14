@@ -2,10 +2,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
-import '../models/event.dart';
+import '../cubit/event_page/event_page_cubit.dart';
+import '../cubit/event_page/event_page_state.dart';
 
 class EventPage extends StatefulWidget {
   const EventPage({
@@ -20,53 +21,52 @@ class EventPage extends StatefulWidget {
 }
 
 class _EventPageState extends State<EventPage> {
-  List<Event> allEvents = [];
-  bool _editMode = false;
-  bool _favoriteMode = false;
-  bool _writingMode = false;
-  String? _image;
-
-  Future attachImage() async {
-    final image = await ImagePicker().pickImage(source: ImageSource.gallery);
-
-    if (image == null) return;
-    setState(() => _image = image.path);
-  }
-
-  final controller = TextEditingController();
+  final EventPageCubit cubit = EventPageCubit();
+  TextEditingController controller = TextEditingController();
+  TextEditingController searchController = TextEditingController();
 
   @override
   void dispose() {
     controller.dispose();
+    searchController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      appBar: !_editMode ? _appBar() : _editAppBar(context),
-      body: Column(
-        children: [
-          allEvents.isEmpty
-              ? _bodyWithoutEvents()
-              : _favoriteMode
-                  ? _bodyFavorite()
-                  : _bodyWithEvents(),
-          Align(
-            child: _inputTextField(),
-            alignment: Alignment.bottomCenter,
+    return BlocBuilder<EventPageCubit, EventPageState>(
+      bloc: cubit,
+      builder: (context, state) {
+        return Scaffold(
+          resizeToAvoidBottomInset: true,
+          appBar: state.editMode
+              ? _editAppBar(context, state)
+              : state.searchMode
+                  ? _searchAppBar()
+                  : _appBar(state),
+          body: Column(
+            children: [
+              state.events.isEmpty
+                  ? _bodyWithoutEvents()
+                  : state.favoriteMode
+                      ? _bodyFavorite(state)
+                      : _bodyWithEvents(state),
+              Align(
+                child: _inputTextField(state),
+                alignment: Alignment.bottomCenter,
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
   Center _bodyWithoutEvents() {
     return Center(
       child: Container(
-        width: 400,
-        height: 400,
+        width: 300,
+        height: 300,
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.primary,
           borderRadius: BorderRadius.circular(10),
@@ -80,7 +80,9 @@ class _EventPageState extends State<EventPage> {
                 'This is the page where you can track everything about ${widget.title}!\n',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                    fontSize: 18, color: Theme.of(context).bottomAppBarColor),
+                  fontSize: 18,
+                  color: Theme.of(context).bottomAppBarColor,
+                ),
               ),
               Text(
                 'Add your first event to ${widget.title} page by entering some text in the text below and hitting the send button. Long tap the send button to allign the event in the opposite direction. Tap on the bookmark icon on the top right corner to show the bookbark events only.',
@@ -94,7 +96,7 @@ class _EventPageState extends State<EventPage> {
     );
   }
 
-  Row _inputTextField() {
+  Row _inputTextField(EventPageState state) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -104,11 +106,7 @@ class _EventPageState extends State<EventPage> {
         ),
         Expanded(
           child: TextField(
-            onChanged: (text) {
-              setState(() {
-                _writingMode = text.isNotEmpty;
-              });
-            },
+            onChanged: cubit.changeWritingMode,
             keyboardType: TextInputType.multiline,
             decoration: const InputDecoration(
               hintText: 'Enter event',
@@ -117,10 +115,10 @@ class _EventPageState extends State<EventPage> {
             controller: controller,
           ),
         ),
-        _writingMode
-            ? _sendIconButton()
+        state.writingMode
+            ? _sendIconButton(state)
             : IconButton(
-                onPressed: attachImage,
+                onPressed: cubit.attachImage,
                 icon: const Icon(
                   Icons.image,
                 ),
@@ -129,41 +127,10 @@ class _EventPageState extends State<EventPage> {
     );
   }
 
-  IconButton _sendIconButton() {
+  IconButton _sendIconButton(EventPageState state) {
     return IconButton(
       onPressed: () {
-        setState(() {
-          if (controller.text.replaceAll('\n', '').isEmpty) {
-            return;
-          }
-          if (_editMode) {
-            var event =
-                allEvents.where((element) => element.isSelected == true).first;
-            allEvents[allEvents.indexOf(event)] = event.copyWith(
-                description: controller.text,
-                isSelected: event.isSelected,
-                isFavorite: event.isFavorite);
-            _editMode = false;
-            allEvents.where((element) => element.isSelected == true).forEach(
-              (element) {
-                element = element.copyWith(
-                    description: element.description,
-                    isSelected: false,
-                    isFavorite: element.isFavorite);
-              },
-            );
-          } else {
-            if (_image != null) {
-              var event = Event(description: controller.text, image: _image);
-              allEvents.add(event);
-            } else {
-              var event = Event(description: controller.text, image: null);
-              allEvents.add(event);
-            }
-          }
-          controller.text = '';
-          _writingMode = false;
-        });
+        cubit.addNewEvent(controller);
       },
       icon: const Icon(
         Icons.send,
@@ -171,61 +138,88 @@ class _EventPageState extends State<EventPage> {
     );
   }
 
-  AppBar _appBar() {
+  AppBar _appBar(EventPageState state) {
     return AppBar(
       backgroundColor: Theme.of(context).primaryColor,
       title: Text(widget.title),
       centerTitle: true,
       actions: <Widget>[
         IconButton(
-          onPressed: (() => {}),
+          onPressed: cubit.changeSearchMode,
           icon: const Icon(Icons.search),
         ),
         IconButton(
-          onPressed: () => setState(
-            (() => _favoriteMode = _favoriteMode ? false : true),
-          ),
+          onPressed: cubit.changeFavoriteMode,
           icon: const Icon(Icons.bookmark_border),
         ),
       ],
     );
   }
 
-  AppBar _editAppBar(BuildContext context) {
+  AppBar _searchAppBar() {
     return AppBar(
       backgroundColor: Theme.of(context).primaryColor,
-      leading: const IconButton(
-        onPressed: null,
-        icon: Icon(Icons.close),
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back),
+        onPressed: () => Navigator.pop(context),
+      ),
+      actions: [
+        const Padding(
+          padding: EdgeInsets.fromLTRB(50, 0, 0, 0),
+        ),
+        Expanded(
+          child: TextField(
+            textAlignVertical: TextAlignVertical.bottom,
+            decoration: const InputDecoration(
+              hintText: 'Enter event',
+              filled: true,
+            ),
+            controller: searchController,
+            onChanged: (text) {
+              cubit.setSearchMode(true);
+            },
+          ),
+        ),
+        IconButton(
+            onPressed: () {
+              cubit.changeSearchMode();
+              searchController.text = '';
+            },
+            icon: const Icon(Icons.close))
+      ],
+    );
+  }
+
+  AppBar _editAppBar(BuildContext context, EventPageState state) {
+    return AppBar(
+      backgroundColor: Theme.of(context).primaryColor,
+      leading: IconButton(
+        onPressed: cubit.changeEditMode,
+        icon: const Icon(Icons.close),
       ),
       title: const Center(
         child: Text('Edit mode'),
       ),
       actions: [
-        if (allEvents.where((element) => element.isSelected == true).length ==
+        IconButton(
+          onPressed: () => _migrateDialog(context, state),
+          icon: Icon(
+            Icons.reply,
+            color: Theme.of(context).highlightColor,
+          ),
+        ),
+        if (state.events
+                .where((element) => element.isSelected == true)
+                .length ==
             1)
           IconButton(
-            onPressed: () => setState(
-              () {
-                controller.text = (allEvents
-                    .where((element) => element.isSelected == true)
-                    .first
-                    .description);
-                _editMode = true;
-                for (var element in allEvents) {
-                  element = element.copyWith(
-                      isSelected: false,
-                      description: element.description,
-                      isFavorite: element.isFavorite);
-                }
-              },
-            ),
+            onPressed: () => cubit.copyEventText(controller),
             icon: const Icon(Icons.edit),
           ),
         IconButton(
           onPressed: () {
             var text = '';
-            var it = allEvents
+            var it = state.events
                 .where((element) => element.isSelected == true)
                 .iterator;
             while (it.moveNext()) {
@@ -233,65 +227,39 @@ class _EventPageState extends State<EventPage> {
             }
 
             Clipboard.setData(ClipboardData(text: text));
-            for (var element in allEvents) {
+            for (var element in state.events) {
               element = element.copyWith(
-                  isSelected: false,
-                  description: element.description,
-                  isFavorite: element.isFavorite);
+                isSelected: false,
+              );
             }
           },
           icon: const Icon(Icons.copy),
         ),
         IconButton(
-          onPressed: () {
-            setState(() {
-              allEvents
-                  .where((element) => element.isSelected == true)
-                  .forEach((element) {
-                element.copyWith(
-                    description: element.description,
-                    isSelected: element.isSelected,
-                    isFavorite: true);
-              });
-              for (var element in allEvents) {
-                element = element.copyWith(
-                    isSelected: false,
-                    description: element.description,
-                    isFavorite: element.isFavorite);
-              }
-            });
-          },
+          onPressed: cubit.copy,
           icon: const Icon(Icons.bookmark_outline),
         ),
         IconButton(
-          onPressed: _dialog,
+          onPressed: () => _dialog(state, context),
           icon: const Icon(Icons.delete),
         ),
       ],
     );
   }
 
-  Expanded _bodyFavorite() {
+  Expanded _bodyFavorite(EventPageState state) {
     return Expanded(
       child: ListView.builder(
         itemCount:
-            allEvents.where((element) => element.isFavorite == true).length,
+            state.events.where((element) => element.isFavorite == true).length,
         itemBuilder: (context, index) => Align(
           alignment: Alignment.centerLeft,
           child: GestureDetector(
             onTap: () {
-              setState(() {
-                _tapOnEvent(index);
-              });
+              cubit.setSelectedIndex(index, searchController);
             },
             onLongPress: () {
-              setState(() {
-                _editMode = true;
-                allEvents[index] = allEvents[index].copyWith(
-                    description: allEvents[index].description,
-                    isSelected: true,
-                    isFavorite: allEvents[index].isFavorite);
-              });
+              cubit.selectEvent(index);
             },
             child: Align(
               alignment: Alignment.topLeft,
@@ -299,7 +267,7 @@ class _EventPageState extends State<EventPage> {
                 margin: const EdgeInsets.all(8),
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: allEvents[index].isFavorite
+                  color: state.events[index].isFavorite
                       ? Colors.green[300]
                       : Colors.green[100],
                   borderRadius: BorderRadius.circular(10),
@@ -307,14 +275,14 @@ class _EventPageState extends State<EventPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (_image != null)
+                    if (state.image != null)
                       Image.file(
-                        File(_image!),
+                        File(state.image!),
                         width: 100,
                         height: 100,
                       ),
                     Text(
-                      allEvents[index].description,
+                      state.events[index].description,
                       style: TextStyle(
                           fontSize: 18,
                           color: Theme.of(context).scaffoldBackgroundColor),
@@ -322,14 +290,14 @@ class _EventPageState extends State<EventPage> {
                     Text(
                       DateFormat()
                           .add_jm()
-                          .format(allEvents[index].timeOfCreation)
+                          .format(state.events[index].timeOfCreation)
                           .toString(),
                       style: const TextStyle(
                         fontSize: 11,
                         color: Color(0xFF616161),
                       ),
                     ),
-                    if (allEvents[index].isFavorite)
+                    if (state.events[index].isFavorite)
                       const Icon(Icons.bookmark_add, size: 12)
                   ],
                 ),
@@ -341,64 +309,62 @@ class _EventPageState extends State<EventPage> {
     );
   }
 
-  Expanded _bodyWithEvents() {
+  Expanded _bodyWithEvents(EventPageState state) {
     return Expanded(
       child: ListView.builder(
-        itemCount: allEvents.length,
+        itemCount: state.searchMode
+            ? state.events
+                .where(
+                  (element) =>
+                      element.description.contains(searchController.text),
+                )
+                .length
+            : state.events.length,
         itemBuilder: (context, index) => Align(
           alignment: Alignment.centerLeft,
           child: GestureDetector(
-            onTap: () => setState(
-              () {
-                _tapOnEvent(index);
-              },
-            ),
+            onTap: () => cubit.tapOnEvent(index, searchController),
             onLongPress: () {
-              setState(() {
-                _editMode = true;
-
-                allEvents[index] = allEvents[index].copyWith(
-                    description: allEvents[index].description,
-                    isSelected: true,
-                    isFavorite: allEvents[index].isFavorite);
-              });
+              cubit.selectEvent(index);
             },
-            child: _eventMessage(index),
+            child: _eventMessage(index, state),
           ),
         ),
       ),
     );
   }
 
-  void _tapOnEvent(int index) {
-    if (allEvents.where((element) => element.isSelected == true).isNotEmpty) {
-      if (allEvents[index].isSelected) {
-        allEvents[index] = allEvents[index].copyWith(
-            description: allEvents[index].description,
-            isSelected: false,
-            isFavorite: allEvents[index].isFavorite);
-      } else {
-        allEvents[index] = allEvents[index].copyWith(
-            description: allEvents[index].description,
-            isSelected: true,
-            isFavorite: allEvents[index].isFavorite);
-      }
-    } else {
-      if (allEvents[index].isFavorite) {
-        allEvents[index] = allEvents[index].copyWith(
-            description: allEvents[index].description,
-            isSelected: allEvents[index].isSelected,
-            isFavorite: false);
-      } else {
-        allEvents[index] = allEvents[index].copyWith(
-            description: allEvents[index].description,
-            isSelected: allEvents[index].isSelected,
-            isFavorite: true);
-      }
-    }
+  void _migrateDialog(BuildContext context, EventPageState state) {
+    var dialog = SimpleDialog(
+      title: const Text(
+          'Select the page you want to migrate the selected event(s) to!'),
+      children: [
+        ListView.builder(
+          itemCount: state.chats.length,
+          itemBuilder: (context, index) => SimpleDialogOption(
+            onPressed: null,
+            child: Text(
+              state.chats.keys.toList()[index],
+            ),
+          ),
+        ),
+      ],
+    );
+
+    var futureValue = showDialog(
+        context: context,
+        builder: (context) {
+          return dialog;
+        });
+
+    futureValue.then(
+      (category) => {
+        print(category),
+      },
+    );
   }
 
-  void _dialog() {
+  void _dialog(EventPageState state, BuildContext context) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -408,20 +374,20 @@ class _EventPageState extends State<EventPage> {
           TextButton(
             style: ButtonStyle(
               foregroundColor: MaterialStateProperty.all<Color>(
-                  Theme.of(context).primaryColor),
+                Theme.of(context).primaryColor,
+              ),
             ),
             onPressed: () {
-              setState(() {
-                allEvents.removeWhere((element) => element.isSelected == true);
-              });
-              Navigator.pop(context);
+              cubit.removeEvents(context);
+              cubit.changeEditMode();
             },
             child: const Text('Yes'),
           ),
           TextButton(
             style: ButtonStyle(
               foregroundColor: MaterialStateProperty.all<Color>(
-                  Theme.of(context).primaryColor),
+                Theme.of(context).primaryColor,
+              ),
             ),
             onPressed: () {
               Navigator.pop(context);
@@ -433,38 +399,41 @@ class _EventPageState extends State<EventPage> {
     );
   }
 
-  Container _eventMessage(int index) {
+  Container _eventMessage(int index, EventPageState state) {
+    var image = state.events[index].image;
+
     return Container(
       margin: const EdgeInsets.all(8),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color:
-            allEvents[index].isSelected ? Colors.green[300] : Colors.green[100],
+        color: state.events[index].isSelected
+            ? Colors.green[300]
+            : Colors.green[100],
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            allEvents[index].description,
+            state.events[index].description,
             style: TextStyle(
                 fontSize: 18, color: Theme.of(context).scaffoldBackgroundColor),
           ),
           Text(
             DateFormat()
                 .add_jm()
-                .format(allEvents[index].timeOfCreation)
+                .format(state.events[index].timeOfCreation)
                 .toString(),
             style: const TextStyle(
               fontSize: 11,
               color: Color(0xFF616161),
             ),
           ),
-          if (allEvents[index].isFavorite)
+          if (state.events[index].isFavorite)
             const Icon(Icons.bookmark_add, size: 12),
-          if (allEvents[index].image != null)
+          if (image != null)
             Image.file(
-              File(allEvents[index].image!),
+              File(image),
             ),
         ],
       ),

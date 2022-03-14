@@ -10,12 +10,12 @@ class EventIcon {
   });
 
   EventIcon copyWith({
-    required bool isSelected,
-    required Icon icon,
+    bool? isSelected,
+    Icon? icon,
   }) {
     return EventIcon(
-      icon: icon,
-      isSelected: isSelected,
+      icon: icon ?? this.icon,
+      isSelected: isSelected ?? this.isSelected,
     );
   }
 }

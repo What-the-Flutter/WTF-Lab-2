@@ -5,23 +5,24 @@ class Event {
   final bool isFavorite;
   final bool isSelected;
 
-  Event(
-      {this.description = '',
-      this.image,
-      this.isFavorite = false,
-      this.isSelected = false});
+  Event({
+    this.description = '',
+    this.image,
+    this.isFavorite = false,
+    this.isSelected = false,
+  });
 
   Event copyWith({
-    required String description,
+    String? description,
     String? image,
-    required bool isSelected,
-    required bool isFavorite,
+    bool? isSelected,
+    bool? isFavorite,
   }) {
     return Event(
-      description: description,
+      description: description ?? this.description,
       image: image ?? this.image,
-      isFavorite: isFavorite,
-      isSelected: isSelected,
+      isFavorite: isFavorite ?? this.isFavorite,
+      isSelected: isSelected ?? this.isSelected,
     );
   }
 
