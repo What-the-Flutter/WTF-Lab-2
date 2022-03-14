@@ -1,4 +1,7 @@
+import 'package:dn/pages/category.dart';
 import 'package:flutter/material.dart';
+
+import 'models/pageargs.dart';
 
 void main() {
   runApp(const MyApp());
@@ -10,6 +13,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      routes: {
+        CategoryPage.routeName: (context) =>
+        const CategoryPage(),
+      },
       title: 'Flutter Demo',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSwatch().copyWith(
@@ -36,7 +43,7 @@ class _MainPageState extends State<MainPage> {
   int _selectedIndex = 0;
 
   static const TextStyle optionStyle =
-  TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
+      TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
   static const List<Widget> _widgetOptions = <Widget>[
     HomePage(),
     Text(
@@ -53,7 +60,9 @@ class _MainPageState extends State<MainPage> {
     ),
   ];
 
-  void _onItemTapped(int index) => setState(() {_selectedIndex = index;});
+  void _onItemTapped(int index) => setState(() {
+        _selectedIndex = index;
+      });
 
   void _addTask() => setState(() {}); //TODO
 
@@ -132,7 +141,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
   final List<String> _entries = <String>['Travel', 'Family', 'Sports'];
   final List<IconData> _icons = <IconData>[
     Icons.airplane_ticket,
@@ -142,7 +150,8 @@ class _HomePageState extends State<HomePage> {
 
   ListTile _tile(String title, String subtitle, IconData icon) {
     return ListTile(
-      title: Text(title,
+      title: Text(
+        title,
         style: const TextStyle(
           fontWeight: FontWeight.w500,
           fontSize: 20,
@@ -153,6 +162,15 @@ class _HomePageState extends State<HomePage> {
         icon,
         size: 50,
       ),
+      onTap: () {
+        Navigator.pushNamed(
+          context,
+          CategoryPage.routeName,
+          arguments: PageArguments(
+          title,
+          'Selected category'),
+        );
+      },
     );
   }
 
