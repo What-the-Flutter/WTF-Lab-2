@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../models/event.dart';
 import '../widgets/event_tile.dart';
@@ -41,7 +44,10 @@ class _ChatScreenBody extends StatefulWidget {
 class __ChatScreenBodyState extends State<_ChatScreenBody> {
   final _controller = TextEditingController();
   final _renameController = TextEditingController();
-  final List<Event> _test = [];
+  final picker = ImagePicker();
+  File? _image;
+
+  final List<Event> _eventList = [];
 
   @override
   void initState() {
@@ -70,17 +76,17 @@ class __ChatScreenBodyState extends State<_ChatScreenBody> {
               IconButton(
                   onPressed: () {
                     setState(() {
-                      _test[index].favorite = !_test[index].favorite;
+                      _eventList[index].favorite = !_eventList[index].favorite;
                       Navigator.pop(context);
                     });
                   },
-                  icon: _test[index].favorite
+                  icon: _eventList[index].favorite
                       ? const Icon(Icons.bookmark)
                       : const Icon(Icons.bookmark_border)),
               TextButton(
                   onPressed: () {
                     setState(() {
-                      _test[index].title = _renameController.text;
+                      _eventList[index].title = _renameController.text;
                       Navigator.pop(context);
                     });
                   },
@@ -88,7 +94,7 @@ class __ChatScreenBodyState extends State<_ChatScreenBody> {
               IconButton(
                 onPressed: () {
                   setState(() {
-                    _test.removeAt(index);
+                    _eventList.removeAt(index);
                     Navigator.pop(context);
                   });
                 },
@@ -103,9 +109,21 @@ class __ChatScreenBodyState extends State<_ChatScreenBody> {
   }
 
   void _copyToClipboard(int index) {
-    Clipboard.setData(ClipboardData(text: _test[index].title)).then((_) {
+    Clipboard.setData(ClipboardData(text: _eventList[index].title)).then((_) {
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Text copied to clipboard')));
+    });
+  }
+
+  Future getImage() async {
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    setState(() {
+      if (pickedFile != null) {
+        _image = File(pickedFile.path);
+      } else {
+        print('No image selected.');
+      }
     });
   }
 
@@ -118,7 +136,7 @@ class __ChatScreenBodyState extends State<_ChatScreenBody> {
                 context,
                 MaterialPageRoute(
                     builder: (context) => BookmarkEvents(
-                          list: _test,
+                          list: _eventList,
                         )));
           },
           icon: const Icon(Icons.bookmark),
@@ -133,15 +151,26 @@ class __ChatScreenBodyState extends State<_ChatScreenBody> {
           ),
         ),
         IconButton(
-          onPressed: () {
+          onPressed: () async {
             if (_controller.value.text.isNotEmpty) {
               setState(() {
-                _test.add(Event(
+                _eventList.add(Event(
                     title: _controller.text,
                     date: DateTime.now(),
                     favorite: false));
                 _controller.clear();
               });
+            } else {
+              await getImage();
+              if (_image != null) {
+                setState(() {
+                  _eventList.add(Event(
+                      title: 'Image from gallery',
+                      date: DateTime.now(),
+                      favorite: false,
+                      image: _image));
+                });
+              }
             }
           },
           icon: _controller.value.text.isEmpty
@@ -159,15 +188,16 @@ class __ChatScreenBodyState extends State<_ChatScreenBody> {
       child: Column(children: [
         Expanded(
           child: ListView.builder(
-            itemCount: _test.length,
+            itemCount: _eventList.length,
             itemBuilder: (context, index) {
               return GestureDetector(
                 onTap: () => _displayTextInputDialog(context, index),
                 onLongPress: () => _copyToClipboard(index),
                 child: EventTile(
-                  title: _test[index].title,
-                  date: _test[index].date,
-                  favorite: _test[index].favorite,
+                  title: _eventList[index].title,
+                  date: _eventList[index].date,
+                  favorite: _eventList[index].favorite,
+                  image: _eventList[index].image,
                 ),
               );
             },
