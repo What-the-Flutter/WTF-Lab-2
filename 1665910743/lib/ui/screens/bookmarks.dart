@@ -5,7 +5,10 @@ import '../widgets/event_tile.dart';
 
 class BookmarkEvents extends StatelessWidget {
   final List<Event> list;
-  BookmarkEvents({Key? key, required this.list}) : super(key: key);
+  BookmarkEvents({
+    Key? key,
+    required this.list,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

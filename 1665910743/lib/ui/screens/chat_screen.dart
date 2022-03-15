@@ -11,7 +11,10 @@ import 'bookmarks.dart';
 class ChatScreen extends StatelessWidget {
   final String title;
 
-  ChatScreen({Key? key, required this.title}) : super(key: key);
+  ChatScreen({
+    Key? key,
+    required this.title,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

@@ -27,62 +27,114 @@ class EventTile extends StatelessWidget {
           color: Theme.of(context).primaryColor),
       alignment: Alignment.centerLeft,
       child: (image != null)
-          ? Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          ? TileWithImage(
+              image: image,
+              title: title,
+              formattedDate: _formattedDate,
+              favorite: favorite)
+          : TIleWithoutImage(
+              title: title,
+              formattedDate: _formattedDate,
+              favorite: favorite,
+            ),
+    );
+  }
+}
+
+class TIleWithoutImage extends StatelessWidget {
+  const TIleWithoutImage({
+    Key? key,
+    required this.title,
+    required String formattedDate,
+    required this.favorite,
+  })  : _formattedDate = formattedDate,
+        super(key: key);
+
+  final String title;
+  final String _formattedDate;
+  final bool favorite;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(fontSize: 20),
+        ),
+        Row(
+          children: [
+            Text(_formattedDate),
+            favorite
+                ? const Icon(
+                    Icons.star,
+                    size: 15,
+                  )
+                : const Icon(
+                    Icons.star_border,
+                    size: 15,
+                  ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class TileWithImage extends StatelessWidget {
+  const TileWithImage({
+    Key? key,
+    required this.image,
+    required this.title,
+    required String formattedDate,
+    required this.favorite,
+  })  : _formattedDate = formattedDate,
+        super(key: key);
+
+  final File? image;
+  final String title;
+  final String _formattedDate;
+  final bool favorite;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Image.file(
+          image!,
+          fit: BoxFit.cover,
+          width: 100,
+          height: 100,
+        ),
+        SizedBox(
+          width: MediaQuery.of(context).size.width * 0.1,
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(fontSize: 20),
+            ),
+            Row(
               children: [
-                Image.file(
-                  image!,
-                  fit: BoxFit.cover,
-                  width: 100,
-                  height: 100,
-                ),
-                Column(
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(fontSize: 20),
-                    ),
-                    Row(
-                      children: [
-                        Text(_formattedDate),
-                        favorite
-                            ? const Icon(
-                                Icons.star,
-                                size: 15,
-                              )
-                            : const Icon(
-                                Icons.star_border,
-                                size: 15,
-                              ),
-                      ],
-                    ),
-                  ],
-                )
-              ],
-            )
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(fontSize: 20),
-                ),
-                Row(
-                  children: [
-                    Text(_formattedDate),
-                    favorite
-                        ? const Icon(
-                            Icons.star,
-                            size: 15,
-                          )
-                        : const Icon(
-                            Icons.star_border,
-                            size: 15,
-                          ),
-                  ],
-                ),
+                Text(_formattedDate),
+                favorite
+                    ? const Icon(
+                        Icons.star,
+                        size: 15,
+                      )
+                    : const Icon(
+                        Icons.star_border,
+                        size: 15,
+                      ),
               ],
             ),
+          ],
+        )
+      ],
     );
   }
 }
