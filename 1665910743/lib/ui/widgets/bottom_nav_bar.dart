@@ -1,12 +1,14 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 
 class BottomNavBar extends StatefulWidget {
   final Function(int)? onTap;
   final int selectedIndex;
 
-  const BottomNavBar({ Key? key, required this.onTap, required this.selectedIndex }) : super(key: key);
+  const BottomNavBar({
+    Key? key,
+    required this.onTap,
+    required this.selectedIndex,
+  }) : super(key: key);
 
   @override
   State<BottomNavBar> createState() => _BottomNavBarState();
@@ -43,4 +45,4 @@ class _BottomNavBarState extends State<BottomNavBar> {
       onTap: widget.onTap,
     );
   }
-  }
+}

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class CustomDrawer extends StatelessWidget {
-  const CustomDrawer({
+class JourneyDrawer extends StatelessWidget {
+  //name of daaver
+  const JourneyDrawer({
     Key? key,
   }) : super(key: key);
 
@@ -32,7 +33,8 @@ class CustomDrawer extends StatelessWidget {
         Container(
           height: MediaQuery.of(context).size.height * 0.8,
         )
-      ]),
+      ],
+      ),
     );
   }
 }
