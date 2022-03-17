@@ -1,48 +1,56 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+
+import '../../extensions/date_extension.dart';
 
 class EventTile extends StatelessWidget {
   final String title;
   final DateTime date;
   final bool favorite;
   final File? image;
+  final bool isSelected;
+
   EventTile({
     Key? key,
     required this.title,
     required this.date,
     required this.favorite,
     this.image,
+    required this.isSelected,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    var _formattedDate = DateFormat.yMMMMd().format(date).toString();
     return Container(
       margin: const EdgeInsets.all(5),
-      padding: const EdgeInsets.all(5),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: Theme.of(context).primaryColor),
-      alignment: Alignment.centerLeft,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(15),
+            topRight: Radius.circular(15),
+            bottomRight: Radius.circular(15),
+          ),
+          color: isSelected
+              ? Theme.of(context).primaryColor.withOpacity(0.7)
+              : Theme.of(context).primaryColor),
       child: (image != null)
-          ? TileWithImage(
+          ? _TileWithImage(
               image: image,
               title: title,
-              formattedDate: _formattedDate,
+              formattedDate: date.mmddyy(),
               favorite: favorite)
-          : TIleWithoutImage(
+          : _TileWithoutImage(
               title: title,
-              formattedDate: _formattedDate,
+              formattedDate: date.mmddyy(),
               favorite: favorite,
             ),
     );
   }
 }
 
-class TIleWithoutImage extends StatelessWidget {
-  const TIleWithoutImage({
+class _TileWithoutImage extends StatelessWidget {
+  const _TileWithoutImage({
     Key? key,
     required this.title,
     required String formattedDate,
@@ -64,16 +72,20 @@ class TIleWithoutImage extends StatelessWidget {
           style: const TextStyle(fontSize: 20),
         ),
         Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Text(_formattedDate),
+            Text(
+              _formattedDate,
+              style: const TextStyle(fontSize: 10),
+            ),
             favorite
                 ? const Icon(
                     Icons.star,
-                    size: 15,
+                    size: 10,
                   )
                 : const Icon(
                     Icons.star_border,
-                    size: 15,
+                    size: 10,
                   ),
           ],
         ),
@@ -82,8 +94,8 @@ class TIleWithoutImage extends StatelessWidget {
   }
 }
 
-class TileWithImage extends StatelessWidget {
-  const TileWithImage({
+class _TileWithImage extends StatelessWidget {
+  const _TileWithImage({
     Key? key,
     required this.image,
     required this.title,
@@ -100,6 +112,7 @@ class TileWithImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Image.file(
@@ -114,21 +127,29 @@ class TileWithImage extends StatelessWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              title,
-              style: const TextStyle(fontSize: 20),
+            Container(
+              width: MediaQuery.of(context).size.width * 0.5,
+              child: Text(
+                title,
+                style:
+                    const TextStyle(fontSize: 20, overflow: TextOverflow.fade),
+              ),
             ),
             Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Text(_formattedDate),
+                Text(
+                  _formattedDate,
+                  style: const TextStyle(fontSize: 10),
+                ),
                 favorite
                     ? const Icon(
                         Icons.star,
-                        size: 15,
+                        size: 10,
                       )
                     : const Icon(
                         Icons.star_border,
-                        size: 15,
+                        size: 10,
                       ),
               ],
             ),

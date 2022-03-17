@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class BottomNavBar extends StatefulWidget {
-  final Function(int)? onTap;
+  final void Function(int)? onTap;
   final int selectedIndex;
 
   const BottomNavBar({
