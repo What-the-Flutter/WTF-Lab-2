@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../models/event.dart';
 import '../../pages/event_page.dart';
 
 class HoveredItem extends StatefulWidget {
@@ -6,12 +7,14 @@ class HoveredItem extends StatefulWidget {
   final String subtitle;
   final IconData icon;
   final Container bottomSheet;
+  final List<Event> events;
 
   HoveredItem(
     this.title,
     this.subtitle,
     this.icon,
-    this.bottomSheet, {
+    this.bottomSheet,
+    this.events, {
     Key? key,
   }) : super(key: key);
 
@@ -30,7 +33,8 @@ class _HoveredItemState extends State<HoveredItem> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => EventPage(title: widget.title),
+                builder: (context) =>
+                    EventPage(title: widget.title, events: widget.events),
               ),
             )
           }),

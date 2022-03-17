@@ -8,6 +8,7 @@ class CustomTheme {
     shadowColor: Colors.grey[200],
     backgroundColor: Colors.black,
     highlightColor: Colors.white,
+    primaryIconTheme: const IconThemeData(color: Colors.white),
     colorScheme:
         ColorScheme.light(secondary: Colors.teal, primary: Colors.green[100]!),
   );
@@ -18,6 +19,7 @@ class CustomTheme {
       hintColor: Colors.white,
       backgroundColor: Colors.white,
       scaffoldBackgroundColor: Colors.black,
+      primaryIconTheme: const IconThemeData(color: Colors.black),
       colorScheme: ColorScheme.dark(
           secondary: Colors.yellow, primary: Colors.yellow[100]!),
       bottomAppBarColor: Colors.black87,

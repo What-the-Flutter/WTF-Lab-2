@@ -1,28 +1,32 @@
 import 'package:flutter/material.dart';
-import '../chats.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../cubit/home/home_cubit.dart';
+import '../cubit/home/home_state.dart';
+import '../events.dart';
+import '../models/event.dart';
 import '../themes/inherited_theme.dart';
 import '../widgets/home_page/hovered_item.dart';
 import 'new_category_page.dart';
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({
+List<Event> events = getEvents();
+
+class HomePage extends StatefulWidget {
+  final String title;
+
+  const HomePage({
     Key? key,
     required this.title,
   }) : super(key: key);
 
-  final String title;
-
-  _MyHomePageState get myState => _MyHomePageState();
   @override
-  State<StatefulWidget> createState() => _MyHomePageState();
+  State<StatefulWidget> createState() => _HomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  final Map<String, Icon> listofChats = <String, Icon>{};
+class _HomePageState extends State<HomePage> {
+  final HomeCubit cubit = HomeCubit();
 
   @override
   Widget build(BuildContext context) {
-    if (listofChats.isEmpty) listofChats.addAll(chats());
     final style = ElevatedButton.styleFrom(
       textStyle: const TextStyle(fontSize: 25),
       primary: Theme.of(context).primaryColor,
@@ -49,46 +53,11 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ),
       drawer: Drawer(backgroundColor: Theme.of(context).primaryColor),
-      body: Column(
-        children: [
-          const Padding(
-            padding: EdgeInsets.only(top: 40),
-          ),
-          botButton(style, context),
-          const Padding(
-            padding: EdgeInsets.only(top: 40.0),
-          ),
-          ListView.builder(
-            shrinkWrap: true,
-            itemCount: listofChats.length,
-            itemBuilder: (context, index) {
-              return Column(
-                children: [
-                  Divider(
-                    height: 5,
-                    thickness: 5,
-                    color: Theme.of(context).shadowColor,
-                  ),
-                  HoveredItem(
-                    listofChats.keys.elementAt(index),
-                    'No events. Click to create one.',
-                    listofChats.values.elementAt(index).icon!,
-                    _bottomSheet(
-                      context,
-                      listofChats.keys.elementAt(index),
-                      listofChats.values.elementAt(index),
-                    ),
-                  ),
-                  Divider(
-                    height: 5,
-                    thickness: 5,
-                    color: Theme.of(context).shadowColor,
-                  ),
-                ],
-              );
-            },
-          ),
-        ],
+      body: BlocBuilder<HomeCubit, HomeState>(
+        bloc: cubit,
+        builder: (context, state) {
+          return _body(style, state);
+        },
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Theme.of(context).colorScheme.secondary,
@@ -96,12 +65,57 @@ class _MyHomePageState extends State<MyHomePage> {
           _createChat(context),
         },
         tooltip: 'Button',
-        child: Icon(
+        child: const Icon(
           Icons.add,
-          color: Theme.of(context).scaffoldBackgroundColor,
         ),
       ),
-      bottomNavigationBar: navBar(context),
+      bottomNavigationBar: _bottomNavigationBar(context),
+    );
+  }
+
+  Column _body(ButtonStyle style, HomeState state) {
+    return Column(
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(top: 40),
+        ),
+        botButton(style, context),
+        const Padding(
+          padding: EdgeInsets.only(top: 40.0),
+        ),
+        ListView.builder(
+          shrinkWrap: true,
+          itemCount: state.listOfChats.length,
+          itemBuilder: (context, index) {
+            return Column(
+              children: [
+                Divider(
+                  height: 5,
+                  thickness: 5,
+                  color: Theme.of(context).shadowColor,
+                ),
+                HoveredItem(
+                  state.listOfChats.keys.elementAt(index),
+                  'No events. Click to create one.',
+                  state.listOfChats.values.elementAt(index).icon!,
+                  _bottomSheet(
+                    context,
+                    state.listOfChats.keys.elementAt(index),
+                    state.listOfChats.values.elementAt(index),
+                    state,
+                  ),
+                  events,
+                ),
+                Divider(
+                  height: 5,
+                  thickness: 5,
+                  color: Theme.of(context).shadowColor,
+                ),
+              ],
+            );
+          },
+        ),
+      ],
     );
   }
 
@@ -110,11 +124,10 @@ class _MyHomePageState extends State<MyHomePage> {
       context,
       MaterialPageRoute(builder: (context) => NewCategoryPage()),
     );
-
-    var res = Map<String, Icon>.from(result).entries;
-    setState(() {
-      listofChats.addEntries(res);
-    });
+    if (result != null) {
+      var res = Map<String, Icon>.from(result).entries;
+      cubit.addChat(res);
+    }
   }
 
   Row botButton(ButtonStyle style, BuildContext context) {
@@ -138,7 +151,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  BottomNavigationBar navBar(BuildContext context) {
+  BottomNavigationBar _bottomNavigationBar(BuildContext context) {
     return BottomNavigationBar(
       backgroundColor: Theme.of(context).bottomAppBarColor,
       selectedItemColor: Theme.of(context).colorScheme.secondary,
@@ -164,9 +177,11 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  void _editChat(BuildContext context, String title, Icon icon) async {
+  void _editChat(
+      BuildContext context, String title, Icon icon, HomeState state) async {
     Navigator.pop(context);
-    listofChats.removeWhere((key, value) => key == title && value == icon);
+    state.listOfChats
+        .removeWhere((key, value) => key == title && value == icon);
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -178,12 +193,121 @@ class _MyHomePageState extends State<MyHomePage> {
     );
 
     var res = Map<String, Icon>.from(result).entries;
-    setState(() {
-      listofChats.addEntries(res);
-    });
+    cubit.addChat(res);
   }
 
-  Container _bottomSheet(BuildContext context, String title, Icon icon) {
+  TextButton _infoButton() {
+    return TextButton(
+      child: Row(children: [
+        const Icon(
+          Icons.info,
+          color: Color.fromARGB(255, 3, 201, 125),
+        ),
+        const Padding(
+          padding: EdgeInsets.all(5),
+        ),
+        Text(
+          'Info',
+          style: TextStyle(
+            fontSize: 25,
+            color: Theme.of(context).hintColor,
+          ),
+        ),
+      ]),
+      onPressed: null,
+    );
+  }
+
+  TextButton _pinPageButton() {
+    return TextButton(
+      child: Row(children: [
+        const Icon(
+          Icons.attach_file,
+          color: Colors.green,
+        ),
+        const Padding(
+          padding: EdgeInsets.all(5),
+        ),
+        Text(
+          'Pin/Unpin page',
+          style: TextStyle(
+            fontSize: 25,
+            color: Theme.of(context).hintColor,
+          ),
+        ),
+      ]),
+      onPressed: null,
+    );
+  }
+
+  TextButton _archieveButton() {
+    return TextButton(
+      child: Row(children: [
+        const Icon(
+          Icons.archive,
+          color: Colors.yellow,
+        ),
+        const Padding(
+          padding: EdgeInsets.all(5),
+        ),
+        Text(
+          'Archive page',
+          style: TextStyle(
+            fontSize: 25,
+            color: Theme.of(context).hintColor,
+          ),
+        ),
+      ]),
+      onPressed: null,
+    );
+  }
+
+  TextButton _editPageButton(String title, Icon icon, HomeState state) {
+    return TextButton(
+      child: Row(children: [
+        const Icon(
+          Icons.edit,
+          color: Colors.blue,
+        ),
+        const Padding(
+          padding: EdgeInsets.all(5),
+        ),
+        Text(
+          'Edit page',
+          style: TextStyle(
+            fontSize: 25,
+            color: Theme.of(context).hintColor,
+          ),
+        ),
+      ]),
+      onPressed: () => _editChat(context, title, icon, state),
+    );
+  }
+
+  TextButton _deletePageButton(String title) {
+    return TextButton(
+      child: Row(children: [
+        const Icon(
+          Icons.delete,
+          color: Colors.red,
+        ),
+        const Padding(
+          padding: EdgeInsets.all(5),
+        ),
+        Text(
+          'Delete page',
+          style: TextStyle(fontSize: 25, color: Theme.of(context).hintColor),
+        ),
+      ]),
+      onPressed: () {
+        Navigator.pop(context);
+        cubit.remove(title);
+      },
+    );
+  }
+
+  Container _bottomSheet(
+      BuildContext context, String title, Icon icon, HomeState state) {
     return Container(
       padding: const EdgeInsets.all(5),
       color: Theme.of(context).scaffoldBackgroundColor,
@@ -192,98 +316,11 @@ class _MyHomePageState extends State<MyHomePage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          TextButton(
-            child: Row(children: [
-              const Icon(
-                Icons.info,
-                color: Color.fromARGB(255, 3, 201, 125),
-              ),
-              const Padding(
-                padding: EdgeInsets.all(5),
-              ),
-              Text(
-                'Info',
-                style:
-                    TextStyle(fontSize: 25, color: Theme.of(context).hintColor),
-              ),
-            ]),
-            onPressed: null,
-          ),
-          TextButton(
-            child: Row(children: [
-              const Icon(
-                Icons.attach_file,
-                color: Colors.green,
-              ),
-              const Padding(
-                padding: EdgeInsets.all(5),
-              ),
-              Text(
-                'Pin/Unpin page',
-                style:
-                    TextStyle(fontSize: 25, color: Theme.of(context).hintColor),
-              ),
-            ]),
-            onPressed: null,
-          ),
-          TextButton(
-            child: Row(children: [
-              const Icon(
-                Icons.archive,
-                color: Colors.yellow,
-              ),
-              const Padding(
-                padding: EdgeInsets.all(5),
-              ),
-              Text(
-                'Archive page',
-                style:
-                    TextStyle(fontSize: 25, color: Theme.of(context).hintColor),
-              ),
-            ]),
-            onPressed: null,
-          ),
-          TextButton(
-            child: Row(children: [
-              const Icon(
-                Icons.edit,
-                color: Colors.blue,
-              ),
-              const Padding(
-                padding: EdgeInsets.all(5),
-              ),
-              Text(
-                'Edit page',
-                style:
-                    TextStyle(fontSize: 25, color: Theme.of(context).hintColor),
-              ),
-            ]),
-            onPressed: () => _editChat(context, title, icon),
-          ),
-          TextButton(
-            child: Row(children: [
-              const Icon(
-                Icons.delete,
-                color: Colors.red,
-              ),
-              const Padding(
-                padding: EdgeInsets.all(5),
-              ),
-              Text(
-                'Delete page',
-                style:
-                    TextStyle(fontSize: 25, color: Theme.of(context).hintColor),
-              ),
-            ]),
-            onPressed: () => {
-              Navigator.pop(context),
-              setState(
-                () {
-                  listofChats.removeWhere((key, value) => key == title);
-                },
-              ),
-            },
-          ),
+          _infoButton(),
+          _pinPageButton(),
+          _archieveButton(),
+          _editPageButton(title, icon, state),
+          _deletePageButton(title),
         ],
       ),
     );
