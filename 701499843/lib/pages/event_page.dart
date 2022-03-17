@@ -8,7 +8,6 @@ import 'package:intl/intl.dart';
 import '../cubit/event_page/event_page_cubit.dart';
 import '../cubit/event_page/event_page_state.dart';
 import '../models/event.dart';
-import 'home.dart';
 
 class EventPage extends StatefulWidget {
   final String title;
@@ -247,13 +246,7 @@ class _EventPageState extends State<EventPage> {
       leading: IconButton(
         onPressed: () {
           cubit.changeEditMode();
-          events.where((element) => element.isSelected == true).forEach(
-            (element) {
-              element = element.copyWith(
-                isSelected: !element.isSelected,
-              );
-            },
-          );
+          cubit.canselSelection();
         },
         icon: const Icon(Icons.close),
       ),
@@ -329,7 +322,7 @@ class _EventPageState extends State<EventPage> {
                 margin: const EdgeInsets.all(8),
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: events[index].isFavorite
+                  color: state.events[index].isFavorite
                       ? Colors.green[300]
                       : Colors.green[100],
                   borderRadius: BorderRadius.circular(10),
@@ -377,16 +370,53 @@ class _EventPageState extends State<EventPage> {
         itemCount: state.searchMode
             ? state.searchedEvents.length
             : state.events.length,
-        itemBuilder: (context, index) => Align(
-          alignment: Alignment.centerLeft,
-          child: GestureDetector(
-            onTap: () => cubit.tapOnEvent(index, _searchController),
-            onLongPress: () {
-              cubit.selectEvent(index);
+        itemBuilder: (context, index) {
+          return Dismissible(
+            key: UniqueKey(),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: GestureDetector(
+                onTap: () => cubit.tapOnEvent(index, _searchController),
+                onLongPress: () {
+                  cubit.selectEvent(index);
+                },
+                child: _eventMessage(index, state),
+              ),
+            ),
+            background: Container(
+              color: Theme.of(context).primaryColor,
+              child: Stack(
+                children: [
+                  CircleAvatar(
+                    radius: 35,
+                    backgroundColor: Theme.of(context).primaryColor,
+                    child: const Icon(Icons.edit),
+                  ),
+                ],
+              ),
+            ),
+            secondaryBackground: Container(
+              color: Theme.of(context).primaryColor,
+              child: Stack(
+                children: [
+                  CircleAvatar(
+                    radius: 35,
+                    backgroundColor: Theme.of(context).primaryColor,
+                    child: const Icon(Icons.delete),
+                  ),
+                ],
+              ),
+            ),
+            onDismissed: (direction) {
+              if (direction == DismissDirection.startToEnd) {
+                cubit.setSelectedIndex(index, _controller);
+                cubit.copyEventText(_controller);
+              } else {
+                cubit.removeEvent(index);
+              }
             },
-            child: _eventMessage(index, state),
-          ),
-        ),
+          );
+        },
       ),
     );
   }

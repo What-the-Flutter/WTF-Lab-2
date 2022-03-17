@@ -25,6 +25,7 @@ class EventPageCubit extends Cubit<EventPageState> {
             migrateCategory: '',
             isScrollbarVisible: false,
             selectedCategory: title,
+            title: title,
           ),
         );
 
@@ -48,17 +49,20 @@ class EventPageCubit extends Cubit<EventPageState> {
   void emitState() {
     emit(
       EventPageState(
-          events: state.events,
-          writingMode: state.writingMode,
-          editMode: state.editMode,
-          favoriteMode: state.favoriteMode,
-          selectedIndex: state.selectedIndex,
-          searchMode: state.searchMode,
-          chats: state.chats,
-          searchedEvents: state.searchedEvents,
-          migrateCategory: state.migrateCategory,
-          isScrollbarVisible: state.isScrollbarVisible,
-          selectedCategory: state.selectedCategory),
+        events:
+            events.where((element) => element.category == state.title).toList(),
+        writingMode: state.writingMode,
+        editMode: state.editMode,
+        favoriteMode: state.favoriteMode,
+        selectedIndex: state.selectedIndex,
+        searchMode: state.searchMode,
+        chats: state.chats,
+        searchedEvents: state.searchedEvents,
+        migrateCategory: state.migrateCategory,
+        isScrollbarVisible: state.isScrollbarVisible,
+        selectedCategory: state.selectedCategory,
+        title: state.title,
+      ),
     );
   }
 
@@ -174,11 +178,10 @@ class EventPageCubit extends Cubit<EventPageState> {
 
   void selectEvent(int index) {
     state.editMode = true;
-    events[index] = events[index].copyWith(
+    events[events.indexOf(state.events[index])] = state.events[index].copyWith(
       isSelected: true,
     );
     state.selectedIndex = index;
-
     emitState();
   }
 
@@ -222,28 +225,14 @@ class EventPageCubit extends Cubit<EventPageState> {
   }
 
   void migrate() {
-    var eventsToMigrate = events.where((element) => element.isSelected == true);
-    events.removeWhere(
-      (element) => element.isSelected == true,
-    );
-    for (var element in eventsToMigrate) {
-      print(element);
-      events.add(
-        element.copyWith(
+    for (var element in state.events) {
+      if (element.isSelected) {
+        events[events.indexOf(element)] = element.copyWith(
+          isSelected: false,
           category: state.migrateCategory,
-          isSelected: !element.isSelected,
-        ),
-      );
-    }
-    /*.forEach(
-      (element) {
-        print(element.category);
-        element = element.copyWith(
-          category: state.migrateCategory,
-          isSelected: !element.isSelected,
         );
-      },
-    );*/
+      }
+    }
 
     emitState();
   }
@@ -256,6 +245,22 @@ class EventPageCubit extends Cubit<EventPageState> {
 
   void changeVisibility() {
     state.isScrollbarVisible = !state.isScrollbarVisible;
+
+    emitState();
+  }
+
+  void canselSelection() {
+    for (var element in state.events) {
+      if (element.isSelected) {
+        events[events.indexOf(element)] = element.copyWith(isSelected: false);
+      }
+    }
+
+    emitState();
+  }
+
+  void removeEvent(int index) {
+    events.remove(state.events[index]);
 
     emitState();
   }

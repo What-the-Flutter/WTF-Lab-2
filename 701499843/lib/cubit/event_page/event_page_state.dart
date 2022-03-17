@@ -15,6 +15,7 @@ class EventPageState {
   String migrateCategory;
   bool isScrollbarVisible;
   String selectedCategory;
+  String title;
 
   EventPageState({
     required this.events,
@@ -29,5 +30,6 @@ class EventPageState {
     required this.migrateCategory,
     required this.isScrollbarVisible,
     required this.selectedCategory,
+    required this.title,
   });
 }
