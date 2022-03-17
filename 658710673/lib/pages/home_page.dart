@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../utils/app_theme.dart';
+import '../utils/constants.dart';
 import '../widgets/main_page_widgets/main_bottom_bar.dart';
 import '../widgets/main_page_widgets/main_event_card.dart';
 
@@ -26,7 +27,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,16 +57,20 @@ class _HomePageState extends State<HomePage> {
           ),
           SliverList(
             delegate: SliverChildBuilderDelegate(
-                  (_, index) {
-                    return const EventCard();
+              (_, index) {
+                return const EventCard(
+                  title: 'Journal',
+                  subtitle: 'No events. Click to create one.',
+                  icon: Icons.book,
+                );
               },
-              childCount: 10,
             ),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {},
+        backgroundColor: Constants.primaryColor,
         child: const Icon(Icons.add),
       ),
       bottomNavigationBar: const MainBottomBar(),
