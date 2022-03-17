@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubit/home/home_cubit.dart';
 import '../cubit/home/home_state.dart';
+import '../events.dart';
+import '../models/event.dart';
 import '../themes/inherited_theme.dart';
 import '../widgets/home_page/hovered_item.dart';
 import 'new_category_page.dart';
+
+List<Event> events = getEvents();
 
 class HomePage extends StatefulWidget {
   final String title;
@@ -100,6 +104,7 @@ class _HomePageState extends State<HomePage> {
                     state.listOfChats.values.elementAt(index),
                     state,
                   ),
+                  events,
                 ),
                 Divider(
                   height: 5,
