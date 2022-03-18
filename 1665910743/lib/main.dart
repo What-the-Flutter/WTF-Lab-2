@@ -28,6 +28,7 @@ class Journal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       theme: CustomTheme.of(context).theme,
       home: const Home(),
     );

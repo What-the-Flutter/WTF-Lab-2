@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -9,7 +11,6 @@ import '../theme/inherited_widget.dart';
 import '../theme/theme_data.dart';
 import 'add_category_dialog.dart';
 import 'bottom_nav_bar.dart';
-import 'drawer.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -20,6 +21,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   int _selectedIndex = 0;
+
   void _onItemTapped(int index) {
     setState(
       () {
@@ -28,19 +30,27 @@ class _HomeState extends State<Home> {
     );
   }
 
-  final _selectedItems = [
+  final _selectedItems = const [
     HomeScreen(),
-    const Daily(),
-    const Timeline(),
-    const Explore(),
+    Daily(),
+    Timeline(),
+    Explore(),
+  ];
+
+  final _title = const [
+    HomeScreen.title,
+    Daily.title,
+    Timeline.title,
+    Explore.title,
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: const JourneyDrawer(),
       appBar: AppBar(
-        title: const Text('Home'),
+        title: Text(_title.elementAt(_selectedIndex)),
+        centerTitle: Platform.isIOS,
+        automaticallyImplyLeading: false,
         actions: [
           IconButton(
             onPressed: () {
@@ -61,10 +71,10 @@ class _HomeState extends State<Home> {
                 : const Icon(Icons.light_mode),
           ),
         ],
-        centerTitle: true,
       ),
       body: _selectedItems.elementAt(_selectedIndex),
       floatingActionButton: FloatingActionButton(
+          backgroundColor: Theme.of(context).primaryColor,
           child: const Icon(Icons.add),
           onPressed: () {
             HapticFeedback.mediumImpact();

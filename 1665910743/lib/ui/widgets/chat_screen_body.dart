@@ -49,35 +49,66 @@ class _ChatScreenBodyState extends State<ChatScreenBody> {
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: const Text('Rename your event'),
+            elevation: 5,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(
+                Radius.circular(25.0),
+              ),
+            ),
+            title: const Center(child: Text('Rename your event')),
             actionsAlignment: MainAxisAlignment.spaceEvenly,
             actions: [
-              IconButton(
-                  onPressed: () {
-                    setState(() {
-                      list[index].favorite = !widget.eventList[index].favorite;
-                      Navigator.pop(context);
-                    });
-                  },
-                  icon: list[index].favorite
-                      ? const Icon(Icons.bookmark)
-                      : const Icon(Icons.bookmark_border)),
-              TextButton(
-                  onPressed: () {
-                    setState(() {
-                      list[index].title = _renameController.text;
-                      Navigator.pop(context);
-                    });
-                  },
-                  child: const Text('Rename')),
-              IconButton(
+              CircleAvatar(
+                foregroundColor: Colors.white,
+                backgroundColor: Theme.of(context).primaryColor,
+                child: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        list[index].favorite =
+                            !widget.eventList[index].favorite;
+                        Navigator.pop(context);
+                      });
+                    },
+                    icon: list[index].favorite
+                        ? Icon(
+                            Icons.bookmark,
+                            color: Theme.of(context).primaryColor,
+                          )
+                        : Icon(
+                            Icons.bookmark_border,
+                            color: Theme.of(context).primaryColor,
+                          )),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  primary: Theme.of(context).primaryColor,
+                ),
                 onPressed: () {
                   setState(() {
-                    list.removeAt(index);
+                    list[index].title = _renameController.text;
                     Navigator.pop(context);
                   });
                 },
-                icon: const Icon(Icons.delete_forever),
+                child: const Text(
+                  'Rename',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+              CircleAvatar(
+                backgroundColor: Theme.of(context).primaryColor,
+                foregroundColor: Colors.white,
+                child: IconButton(
+                  onPressed: () {
+                    setState(() {
+                      list.removeAt(index);
+                      Navigator.pop(context);
+                    });
+                  },
+                  icon: Icon(
+                    Icons.delete_forever,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                ),
               )
             ],
             content: TextField(
@@ -122,8 +153,14 @@ class _ChatScreenBodyState extends State<ChatScreenBody> {
             }
           },
           icon: hasSelected.isNotEmpty
-              ? const Icon(Icons.delete)
-              : const Icon(Icons.bookmark),
+              ? Icon(
+                  Icons.delete,
+                  color: Theme.of(context).primaryColor,
+                )
+              : Icon(
+                  Icons.bookmark,
+                  color: Theme.of(context).primaryColor,
+                ),
         ),
         Expanded(
           child: TextField(
@@ -162,8 +199,14 @@ class _ChatScreenBodyState extends State<ChatScreenBody> {
             }
           },
           icon: _controller.value.text.isEmpty
-              ? const Icon(Icons.photo_camera)
-              : const Icon(Icons.send),
+              ? Icon(
+                  Icons.photo_camera,
+                  color: Theme.of(context).primaryColor,
+                )
+              : Icon(
+                  Icons.send,
+                  color: Theme.of(context).primaryColor,
+                ),
         )
       ],
     );

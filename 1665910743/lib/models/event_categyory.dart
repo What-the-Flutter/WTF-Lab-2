@@ -4,7 +4,6 @@ import 'event.dart';
 
 class EventCategory {
   final list = <Event>[];
-  final selectedTiles = <Event>[];
   final Icon icon;
   String title;
   bool pined;
@@ -13,13 +12,7 @@ class EventCategory {
 }
 
 class CategoryList extends ChangeNotifier {
-  final List<EventCategory> _categoryList = [
-    EventCategory(
-      'Hello',
-      false,
-      const Icon(Icons.help_outline),
-    )
-  ];
+  final List<EventCategory> _categoryList = [];
   final List<EventCategory> _pinedList = [];
 
   List get categoryList => _categoryList;

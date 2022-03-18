@@ -6,7 +6,9 @@ import '../../models/event_categyory.dart';
 import 'chat_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  HomeScreen({
+  static const title = 'Home';
+
+  const HomeScreen({
     Key? key,
   }) : super(key: key);
 
@@ -25,43 +27,77 @@ class _HomeScreenState extends State<HomeScreen> {
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: const Text('Rename your event'),
+            elevation: 5,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(
+                Radius.circular(25.0),
+              ),
+            ),
+            title: const Center(child: Text('Rename your event')),
             actionsAlignment: MainAxisAlignment.spaceEvenly,
             actions: [
-              IconButton(
+              CircleAvatar(
+                backgroundColor: Theme.of(context).primaryColor,
+                foregroundColor: Colors.white,
+                child: IconButton(
                   onPressed: () {
-                    setState(() {
-                      if (list.pined == false) {
-                        list.pined = true;
-                        context.read<CategoryList>().pin(list);
-                        context.read<CategoryList>().remove(list);
-                      } else {
-                        list.pined = true;
-                        context.read<CategoryList>().unpin(list);
-                        context.read<CategoryList>().add(list);
-                      }
+                    setState(
+                      () {
+                        if (list.pined == false) {
+                          list.pined = true;
+                          context.read<CategoryList>().pin(list);
+                          context.read<CategoryList>().remove(list);
+                        } else {
+                          list.pined = false;
+                          context.read<CategoryList>().unpin(list);
+                          context.read<CategoryList>().add(list);
+                        }
 
-                      Navigator.pop(context);
-                    });
+                        Navigator.pop(context);
+                      },
+                    );
                   },
                   icon: list.pined
-                      ? const Icon(Icons.bookmark)
-                      : const Icon(Icons.bookmark_border)),
-              TextButton(
-                  onPressed: () {
-                    setState(() {
+                      ? const Icon(Icons.push_pin)
+                      : const Icon(Icons.push_pin_outlined),
+                ),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  primary: Theme.of(context).primaryColor,
+                ),
+                onPressed: () {
+                  setState(
+                    () {
                       list.title = _controller.text;
                       Navigator.pop(context);
-                    });
-                  },
-                  child: const Text('Rename')),
-              IconButton(
-                onPressed: () {
-                  setState(() {
-                    Navigator.pop(context);
-                  });
+                    },
+                  );
                 },
-                icon: const Icon(Icons.delete_forever),
+                child: const Text(
+                  'Rename',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+              CircleAvatar(
+                foregroundColor: Colors.white,
+                backgroundColor: Theme.of(context).primaryColor,
+                child: IconButton(
+                  onPressed: () {
+                    setState(
+                      () {
+                        if (list.pined == false) {
+                          context.read<CategoryList>().remove(list);
+                        } else {
+                          context.read<CategoryList>().unpin(list);
+                          context.read<CategoryList>().remove(list);
+                        }
+                        Navigator.pop(context);
+                      },
+                    );
+                  },
+                  icon: const Icon(Icons.delete_forever),
+                ),
               )
             ],
             content: TextField(
@@ -87,16 +123,21 @@ class _HomeScreenState extends State<HomeScreen> {
                 Column(
                   mainAxisSize: MainAxisSize.min,
                   children: pinedLIst
-                      .map((e) => ListTile(
-                          leading: CircleAvatar(child: e.icon),
+                      .map(
+                        (e) => ListTile(
+                          leading: CircleAvatar(
+                            foregroundColor: Colors.white,
+                            child: e.icon,
+                            backgroundColor: Theme.of(context).primaryColor,
+                          ),
                           title: Text(e.title),
                           subtitle: e.list.isEmpty
                               ? const Text('No events')
                               : Text(e.list.last.title),
                           onLongPress: () => _displayTextInputDialog(
-                                context: context,
-                                list: e,
-                              ),
+                            context: context,
+                            list: e,
+                          ),
                           onTap: () {
                             Navigator.push(
                               context,
@@ -105,7 +146,12 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             );
                           },
-                          trailing: const Icon(Icons.push_pin_outlined)))
+                          trailing: Icon(
+                            Icons.push_pin_outlined,
+                            color: Theme.of(context).primaryColor,
+                          ),
+                        ),
+                      )
                       .toList(),
                 ),
                 Expanded(
@@ -113,7 +159,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     itemCount: list.length,
                     itemBuilder: (context, i) {
                       return ListTile(
-                        leading: CircleAvatar(child: list[i].icon),
+                        leading: CircleAvatar(
+                          foregroundColor: Colors.white,
+                          child: list[i].icon,
+                          backgroundColor: Theme.of(context).primaryColor,
+                        ),
                         title: Text(list[i].title),
                         subtitle: list[i].list.isEmpty
                             ? const Text('No events')

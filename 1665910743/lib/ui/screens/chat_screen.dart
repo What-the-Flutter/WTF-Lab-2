@@ -30,10 +30,16 @@ class _ChatScreenState extends State<ChatScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            setState(() {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const Home()));
-            });
+            setState(
+              () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const Home(),
+                  ),
+                );
+              },
+            );
           },
         ),
       ),
