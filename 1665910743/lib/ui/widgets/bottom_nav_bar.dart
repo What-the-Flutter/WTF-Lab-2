@@ -1,7 +1,10 @@
+import 'dart:io';
+
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 
 class BottomNavBar extends StatefulWidget {
-  final Function(int)? onTap;
+  final void Function(int)? onTap;
   final int selectedIndex;
 
   const BottomNavBar({
@@ -17,31 +20,26 @@ class BottomNavBar extends StatefulWidget {
 class _BottomNavBarState extends State<BottomNavBar> {
   @override
   Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      showUnselectedLabels: true,
-      items: [
-        BottomNavigationBarItem(
-          icon: const Icon(Icons.book),
-          label: 'Home',
-          backgroundColor: Theme.of(context).primaryColor,
+    return CurvedNavigationBar(
+      animationDuration: const Duration(milliseconds: 300),
+      color: Theme.of(context).primaryColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      buttonBackgroundColor: Theme.of(context).primaryColor,
+      height: Platform.isIOS ? 70 : 60,
+      items: const [
+        Icon(
+          Icons.book,
         ),
-        BottomNavigationBarItem(
-          icon: const Icon(Icons.assignment),
-          label: 'Daily',
-          backgroundColor: Theme.of(context).primaryColor,
+        Icon(
+          Icons.assignment,
         ),
-        BottomNavigationBarItem(
-          icon: const Icon(Icons.map),
-          label: 'Timeline',
-          backgroundColor: Theme.of(context).primaryColor,
+        Icon(
+          Icons.map,
         ),
-        BottomNavigationBarItem(
-          icon: const Icon(Icons.map),
-          label: 'Explore',
-          backgroundColor: Theme.of(context).primaryColor,
+        Icon(
+          Icons.add_to_drive_rounded,
         ),
       ],
-      currentIndex: widget.selectedIndex,
       onTap: widget.onTap,
     );
   }

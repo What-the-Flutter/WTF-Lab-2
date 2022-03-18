@@ -34,6 +34,10 @@ cupertino_icons
 2.12
 file:///Users/macbook/flutter/.pub-cache/hosted/pub.dartlang.org/cupertino_icons-1.0.4/
 file:///Users/macbook/flutter/.pub-cache/hosted/pub.dartlang.org/cupertino_icons-1.0.4/lib/
+curved_navigation_bar
+2.12
+file:///Users/macbook/flutter/.pub-cache/hosted/pub.dartlang.org/curved_navigation_bar-1.0.3/
+file:///Users/macbook/flutter/.pub-cache/hosted/pub.dartlang.org/curved_navigation_bar-1.0.3/lib/
 fake_async
 2.12
 file:///Users/macbook/flutter/.pub-cache/hosted/pub.dartlang.org/fake_async-1.2.0/
@@ -90,6 +94,10 @@ meta
 2.12
 file:///Users/macbook/flutter/.pub-cache/hosted/pub.dartlang.org/meta-1.7.0/
 file:///Users/macbook/flutter/.pub-cache/hosted/pub.dartlang.org/meta-1.7.0/lib/
+nested
+2.12
+file:///Users/macbook/flutter/.pub-cache/hosted/pub.dartlang.org/nested-1.0.0/
+file:///Users/macbook/flutter/.pub-cache/hosted/pub.dartlang.org/nested-1.0.0/lib/
 path
 2.12
 file:///Users/macbook/flutter/.pub-cache/hosted/pub.dartlang.org/path-1.8.0/
@@ -98,6 +106,10 @@ plugin_platform_interface
 2.12
 file:///Users/macbook/flutter/.pub-cache/hosted/pub.dartlang.org/plugin_platform_interface-2.1.2/
 file:///Users/macbook/flutter/.pub-cache/hosted/pub.dartlang.org/plugin_platform_interface-2.1.2/lib/
+provider
+2.12
+file:///Users/macbook/flutter/.pub-cache/hosted/pub.dartlang.org/provider-6.0.2/
+file:///Users/macbook/flutter/.pub-cache/hosted/pub.dartlang.org/provider-6.0.2/lib/
 source_span
 2.12
 file:///Users/macbook/flutter/.pub-cache/hosted/pub.dartlang.org/source_span-1.8.1/

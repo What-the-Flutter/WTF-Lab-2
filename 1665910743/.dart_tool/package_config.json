@@ -50,6 +50,12 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "curved_navigation_bar",
+      "rootUri": "file:///Users/macbook/flutter/.pub-cache/hosted/pub.dartlang.org/curved_navigation_bar-1.0.3",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "fake_async",
       "rootUri": "file:///Users/macbook/flutter/.pub-cache/hosted/pub.dartlang.org/fake_async-1.2.0",
       "packageUri": "lib/",
@@ -152,6 +158,12 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "nested",
+      "rootUri": "file:///Users/macbook/flutter/.pub-cache/hosted/pub.dartlang.org/nested-1.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "path",
       "rootUri": "file:///Users/macbook/flutter/.pub-cache/hosted/pub.dartlang.org/path-1.8.0",
       "packageUri": "lib/",
@@ -160,6 +172,12 @@
     {
       "name": "plugin_platform_interface",
       "rootUri": "file:///Users/macbook/flutter/.pub-cache/hosted/pub.dartlang.org/plugin_platform_interface-2.1.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "provider",
+      "rootUri": "file:///Users/macbook/flutter/.pub-cache/hosted/pub.dartlang.org/provider-6.0.2",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -224,7 +242,7 @@
       "languageVersion": "2.16"
     }
   ],
-  "generated": "2022-03-15T11:31:21.933542Z",
+  "generated": "2022-03-18T10:06:43.158052Z",
   "generator": "pub",
   "generatorVersion": "2.16.0"
 }
