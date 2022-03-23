@@ -1,7 +1,7 @@
 import 'dart:io';
 
 class Event {
-  Event(this.description);
+  Event(this.description, {this.attachment});
 
   DateTime timeOfCreation = DateTime.now();
   String description;
