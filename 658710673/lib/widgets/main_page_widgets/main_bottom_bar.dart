@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../utils/constants.dart';
-
 class MainBottomBar extends StatelessWidget {
   const MainBottomBar({Key? key}) : super(key: key);
 
@@ -9,8 +7,6 @@ class MainBottomBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return BottomNavigationBar(
       type: BottomNavigationBarType.fixed,
-      selectedItemColor: Constants.primaryColor,
-      unselectedItemColor: Constants.iconColor,
       items: const [
         BottomNavigationBarItem(
           icon: Icon(Icons.book),
