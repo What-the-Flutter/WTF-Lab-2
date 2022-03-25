@@ -30,6 +30,10 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_bloc: ^8.0.0
+  shared_preferences: ^2.0.13
+  sqflite:
+  path:
+
 
     
 

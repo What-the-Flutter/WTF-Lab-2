@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../cubit/home/home_cubit.dart';
-import '../cubit/home/home_state.dart';
-import '../events.dart';
-import '../models/event.dart';
-import '../themes/inherited_theme.dart';
-import '../widgets/home_page/hovered_item.dart';
-import 'new_category_page.dart';
 
-List<Event> events = getEvents();
+import '../../data/database_provider.dart';
+import '../../models/chat.dart';
+import '../../models/event.dart';
+import '../../themes/inherited_theme.dart';
+import '../new_category_page/new_category_page.dart';
+import 'home_cubit.dart';
+import 'home_state.dart';
+import 'widgets/hovered_item.dart';
 
 class HomePage extends StatefulWidget {
   final String title;
@@ -23,7 +23,16 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final HomeCubit cubit = HomeCubit();
+  late final HomeCubit _cubit;
+  //late final List<Event> events;
+
+  @override
+  void initState() {
+    _cubit = BlocProvider.of<HomeCubit>(context);
+    _cubit.init();
+    //events = await DatabaseProvider.db.getEvents();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +63,7 @@ class _HomePageState extends State<HomePage> {
       ),
       drawer: Drawer(backgroundColor: Theme.of(context).primaryColor),
       body: BlocBuilder<HomeCubit, HomeState>(
-        bloc: cubit,
+        bloc: _cubit,
         builder: (context, state) {
           return _body(style, state);
         },
@@ -73,7 +82,11 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Column _body(ButtonStyle style, HomeState state) {
+  Future<List<Event>> getEvents() async {
+    return await DatabaseProvider.db.getEvents();
+  }
+
+  Widget _body(ButtonStyle style, HomeState state) {
     return Column(
       children: [
         const Padding(
@@ -81,39 +94,42 @@ class _HomePageState extends State<HomePage> {
         ),
         botButton(style, context),
         const Padding(
-          padding: EdgeInsets.only(top: 40.0),
+          padding: EdgeInsets.only(top: 10.0),
         ),
-        ListView.builder(
-          shrinkWrap: true,
-          itemCount: state.listOfChats.length,
-          itemBuilder: (context, index) {
-            return Column(
-              children: [
-                Divider(
-                  height: 5,
-                  thickness: 5,
-                  color: Theme.of(context).shadowColor,
-                ),
-                HoveredItem(
-                  state.listOfChats.keys.elementAt(index),
-                  'No events. Click to create one.',
-                  state.listOfChats.values.elementAt(index).icon!,
-                  _bottomSheet(
-                    context,
-                    state.listOfChats.keys.elementAt(index),
-                    state.listOfChats.values.elementAt(index),
-                    state,
+        Expanded(
+          child: ListView.builder(
+            scrollDirection: Axis.vertical,
+            shrinkWrap: true,
+            itemCount: state.listOfChats.length,
+            itemBuilder: (context, index) {
+              return Column(
+                children: [
+                  Divider(
+                    height: 5,
+                    thickness: 5,
+                    color: Theme.of(context).shadowColor,
                   ),
-                  events,
-                ),
-                Divider(
-                  height: 5,
-                  thickness: 5,
-                  color: Theme.of(context).shadowColor,
-                ),
-              ],
-            );
-          },
+                  HoveredItem(
+                    state.listOfChats[index].category,
+                    'No events. Click to create one.',
+                    state.listOfChats[index].icon.icon!,
+                    _bottomSheet(
+                      context,
+                      state.listOfChats[index].category,
+                      state.listOfChats[index].icon,
+                      state,
+                    ),
+                    state.events,
+                  ),
+                  Divider(
+                    height: 5,
+                    thickness: 5,
+                    color: Theme.of(context).shadowColor,
+                  ),
+                ],
+              );
+            },
+          ),
         ),
       ],
     );
@@ -122,15 +138,17 @@ class _HomePageState extends State<HomePage> {
   void _createChat(BuildContext context) async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => NewCategoryPage()),
+      MaterialPageRoute(
+        builder: (context) => NewCategoryPage(),
+      ),
     );
     if (result != null) {
-      var res = Map<String, Icon>.from(result).entries;
-      cubit.addChat(res);
+      var res = List<Chat>.from(result);
+      _cubit.addChat(res.first);
     }
   }
 
-  Row botButton(ButtonStyle style, BuildContext context) {
+  Widget botButton(ButtonStyle style, BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -151,7 +169,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  BottomNavigationBar _bottomNavigationBar(BuildContext context) {
+  Widget _bottomNavigationBar(BuildContext context) {
     return BottomNavigationBar(
       backgroundColor: Theme.of(context).bottomAppBarColor,
       selectedItemColor: Theme.of(context).colorScheme.secondary,
@@ -180,8 +198,8 @@ class _HomePageState extends State<HomePage> {
   void _editChat(
       BuildContext context, String title, Icon icon, HomeState state) async {
     Navigator.pop(context);
-    state.listOfChats
-        .removeWhere((key, value) => key == title && value == icon);
+    state.listOfChats.removeWhere(
+        (element) => element.category == title && element.icon == icon);
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -192,11 +210,11 @@ class _HomePageState extends State<HomePage> {
       ),
     );
 
-    var res = Map<String, Icon>.from(result).entries;
-    cubit.addChat(res);
+    var res = List<Chat>.from(result);
+    _cubit.addChat(res.first);
   }
 
-  TextButton _infoButton() {
+  Widget _infoButton() {
     return TextButton(
       child: Row(children: [
         const Icon(
@@ -218,7 +236,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  TextButton _pinPageButton() {
+  Widget _pinPageButton() {
     return TextButton(
       child: Row(children: [
         const Icon(
@@ -240,7 +258,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  TextButton _archieveButton() {
+  Widget _archieveButton() {
     return TextButton(
       child: Row(children: [
         const Icon(
@@ -262,7 +280,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  TextButton _editPageButton(String title, Icon icon, HomeState state) {
+  Widget _editPageButton(String title, Icon icon, HomeState state) {
     return TextButton(
       child: Row(children: [
         const Icon(
@@ -284,7 +302,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  TextButton _deletePageButton(String title) {
+  Widget _deletePageButton(String title) {
     return TextButton(
       child: Row(children: [
         const Icon(
@@ -301,13 +319,17 @@ class _HomePageState extends State<HomePage> {
       ]),
       onPressed: () {
         Navigator.pop(context);
-        cubit.remove(title);
+        _cubit.remove(title);
       },
     );
   }
 
-  Container _bottomSheet(
-      BuildContext context, String title, Icon icon, HomeState state) {
+  Widget _bottomSheet(
+    BuildContext context,
+    String title,
+    Icon icon,
+    HomeState state,
+  ) {
     return Container(
       padding: const EdgeInsets.all(5),
       color: Theme.of(context).scaffoldBackgroundColor,

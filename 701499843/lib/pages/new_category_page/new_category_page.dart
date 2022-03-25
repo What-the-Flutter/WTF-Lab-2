@@ -2,8 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../cubit/new_category_page/new_category_page_cubit.dart';
-import '../cubit/new_category_page/new_category_page_state.dart';
+import '../../models/chat.dart';
+import 'new_category_page_cubit.dart';
+import 'new_category_page_state.dart';
 
 class NewCategoryPage extends StatefulWidget {
   final String title;
@@ -27,12 +28,19 @@ class NewCategoryPage extends StatefulWidget {
 
 class _NewCategoryPageState extends State<NewCategoryPage> {
   final _controller = TextEditingController();
-  final cubit = NewCategoryPageCubit();
+  late final NewCategoryPageCubit _cubit;
+
+  @override
+  void initState() {
+    _cubit = BlocProvider.of<NewCategoryPageCubit>(context);
+    _cubit.init();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<NewCategoryPageCubit, NewCategoryPageState>(
-      bloc: cubit,
+      bloc: _cubit,
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
@@ -53,7 +61,7 @@ class _NewCategoryPageState extends State<NewCategoryPage> {
     super.dispose();
   }
 
-  FloatingActionButton _floatingActionButton(NewCategoryPageState state) {
+  Widget _floatingActionButton(NewCategoryPageState state) {
     return FloatingActionButton(
       onPressed: () => {
         if (_controller.text.isNotEmpty &&
@@ -64,10 +72,13 @@ class _NewCategoryPageState extends State<NewCategoryPage> {
             Navigator.pop(
               context,
               {
-                _controller.text: state.iconsList
-                    .where((element) => element.isSelected == true)
-                    .first
-                    .icon,
+                Chat(
+                  category: _controller.text,
+                  icon: state.iconsList
+                      .where((element) => element.isSelected == true)
+                      .first
+                      .icon,
+                ),
               },
             ),
           },
@@ -79,14 +90,14 @@ class _NewCategoryPageState extends State<NewCategoryPage> {
     );
   }
 
-  Container _body(NewCategoryPageState state) {
+  Widget _body(NewCategoryPageState state) {
     return Container(
       alignment: Alignment.center,
       padding: const EdgeInsets.all(40),
       child: Column(
         children: [
           TextField(
-            onChanged: cubit.changeWritingMode,
+            onChanged: _cubit.changeWritingMode,
             keyboardType: TextInputType.multiline,
             decoration: InputDecoration(
               labelText: widget.title != ''
@@ -110,7 +121,7 @@ Please, enter new value'''
     );
   }
 
-  Expanded _iconsGrid(NewCategoryPageState state) {
+  Widget _iconsGrid(NewCategoryPageState state) {
     return Expanded(
       child: GridView.builder(
         itemCount: state.iconsList.length,
@@ -127,7 +138,7 @@ Please, enter new value'''
                 backgroundColor: Theme.of(context).colorScheme.secondary,
                 child: IconButton(
                   icon: state.iconsList[index].icon,
-                  onPressed: () => cubit.selectIcon(index, context),
+                  onPressed: () => _cubit.selectIcon(index),
                   iconSize: 25,
                 ),
               ),

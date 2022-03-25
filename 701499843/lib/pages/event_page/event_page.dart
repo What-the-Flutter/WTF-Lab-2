@@ -5,9 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
-import '../cubit/event_page/event_page_cubit.dart';
-import '../cubit/event_page/event_page_state.dart';
-import '../models/event.dart';
+import '../../models/event.dart';
+import 'event_page_cubit.dart';
+import 'event_page_state.dart';
 
 class EventPage extends StatefulWidget {
   final String title;
@@ -27,6 +27,15 @@ class _EventPageState extends State<EventPage> {
   final _controller = TextEditingController();
   final _searchController = TextEditingController();
   final _scrollController = ScrollController();
+  late final EventPageCubit _cubit;
+
+  @override
+  void initState() {
+    _cubit = BlocProvider.of<EventPageCubit>(context);
+    _cubit.initValues(widget.title);
+
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -38,27 +47,25 @@ class _EventPageState extends State<EventPage> {
 
   @override
   Widget build(BuildContext context) {
-    final cubit = EventPageCubit(widget.title, widget.events);
-
     return BlocBuilder<EventPageCubit, EventPageState>(
-      bloc: cubit,
+      bloc: _cubit,
       builder: (context, state) {
         return Scaffold(
           resizeToAvoidBottomInset: true,
           appBar: state.editMode
-              ? _editAppBar(context, state, cubit)
+              ? _editAppBar(context, state, _cubit)
               : state.searchMode
-                  ? _searchAppBar(cubit)
-                  : _appBar(state, cubit),
+                  ? _searchAppBar(_cubit)
+                  : _appBar(state, _cubit),
           body: Column(
             children: [
               state.events.isEmpty
                   ? _bodyWithoutEvents()
                   : state.favoriteMode
-                      ? _bodyFavorite(state, cubit)
-                      : _bodyWithEvents(state, cubit),
+                      ? _bodyFavorite(state, _cubit)
+                      : _bodyWithEvents(state, _cubit),
               Align(
-                child: _inputTextField(state, cubit),
+                child: _inputTextField(state, _cubit),
                 alignment: Alignment.bottomCenter,
               ),
             ],
@@ -68,7 +75,7 @@ class _EventPageState extends State<EventPage> {
     );
   }
 
-  Center _bodyWithoutEvents() {
+  Widget _bodyWithoutEvents() {
     return Center(
       child: Container(
         width: 300,
@@ -102,7 +109,7 @@ class _EventPageState extends State<EventPage> {
     );
   }
 
-  Column _inputTextField(EventPageState state, EventPageCubit cubit) {
+  Widget _inputTextField(EventPageState state, EventPageCubit cubit) {
     return Column(
       children: [
         Visibility(
@@ -121,15 +128,15 @@ class _EventPageState extends State<EventPage> {
                         backgroundColor:
                             Theme.of(context).colorScheme.secondary,
                         child: IconButton(
-                          icon: state.chats.values.elementAt(index),
-                          onPressed: () => cubit.selectCategory(index),
+                          icon: state.chats[index].icon,
+                          onPressed: () => _cubit.selectCategory(index),
                           iconSize: 45,
                         ),
                       ),
                       Align(
                         alignment: Alignment.bottomCenter,
                         child: Text(
-                          state.chats.keys.elementAt(index),
+                          state.chats[index].category,
                           textAlign: TextAlign.center,
                           style: const TextStyle(fontSize: 20),
                         ),
@@ -147,12 +154,12 @@ class _EventPageState extends State<EventPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
-              onPressed: cubit.changeVisibility,
+              onPressed: _cubit.changeVisibility,
               icon: const Icon(Icons.bubble_chart),
             ),
             Expanded(
               child: TextField(
-                onChanged: cubit.changeWritingMode,
+                onChanged: _cubit.changeWritingMode,
                 keyboardType: TextInputType.multiline,
                 decoration: const InputDecoration(
                   hintText: 'Enter event',
@@ -162,9 +169,9 @@ class _EventPageState extends State<EventPage> {
               ),
             ),
             state.writingMode
-                ? _sendIconButton(state, cubit)
+                ? _sendIconButton(state)
                 : IconButton(
-                    onPressed: cubit.attachImage,
+                    onPressed: _cubit.attachImage,
                     icon: const Icon(
                       Icons.image,
                     ),
@@ -175,10 +182,11 @@ class _EventPageState extends State<EventPage> {
     );
   }
 
-  IconButton _sendIconButton(EventPageState state, EventPageCubit cubit) {
+  Widget _sendIconButton(EventPageState state) {
     return IconButton(
       onPressed: () {
-        cubit.addNewEvent(_controller, widget.title);
+        _cubit.addNewEvent(_controller.text, widget.title);
+        _controller.text = '';
       },
       icon: const Icon(
         Icons.send,
@@ -193,11 +201,11 @@ class _EventPageState extends State<EventPage> {
       centerTitle: true,
       actions: <Widget>[
         IconButton(
-          onPressed: cubit.changeSearchMode,
+          onPressed: _cubit.changeSearchMode,
           icon: const Icon(Icons.search),
         ),
         IconButton(
-          onPressed: cubit.changeFavoriteMode,
+          onPressed: _cubit.changeFavoriteMode,
           icon: const Icon(Icons.bookmark_border),
         ),
       ],
@@ -224,14 +232,14 @@ class _EventPageState extends State<EventPage> {
             ),
             controller: _searchController,
             onChanged: (text) {
-              cubit.setSearchMode(true);
-              cubit.search(text);
+              _cubit.setSearchMode(true);
+              _cubit.search(text);
             },
           ),
         ),
         IconButton(
             onPressed: () {
-              cubit.changeSearchMode();
+              _cubit.changeSearchMode();
               _searchController.text = '';
             },
             icon: const Icon(Icons.close))
@@ -245,8 +253,8 @@ class _EventPageState extends State<EventPage> {
       backgroundColor: Theme.of(context).primaryColor,
       leading: IconButton(
         onPressed: () {
-          cubit.changeEditMode();
-          cubit.canselSelection();
+          _cubit.changeEditMode();
+          _cubit.cancelSelection();
         },
         icon: const Icon(Icons.close),
       ),
@@ -256,7 +264,7 @@ class _EventPageState extends State<EventPage> {
       actions: [
         IconButton(
           onPressed: () {
-            _migrateDialog(context, state, cubit);
+            _migrateDialog(context, state, _cubit);
           },
           icon: Icon(
             Icons.reply,
@@ -268,7 +276,7 @@ class _EventPageState extends State<EventPage> {
                 .length ==
             1)
           IconButton(
-            onPressed: () => cubit.copyEventText(_controller),
+            onPressed: () => _cubit.copyEventText(_controller),
             icon: const Icon(Icons.edit),
           ),
         IconButton(
@@ -291,18 +299,18 @@ class _EventPageState extends State<EventPage> {
           icon: const Icon(Icons.copy),
         ),
         IconButton(
-          onPressed: cubit.copy,
+          onPressed: _cubit.copy,
           icon: const Icon(Icons.bookmark_outline),
         ),
         IconButton(
-          onPressed: () => _dialog(state, context, cubit),
+          onPressed: () => _dialog(state, context, _cubit),
           icon: const Icon(Icons.delete),
         ),
       ],
     );
   }
 
-  Expanded _bodyFavorite(EventPageState state, EventPageCubit cubit) {
+  Widget _bodyFavorite(EventPageState state, EventPageCubit cubit) {
     return Expanded(
       child: ListView.builder(
         itemCount:
@@ -311,10 +319,10 @@ class _EventPageState extends State<EventPage> {
           alignment: Alignment.centerLeft,
           child: GestureDetector(
             onTap: () {
-              cubit.setSelectedIndex(index, _searchController);
+              _cubit.setSelectedIndex(index, _searchController);
             },
             onLongPress: () {
-              cubit.selectEvent(index);
+              _cubit.selectEvent(index);
             },
             child: Align(
               alignment: Alignment.topLeft,
@@ -364,7 +372,7 @@ class _EventPageState extends State<EventPage> {
     );
   }
 
-  Expanded _bodyWithEvents(EventPageState state, EventPageCubit cubit) {
+  Widget _bodyWithEvents(EventPageState state, EventPageCubit cubit) {
     return Expanded(
       child: ListView.builder(
         itemCount: state.searchMode
@@ -376,9 +384,9 @@ class _EventPageState extends State<EventPage> {
             child: Align(
               alignment: Alignment.centerLeft,
               child: GestureDetector(
-                onTap: () => cubit.tapOnEvent(index, _searchController),
+                onTap: () => _cubit.tapOnEvent(index, _searchController),
                 onLongPress: () {
-                  cubit.selectEvent(index);
+                  _cubit.selectEvent(index);
                 },
                 child: _eventMessage(index, state),
               ),
@@ -409,10 +417,10 @@ class _EventPageState extends State<EventPage> {
             ),
             onDismissed: (direction) {
               if (direction == DismissDirection.startToEnd) {
-                cubit.setSelectedIndex(index, _controller);
-                cubit.copyEventText(_controller);
+                _cubit.setSelectedIndex(index, _controller);
+                _cubit.copyEventText(_controller);
               } else {
-                cubit.removeEvent(index);
+                _cubit.removeEvent(index);
               }
             },
           );
@@ -421,8 +429,11 @@ class _EventPageState extends State<EventPage> {
     );
   }
 
-  Future _migrateDialog(
-      BuildContext context, EventPageState state, EventPageCubit cubit) {
+  Future<void> _migrateDialog(
+    BuildContext context,
+    EventPageState state,
+    EventPageCubit cubit,
+  ) {
     return showDialog(
       context: context,
       builder: (context) {
@@ -441,12 +452,12 @@ class _EventPageState extends State<EventPage> {
                     itemBuilder: (context, index) {
                       return SimpleDialogOption(
                         child: Text(
-                          state.chats.entries.elementAt(index).key,
+                          state.chats[index].category,
                           style: const TextStyle(fontSize: 20),
                         ),
                         onPressed: () {
-                          cubit.setMigrateCategory(
-                              state.chats.entries.elementAt(index).key);
+                          _cubit
+                              .setMigrateCategory(state.chats[index].category);
                         },
                       );
                     },
@@ -457,7 +468,7 @@ class _EventPageState extends State<EventPage> {
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
-                cubit.migrate();
+                _cubit.migrate();
               },
               child: const Text('Ok'),
             )
@@ -468,7 +479,10 @@ class _EventPageState extends State<EventPage> {
   }
 
   void _dialog(
-      EventPageState state, BuildContext context, EventPageCubit cubit) {
+    EventPageState state,
+    BuildContext context,
+    EventPageCubit cubit,
+  ) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -482,8 +496,10 @@ class _EventPageState extends State<EventPage> {
               ),
             ),
             onPressed: () {
-              cubit.removeEvents(context);
-              cubit.changeEditMode();
+              _cubit.removeEvents();
+
+              _cubit.changeEditMode();
+              Navigator.pop(context);
             },
             child: const Text('Yes'),
           ),
@@ -503,7 +519,7 @@ class _EventPageState extends State<EventPage> {
     );
   }
 
-  Container _eventMessage(int index, EventPageState state) {
+  Widget _eventMessage(int index, EventPageState state) {
     var image = state.events[index].image;
 
     return Container(
