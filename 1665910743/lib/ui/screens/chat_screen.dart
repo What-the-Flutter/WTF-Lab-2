@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../models/event_categyory.dart';
+import '../../cubit/categorylist_cubit.dart';
 import '../widgets/chat_screen_body.dart';
 import '../widgets/home_widget.dart';
 
 class ChatScreen extends StatefulWidget {
-  final EventCategory event;
+  final int eventId;
 
   const ChatScreen({
     Key? key,
-    required this.event,
+    required this.eventId,
   }) : super(key: key);
 
   @override
@@ -26,7 +27,13 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.event.title),
+        title: Text(
+          context
+              .read<CategorylistCubit>()
+              .state
+              .categoryList[widget.eventId]
+              .title,
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
@@ -44,7 +51,7 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
       ),
       body: ChatScreenBody(
-        eventList: widget.event.list,
+        eventId: widget.eventId,
       ),
     );
   }

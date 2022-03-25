@@ -2,7 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../cubit/categorylist_cubit.dart';
 import '../screens/daily.dart';
 import '../screens/explore.dart';
 import '../screens/home.dart';
@@ -21,58 +23,26 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   int _selectedIndex = 0;
+  final _searchController = TextEditingController();
 
-  void _onItemTapped(int index) {
-    setState(
-      () {
-        _selectedIndex = index;
-      },
-    );
+  final List<List> _selectedItems = [
+    [const HomeScreen(), 'Home'],
+    [const Daily(), 'Daily'],
+    [const Timeline(), 'Timeline'],
+    [const Explore(), 'Explore'],
+  ];
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
-
-  final _selectedItems = const [
-    HomeScreen(),
-    Daily(),
-    Timeline(),
-    Explore(),
-  ];
-
-  final _title = const [
-    HomeScreen.title,
-    Daily.title,
-    Timeline.title,
-    Explore.title,
-  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_title.elementAt(_selectedIndex)),
-        centerTitle: Platform.isIOS,
-        automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            onPressed: () {
-              CustomTheme.of(context).theme == MyThemes.lightTheme
-                  ? setState(
-                      () {
-                        CustomTheme.of(context).changeTheme(MyThemeKeys.dark);
-                      },
-                    )
-                  : setState(
-                      () {
-                        CustomTheme.of(context).changeTheme(MyThemeKeys.light);
-                      },
-                    );
-            },
-            icon: CustomTheme.of(context).theme == MyThemes.lightTheme
-                ? const Icon(Icons.mode_night)
-                : const Icon(Icons.light_mode),
-          ),
-        ],
-      ),
-      body: _selectedItems.elementAt(_selectedIndex),
+      appBar: _appBar(context),
+      body: _selectedItems.elementAt(_selectedIndex).first,
       floatingActionButton: FloatingActionButton(
           backgroundColor: Theme.of(context).primaryColor,
           child: const Icon(Icons.add),
@@ -85,5 +55,86 @@ class _HomeState extends State<Home> {
         selectedIndex: _selectedIndex,
       ),
     );
+  }
+
+  void _onItemTapped(int index) {
+    if (index == 1) {
+      context.read<CategorylistCubit>().fetchAllEvents();
+    }
+    context.read<CategorylistCubit>().exitSearch();
+    setState(
+      () {
+        _selectedIndex = index;
+      },
+    );
+  }
+
+  AppBar _appBar(BuildContext context) {
+    return context.watch<CategorylistCubit>().state.searchMode
+        ? AppBar(
+            leading: Hero(
+              tag: 'search',
+              child: IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {},
+              ),
+            ),
+            title: TextField(
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                errorBorder: InputBorder.none,
+                disabledBorder: InputBorder.none,
+                hintText: 'Enter a search term',
+              ),
+              controller: _searchController,
+              onChanged: (value) =>
+                  context.read<CategorylistCubit>().searchControll(value),
+            ),
+            actions: [
+              IconButton(
+                onPressed: () => context.read<CategorylistCubit>().exitSearch(),
+                icon: const Icon(Icons.close_rounded),
+              ),
+            ],
+          )
+        : AppBar(
+            title: Text(_selectedItems.elementAt(_selectedIndex).last),
+            centerTitle: Platform.isIOS,
+            automaticallyImplyLeading: false,
+            actions: [
+              _selectedIndex == 1
+                  ? Hero(
+                      tag: 'search',
+                      child: IconButton(
+                        onPressed: (() => context
+                            .read<CategorylistCubit>()
+                            .enterSearchMode()),
+                        icon: const Icon(Icons.search),
+                      ),
+                    )
+                  : IconButton(
+                      onPressed: () {
+                        CustomTheme.of(context).theme == MyThemes.lightTheme
+                            ? setState(
+                                () {
+                                  CustomTheme.of(context)
+                                      .changeTheme(MyThemeKeys.dark);
+                                },
+                              )
+                            : setState(
+                                () {
+                                  CustomTheme.of(context)
+                                      .changeTheme(MyThemeKeys.light);
+                                },
+                              );
+                      },
+                      icon: CustomTheme.of(context).theme == MyThemes.lightTheme
+                          ? const Icon(Icons.mode_night)
+                          : const Icon(Icons.light_mode),
+                    ),
+            ],
+          );
   }
 }

@@ -9,7 +9,6 @@ class MyThemes {
     ),
     primaryColor: const Color.fromARGB(255, 202, 142, 212),
     primaryColorLight: const Color.fromARGB(255, 202, 142, 212),
-    // primarySwatch: Colors.green,
     brightness: Brightness.light,
     bottomAppBarColor: const Color.fromARGB(255, 202, 142, 212),
   );
@@ -20,7 +19,6 @@ class MyThemes {
     ),
     primaryColor: const Color.fromARGB(255, 118, 86, 124),
     primaryColorLight: const Color.fromARGB(255, 118, 86, 124),
-    // primarySwatch: Colors.green,
     brightness: Brightness.dark,
     bottomAppBarColor: const Color.fromARGB(255, 118, 86, 124),
   );

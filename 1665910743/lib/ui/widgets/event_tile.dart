@@ -10,14 +10,16 @@ class EventTile extends StatelessWidget {
   final bool favorite;
   final File? image;
   final bool isSelected;
+  final Icon? icon;
 
   EventTile({
     Key? key,
     required this.title,
     required this.date,
     required this.favorite,
-    this.image,
     required this.isSelected,
+    this.image,
+    this.icon,
   }) : super(key: key);
 
   @override
@@ -26,6 +28,16 @@ class EventTile extends StatelessWidget {
       margin: const EdgeInsets.all(5),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.black38
+                  : Colors.grey,
+              blurRadius: 2.0,
+              spreadRadius: 0.0,
+              offset: const Offset(2.0, 2.0), // shadow direction: bottom right
+            )
+          ],
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(15),
             topRight: Radius.circular(15),
@@ -39,56 +51,73 @@ class EventTile extends StatelessWidget {
               image: image,
               title: title,
               formattedDate: date.mmddyy(),
-              favorite: favorite)
+              favorite: favorite,
+            )
           : _TileWithoutImage(
               title: title,
               formattedDate: date.mmddyy(),
               favorite: favorite,
-            ),
+              icon: icon),
     );
   }
 }
 
 class _TileWithoutImage extends StatelessWidget {
+  final String title;
+  final String _formattedDate;
+  final bool favorite;
+  final Icon? icon;
   const _TileWithoutImage({
     Key? key,
     required this.title,
     required String formattedDate,
     required this.favorite,
+    this.icon,
   })  : _formattedDate = formattedDate,
         super(key: key);
 
-  final String title;
-  final String _formattedDate;
-  final bool favorite;
-
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          title,
-          style: const TextStyle(fontSize: 20),
+        (icon != null)
+            ? Icon(
+                icon!.icon,
+                color: Theme.of(context).scaffoldBackgroundColor,
+                size: 50,
+              )
+            : const SizedBox(),
+        SizedBox(
+          width: MediaQuery.of(context).size.width * 0.02,
         ),
-        Row(
-          mainAxisSize: MainAxisSize.min,
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              _formattedDate,
-              style: const TextStyle(fontSize: 10),
+              title,
+              style: const TextStyle(fontSize: 20),
             ),
-            favorite
-                ? const Icon(
-                    Icons.star,
-                    size: 10,
-                  )
-                : const Icon(
-                    Icons.star_border,
-                    size: 10,
-                  ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  _formattedDate,
+                  style: const TextStyle(fontSize: 10),
+                ),
+                favorite
+                    ? const Icon(
+                        Icons.star,
+                        size: 10,
+                      )
+                    : const Icon(
+                        Icons.star_border,
+                        size: 10,
+                      ),
+              ],
+            ),
           ],
-        ),
+        )
       ],
     );
   }
@@ -118,8 +147,8 @@ class _TileWithImage extends StatelessWidget {
         Image.file(
           image!,
           fit: BoxFit.cover,
-          width: 100,
-          height: 100,
+          width: 70,
+          height: 70,
         ),
         SizedBox(
           width: MediaQuery.of(context).size.width * 0.1,
