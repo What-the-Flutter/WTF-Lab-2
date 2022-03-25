@@ -1,28 +1,28 @@
 import 'package:flutter/material.dart';
 
-class EventIcon {
+class Chat {
+  final String category;
   final Icon icon;
-  final bool isSelected;
 
-  EventIcon({
+  Chat({
+    required this.category,
     required this.icon,
-    this.isSelected = false,
   });
 
-  EventIcon copyWith({
-    bool? isSelected,
+  Chat copyWith({
+    String? category,
     Icon? icon,
   }) {
-    return EventIcon(
+    return Chat(
+      category: category ?? this.category,
       icon: icon ?? this.icon,
-      isSelected: isSelected ?? this.isSelected,
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
       'icon': icon.icon!.codePoint,
-      'isSelected': isSelected,
+      'category': category,
     };
   }
 }

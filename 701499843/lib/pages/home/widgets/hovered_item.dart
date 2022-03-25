@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import '../../models/event.dart';
-import '../../pages/event_page.dart';
+import '../../../models/event.dart';
+import '../../event_page/event_page.dart';
 
 class HoveredItem extends StatefulWidget {
   final String title;
   final String subtitle;
   final IconData icon;
-  final Container bottomSheet;
+  final Widget bottomSheet;
   final List<Event> events;
 
   HoveredItem(
@@ -36,7 +36,7 @@ class _HoveredItemState extends State<HoveredItem> {
                 builder: (context) =>
                     EventPage(title: widget.title, events: widget.events),
               ),
-            )
+            ),
           }),
       onLongPress: (() => {
             showModalBottomSheet(

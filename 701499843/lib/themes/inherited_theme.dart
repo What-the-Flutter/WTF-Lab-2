@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'theme.dart';
 
 class Inherited extends InheritedWidget {
@@ -34,13 +35,31 @@ class AppThemeProvider extends StatefulWidget {
 class AppThemeProviderState extends State<AppThemeProvider> {
   ThemeData themeData = CustomTheme.lightTheme;
 
-  void changeTheme() {
+  void loadTheme() async {
+    final prefs = await SharedPreferences.getInstance();
+    final theme = prefs.getString('theme') ?? '';
+
+    setState(
+      () {
+        if (theme == 'light' || theme == '') {
+          themeData = CustomTheme.lightTheme;
+        } else {
+          themeData = CustomTheme.darkTheme;
+        }
+      },
+    );
+  }
+
+  void changeTheme() async {
+    final prefs = await SharedPreferences.getInstance();
     setState(
       () {
         if (themeData == CustomTheme.lightTheme) {
           themeData = CustomTheme.darkTheme;
+          prefs.setString('theme', 'dark');
         } else {
           themeData = CustomTheme.lightTheme;
+          prefs.setString('theme', 'light');
         }
       },
     );
@@ -48,6 +67,7 @@ class AppThemeProviderState extends State<AppThemeProvider> {
 
   @override
   Widget build(BuildContext context) {
+    loadTheme();
     return Inherited(
       themeData: themeData,
       child: widget.child,

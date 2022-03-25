@@ -1,5 +1,5 @@
 class Event {
-  final DateTime timeOfCreation = DateTime.now();
+  late final DateTime timeOfCreation = DateTime.now();
   final String description;
   final String? image;
   final bool isFavorite;
@@ -28,6 +28,17 @@ class Event {
       isSelected: isSelected ?? this.isSelected,
       category: category ?? this.category,
     );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'description': description,
+      'isSelected': isSelected,
+      'image': image,
+      'isFavorite': isFavorite,
+      'category': category,
+      'timeOfCreation': timeOfCreation.toString(),
+    };
   }
 
   @override
