@@ -2,17 +2,24 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../constants.dart';
+import '../../cubit/categorylist_cubit.dart';
+import '../../cubit/categorylist_state.dart';
 import '../../models/event.dart';
+import '../../models/icons_pack.dart';
 import '../screens/bookmarks.dart';
+import 'edit_chat_item_dialog.dart';
 import 'event_tile.dart';
+import 'move_event_tile.dart';
 
 class ChatScreenBody extends StatefulWidget {
-  final List<Event> eventList;
+  final int eventId;
 
-  const ChatScreenBody({Key? key, required this.eventList}) : super(key: key);
+  const ChatScreenBody({Key? key, required this.eventId,}) : super(key: key);
 
   @override
   State<ChatScreenBody> createState() => _ChatScreenBodyState();
@@ -23,12 +30,16 @@ class _ChatScreenBodyState extends State<ChatScreenBody> {
   final _renameController = TextEditingController();
   final picker = ImagePicker();
   final List hasSelected = [];
+  bool _iconAdd = false;
   File? _image;
+  int _selectedIcon = -1;
 
   @override
   void initState() {
     _controller.addListener(() {
-      setState(() {});
+      if (_controller.text.length <= 1) {
+        setState(() {});
+      }
     });
     super.initState();
   }
@@ -40,176 +51,11 @@ class _ChatScreenBodyState extends State<ChatScreenBody> {
     super.dispose();
   }
 
-  Future<void> _displayTextInputDialog(
-    BuildContext context,
-    int index,
-    List<Event> list,
-  ) async {
-    return showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            elevation: 5,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(
-                Radius.circular(25.0),
-              ),
-            ),
-            title: const Center(child: Text('Rename your event')),
-            actionsAlignment: MainAxisAlignment.spaceEvenly,
-            actions: [
-              CircleAvatar(
-                foregroundColor: Colors.white,
-                backgroundColor: Theme.of(context).primaryColor,
-                child: IconButton(
-                    onPressed: () {
-                      setState(() {
-                        list[index].favorite =
-                            !widget.eventList[index].favorite;
-                        Navigator.pop(context);
-                      });
-                    },
-                    icon: list[index].favorite
-                        ? Icon(
-                            Icons.bookmark,
-                            color: Theme.of(context).primaryColor,
-                          )
-                        : Icon(
-                            Icons.bookmark_border,
-                            color: Theme.of(context).primaryColor,
-                          )),
-              ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  primary: Theme.of(context).primaryColor,
-                ),
-                onPressed: () {
-                  setState(() {
-                    list[index].title = _renameController.text;
-                    Navigator.pop(context);
-                  });
-                },
-                child: const Text(
-                  'Rename',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-              CircleAvatar(
-                backgroundColor: Theme.of(context).primaryColor,
-                foregroundColor: Colors.white,
-                child: IconButton(
-                  onPressed: () {
-                    setState(() {
-                      list.removeAt(index);
-                      Navigator.pop(context);
-                    });
-                  },
-                  icon: Icon(
-                    Icons.delete_forever,
-                    color: Theme.of(context).primaryColor,
-                  ),
-                ),
-              )
-            ],
-            content: TextField(
-              controller: _renameController,
-            ),
-          );
-        });
-  }
-
-  void _copyToClipboard(int index) {
-    Clipboard.setData(ClipboardData(text: widget.eventList[index].title))
-        .then((_) {
+  void _copyToClipboard(String text) {
+    Clipboard.setData(ClipboardData(text: text)).then((_) {
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Text copied to clipboard')));
     });
-  }
-
-  Row _chatScreenNavBar() {
-    return Row(
-      children: [
-        IconButton(
-          onPressed: () {
-            if (hasSelected.isEmpty) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => BookmarkEvents(
-                    list: widget.eventList,
-                  ),
-                ),
-              );
-            } else {
-              for (var element in hasSelected) {
-                setState(
-                  () {
-                    widget.eventList.removeWhere(
-                        (e) => e.title.hashCode == element.hashCode);
-                  },
-                );
-              }
-              hasSelected.clear();
-            }
-          },
-          icon: hasSelected.isNotEmpty
-              ? Icon(
-                  Icons.delete,
-                  color: Theme.of(context).primaryColor,
-                )
-              : Icon(
-                  Icons.bookmark,
-                  color: Theme.of(context).primaryColor,
-                ),
-        ),
-        Expanded(
-          child: TextField(
-            decoration: const InputDecoration(
-              hintText: ' Enter event',
-              border: InputBorder.none,
-            ),
-            controller: _controller,
-          ),
-        ),
-        IconButton(
-          onPressed: () async {
-            if (_controller.value.text.isNotEmpty) {
-              setState(() {
-                widget.eventList.add(
-                  Event(
-                      title: _controller.text,
-                      date: DateTime.now(),
-                      favorite: false),
-                );
-                _controller.clear();
-              });
-            } else if (_controller.value.text.isEmpty) {
-              await getImage();
-              if (_image != null) {
-                setState(() {
-                  widget.eventList.add(
-                    Event(
-                        title: 'Image from gallery',
-                        date: DateTime.now(),
-                        favorite: false,
-                        image: _image),
-                  );
-                });
-              }
-            }
-          },
-          icon: _controller.value.text.isEmpty
-              ? Icon(
-                  Icons.photo_camera,
-                  color: Theme.of(context).primaryColor,
-                )
-              : Icon(
-                  Icons.send,
-                  color: Theme.of(context).primaryColor,
-                ),
-        )
-      ],
-    );
   }
 
   Future getImage() async {
@@ -225,47 +71,282 @@ class _ChatScreenBodyState extends State<ChatScreenBody> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: kListViewPadding,
-      child: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              itemCount: widget.eventList.length,
-              itemBuilder: (context, index) {
-                return Align(
-                  alignment: Alignment.bottomLeft,
-                  child: GestureDetector(
-                    onTap: () => _displayTextInputDialog(
-                        context, index, widget.eventList),
-                    onDoubleTap: () => _copyToClipboard(index),
-                    onLongPress: () {
-                      setState(() {
-                        if (widget.eventList[index].isSelected == false) {
-                          hasSelected.add(widget.eventList[index].title);
-                        } else {
-                          hasSelected.remove(widget.eventList[index].title);
-                        }
+    return BlocBuilder<CategorylistCubit, CategoryListState>(
+      bloc: CategorylistCubit(),
+      builder: (context, state) {
+        final eventList = context
+            .watch<CategorylistCubit>()
+            .state
+            .categoryList[widget.eventId]
+            .list;
 
-                        widget.eventList[index].isSelected =
-                            !widget.eventList[index].isSelected;
-                        HapticFeedback.heavyImpact();
-                      });
-                    },
-                    child: EventTile(
-                      isSelected: widget.eventList[index].isSelected,
-                      title: widget.eventList[index].title,
-                      date: widget.eventList[index].date,
-                      favorite: widget.eventList[index].favorite,
-                      image: widget.eventList[index].image,
-                    ),
-                  ),
-                );
-              },
-            ),
+        return Container(
+          padding: kListViewPadding,
+          child: Column(
+            children: [
+              Expanded(
+                child: ListView.builder(
+                  itemCount: eventList.length,
+                  itemBuilder: (context, index) {
+                    return Slidable(
+                      startActionPane: ActionPane(
+                        motion: const ScrollMotion(),
+                        children: [
+                          SlidableAction(
+                            onPressed: (context) async =>
+                                await chatTileEditDialog(
+                                    context: context,
+                                    catIndex: widget.eventId,
+                                    index: index),
+                            backgroundColor:
+                                Theme.of(context).scaffoldBackgroundColor,
+                            foregroundColor: Theme.of(context).primaryColor,
+                            icon: Icons.edit,
+                          ),
+                          SlidableAction(
+                            onPressed: (context) => context
+                                .read<CategorylistCubit>()
+                                .removeEventInCategory(
+                                  categoryIndex: widget.eventId,
+                                  eventIndex: index,
+                                ),
+                            backgroundColor:
+                                Theme.of(context).scaffoldBackgroundColor,
+                            foregroundColor: Theme.of(context).primaryColor,
+                            icon: Icons.delete,
+                          ),
+                          SlidableAction(
+                            autoClose: true,
+                            onPressed: (context) {
+                              moveTile(
+                                  categoryIndex: widget.eventId,
+                                  context: context,
+                                  eventIndex: index);
+                            },
+                            backgroundColor:
+                                Theme.of(context).scaffoldBackgroundColor,
+                            foregroundColor: Theme.of(context).primaryColor,
+                            icon: Icons.move_down,
+                          ),
+                        ],
+                      ),
+                      child: Container(
+                        width: MediaQuery.of(context).size.width * 0.9,
+                        child: Align(
+                          alignment: Alignment.bottomLeft,
+                          child: GestureDetector(
+                            onDoubleTap: () =>
+                                _copyToClipboard(eventList[index].title),
+                            onLongPress: () {
+                              setState(() {
+                                if (eventList[index].isSelected == false) {
+                                  hasSelected.add(eventList[index].title);
+                                } else {
+                                  hasSelected.remove(eventList[index].title);
+                                }
+
+                                eventList[index].isSelected =
+                                    !eventList[index].isSelected;
+                                HapticFeedback.heavyImpact();
+                              });
+                            },
+                            child: EventTile(
+                              icon: eventList[index].icon,
+                              isSelected: eventList[index].isSelected,
+                              title: eventList[index].title,
+                              date: eventList[index].date,
+                              favorite: eventList[index].favorite,
+                              image: eventList[index].image,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              _iconAdd ? _iconsGrid() : const SizedBox(),
+              _chatScreenNavBar(widget.eventId),
+            ],
           ),
-          _chatScreenNavBar(),
-        ],
+        );
+      },
+    );
+  }
+
+  Widget _iconsGrid() => Container(
+        height: MediaQuery.of(context).size.height * 0.1,
+        child: Stack(
+          alignment: AlignmentDirectional.centerStart,
+          children: [
+            Container(
+              width: MediaQuery.of(context).size.width,
+              child: ListView.builder(
+                shrinkWrap: true,
+                scrollDirection: Axis.horizontal,
+                itemCount: kMyIcons.length,
+                itemBuilder: ((context, index) => GestureDetector(
+                      onTap: (() => setState(() {
+                            _selectedIcon = index;
+                            _iconAdd = !_iconAdd;
+                          })),
+                      child: Container(
+                        margin: const EdgeInsets.all(5),
+                        child: CircleAvatar(
+                          radius: 20,
+                          child: kMyIcons[index],
+                        ),
+                      ),
+                    )),
+              ),
+            ),
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  _selectedIcon = -1;
+                  _iconAdd = !_iconAdd;
+                });
+              },
+              child: Container(
+                margin: const EdgeInsets.all(5),
+                child: const CircleAvatar(
+                  radius: 20,
+                  child: Icon(Icons.cancel_outlined),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+
+  Widget _chatScreenNavBar(int eventid) {
+    return SafeArea(
+      child: BlocBuilder<CategorylistCubit, CategoryListState>(
+        bloc: CategorylistCubit(),
+        builder: (context, state) => Row(
+          children: [
+            IconButton(
+              onPressed: () {
+                if (hasSelected.isEmpty) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => BookmarkEvents(
+                        id: eventid,
+                      ),
+                    ),
+                  );
+                } else {
+                  for (final element in hasSelected) {
+                    context
+                        .read<CategorylistCubit>()
+                        .state
+                        .categoryList[eventid]
+                        .list
+                        .removeWhere(
+                            (e) => e.title.hashCode == element.hashCode);
+                  }
+                  hasSelected.clear();
+                }
+              },
+              icon: hasSelected.isNotEmpty
+                  ? Icon(
+                      Icons.delete,
+                      color: Theme.of(context).primaryColor,
+                    )
+                  : Icon(
+                      Icons.bookmark,
+                      color: Theme.of(context).primaryColor,
+                    ),
+            ),
+            IconButton(
+              onPressed: () {
+                setState(() {
+                  _iconAdd = !_iconAdd;
+                });
+              },
+              icon: Icon(
+                (_selectedIcon == -1)
+                    ? Icons.bubble_chart
+                    : kMyIcons[_selectedIcon].icon,
+                color: Theme.of(context).primaryColor,
+              ),
+            ),
+            Expanded(
+              child: TextField(
+                decoration: const InputDecoration(
+                  hintText: ' Enter event',
+                  border: InputBorder.none,
+                ),
+                controller: _controller,
+              ),
+            ),
+            IconButton(
+              onPressed: () async {
+                if (_controller.value.text.isNotEmpty) {
+                  if (_selectedIcon == -1) {
+                    context
+                        .read<CategorylistCubit>()
+                        .state
+                        .categoryList[eventid]
+                        .list
+                        .add(
+                          Event(
+                              title: _controller.text,
+                              date: DateTime.now(),
+                              favorite: false,
+                              categoryIndex: eventid),
+                        );
+                  } else {
+                    context
+                        .read<CategorylistCubit>()
+                        .state
+                        .categoryList[eventid]
+                        .list
+                        .add(
+                          Event(
+                              title: _controller.text,
+                              date: DateTime.now(),
+                              favorite: false,
+                              icon: kMyIcons[_selectedIcon],
+                              categoryIndex: eventid),
+                        );
+                  }
+                  _selectedIcon = -1;
+
+                  _controller.clear();
+                } else if (_controller.value.text.isEmpty) {
+                  await getImage();
+                  if (_image != null) {
+                    context
+                        .read<CategorylistCubit>()
+                        .state
+                        .categoryList[eventid]
+                        .list
+                        .add(
+                          Event(
+                            title: 'Image from gallery',
+                            date: DateTime.now(),
+                            favorite: false,
+                            image: _image,
+                            categoryIndex: eventid,
+                          ),
+                        );
+                  }
+                }
+              },
+              icon: _controller.value.text.isEmpty
+                  ? Icon(
+                      Icons.photo_camera,
+                      color: Theme.of(context).primaryColor,
+                    )
+                  : Icon(
+                      Icons.send,
+                      color: Theme.of(context).primaryColor,
+                    ),
+            )
+          ],
+        ),
       ),
     );
   }

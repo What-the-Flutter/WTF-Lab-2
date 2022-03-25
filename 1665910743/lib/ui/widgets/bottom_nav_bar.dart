@@ -27,18 +27,10 @@ class _BottomNavBarState extends State<BottomNavBar> {
       buttonBackgroundColor: Theme.of(context).primaryColor,
       height: Platform.isIOS ? 70 : 60,
       items: const [
-        Icon(
-          Icons.book,
-        ),
-        Icon(
-          Icons.assignment,
-        ),
-        Icon(
-          Icons.map,
-        ),
-        Icon(
-          Icons.add_to_drive_rounded,
-        ),
+        Icon(Icons.book),
+        Icon(Icons.assignment),
+        Icon(Icons.map),
+        Icon(Icons.add_to_drive_rounded),
       ],
       onTap: widget.onTap,
     );

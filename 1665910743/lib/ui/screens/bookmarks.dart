@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '/models/event.dart';
 import '../../constants.dart';
+import '../../cubit/categorylist_cubit.dart';
 import '../widgets/event_tile.dart';
 
 class BookmarkEvents extends StatelessWidget {
-  final List<Event> list;
+  final int id;
 
   const BookmarkEvents({
     Key? key,
-    required this.list,
+    required this.id,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    var list = context.watch<CategorylistCubit>().state.categoryList[id].list;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Bookmarks'),
