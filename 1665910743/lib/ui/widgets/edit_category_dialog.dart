@@ -98,7 +98,7 @@ class _EditDialogState extends State<EditDialog> {
           if (cubit.state.categoryList[widget.categoryIndex].pined == false) {
             context.read<CategorylistCubit>().remove(widget.category);
           } else {
-            context.read<CategorylistCubit>().unPin(widget.category);
+            context.read<CategorylistCubit>().unpin(widget.category);
             context.read<CategorylistCubit>().remove(widget.category);
           }
           Navigator.pop(context);
@@ -120,7 +120,7 @@ class _EditDialogState extends State<EditDialog> {
             context.read<CategorylistCubit>().remove(widget.category);
           } else {
             widget.category.pined = false;
-            context.read<CategorylistCubit>().unPin(widget.category);
+            context.read<CategorylistCubit>().unpin(widget.category);
           }
 
           Navigator.pop(context);

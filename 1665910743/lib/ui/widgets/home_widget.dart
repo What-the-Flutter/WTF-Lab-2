@@ -69,7 +69,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-  AppBar _appBar(BuildContext context) {
+  PreferredSizeWidget _appBar(BuildContext context) {
     return context.watch<CategorylistCubit>().state.searchMode
         ? AppBar(
             leading: Hero(
@@ -130,9 +130,11 @@ class _HomeState extends State<Home> {
                                 },
                               );
                       },
-                      icon: CustomTheme.of(context).theme == MyThemes.lightTheme
-                          ? const Icon(Icons.mode_night)
-                          : const Icon(Icons.light_mode),
+                      icon: Icon(
+                        CustomTheme.of(context).theme == MyThemes.lightTheme
+                            ? Icons.nightlight_outlined
+                            : Icons.light_mode,
+                      ),
                     ),
             ],
           );

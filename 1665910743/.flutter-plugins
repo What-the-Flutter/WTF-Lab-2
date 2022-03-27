@@ -2,3 +2,12 @@
 flutter_plugin_android_lifecycle=/Users/macbook/flutter/.pub-cache/hosted/pub.dartlang.org/flutter_plugin_android_lifecycle-2.0.5/
 image_picker=/Users/macbook/flutter/.pub-cache/hosted/pub.dartlang.org/image_picker-0.8.4+11/
 image_picker_for_web=/Users/macbook/flutter/.pub-cache/hosted/pub.dartlang.org/image_picker_for_web-2.1.6/
+path_provider_linux=/Users/macbook/flutter/.pub-cache/hosted/pub.dartlang.org/path_provider_linux-2.1.5/
+path_provider_windows=/Users/macbook/flutter/.pub-cache/hosted/pub.dartlang.org/path_provider_windows-2.0.5/
+shared_preferences=/Users/macbook/flutter/.pub-cache/hosted/pub.dartlang.org/shared_preferences-2.0.13/
+shared_preferences_android=/Users/macbook/flutter/.pub-cache/hosted/pub.dartlang.org/shared_preferences_android-2.0.11/
+shared_preferences_ios=/Users/macbook/flutter/.pub-cache/hosted/pub.dartlang.org/shared_preferences_ios-2.1.0/
+shared_preferences_linux=/Users/macbook/flutter/.pub-cache/hosted/pub.dartlang.org/shared_preferences_linux-2.1.0/
+shared_preferences_macos=/Users/macbook/flutter/.pub-cache/hosted/pub.dartlang.org/shared_preferences_macos-2.0.3/
+shared_preferences_web=/Users/macbook/flutter/.pub-cache/hosted/pub.dartlang.org/shared_preferences_web-2.0.3/
+shared_preferences_windows=/Users/macbook/flutter/.pub-cache/hosted/pub.dartlang.org/shared_preferences_windows-2.1.0/

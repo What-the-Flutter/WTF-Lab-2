@@ -34,19 +34,18 @@ class ModalBody extends StatefulWidget {
 }
 
 class _ModalBodyState extends State<ModalBody> {
-  final controller = TextEditingController();
+  final _controller = TextEditingController();
   bool _isSelected = false;
   int _selectedIndexAvatar = -1;
 
   @override
   void dispose() {
-    controller.dispose();
+    _controller.dispose();
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
-    var _screenSize = MediaQuery.of(context).size;
+    final _screenSize = MediaQuery.of(context).size;
     return BlocBuilder<CategorylistCubit, CategoryListState>(
       bloc: CategorylistCubit(),
       builder: ((context, state) => Container(
@@ -78,93 +77,105 @@ class _ModalBodyState extends State<ModalBody> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Container(
-                          width: _screenSize.width * 0.7,
-                          child: CupertinoTextField(
-                            placeholder: 'Enter the name',
-                            controller: controller,
-                            style: TextStyle(
-                              fontSize: 20,
-                              color: Theme.of(context).primaryColor,
-                            ),
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () {
-                            if (_selectedIndexAvatar == -1) {
-                              context
-                                  .read<CategorylistCubit>()
-                                  .add(EventCategory(
-                                    controller.text,
-                                    false,
-                                    kMyIcons[7],
-                                  ));
-                              Navigator.pop(
-                                context,
-                              );
-                            } else {
-                              context
-                                  .read<CategorylistCubit>()
-                                  .add(EventCategory(
-                                    controller.text,
-                                    false,
-                                    kMyIcons[_selectedIndexAvatar],
-                                  ));
-                              Navigator.pop(
-                                context,
-                              );
-                            }
-                          },
-                          icon: const Icon(
-                            Icons.send,
-                            color: Colors.white,
-                          ),
-                        )
+                        _addTextField(_screenSize, context),
+                        _addButton(context)
                       ],
                     ),
                   ),
                   SizedBox(
                     height: _screenSize.height * 0.02,
                   ),
-                  Container(
-                    constraints:
-                        BoxConstraints(maxHeight: _screenSize.height * 0.30),
-                    child: GridView.builder(
-                      gridDelegate:
-                          const SliverGridDelegateWithMaxCrossAxisExtent(
-                              maxCrossAxisExtent: 120,
-                              childAspectRatio: 3 / 2,
-                              crossAxisSpacing: 20,
-                              mainAxisSpacing: 20),
-                      itemCount: kMyIcons.length,
-                      itemBuilder: (context, i) {
-                        return GestureDetector(
-                          onTap: () {
-                            setState(
-                              () {
-                                _isSelected = !_isSelected;
-                                _selectedIndexAvatar = i;
-                              },
-                            );
-                          },
-                          child: CircleAvatar(
-                            backgroundColor: (_selectedIndexAvatar == i)
-                                ? Theme.of(context).primaryColor
-                                : Colors.white,
-                            radius: _screenSize.width * 0.13,
-                            child: CategoryIconButton(
-                              icon: kMyIcons[i],
-                              size: _screenSize.width * 0.13,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  )
+                  _iconGrid(_screenSize)
                 ],
               ),
             ),
           )),
     );
+  }
+
+  Container _iconGrid(Size _screenSize) {
+    return Container(
+                  constraints:
+                      BoxConstraints(maxHeight: _screenSize.height * 0.30),
+                  child: GridView.builder(
+                    gridDelegate:
+                        const SliverGridDelegateWithMaxCrossAxisExtent(
+                            maxCrossAxisExtent: 120,
+                            childAspectRatio: 3 / 2,
+                            crossAxisSpacing: 20,
+                            mainAxisSpacing: 20),
+                    itemCount: kMyIcons.length,
+                    itemBuilder: (context, i) {
+                      return GestureDetector(
+                        onTap: () {
+                          setState(
+                            () {
+                              _isSelected = !_isSelected;
+                              _selectedIndexAvatar = i;
+                            },
+                          );
+                        },
+                        child: CircleAvatar(
+                          backgroundColor: (_selectedIndexAvatar == i)
+                              ? Theme.of(context).primaryColor
+                              : Colors.white,
+                          radius: _screenSize.width * 0.13,
+                          child: CategoryIconButton(
+                            icon: kMyIcons[i],
+                            size: _screenSize.width * 0.13,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                );
+  }
+
+  Container _addTextField(Size _screenSize, BuildContext context) {
+    return Container(
+                        width: _screenSize.width * 0.7,
+                        child: CupertinoTextField(
+                          placeholder: 'Enter the name',
+                          controller: _controller,
+                          style: TextStyle(
+                            fontSize: 20,
+                            color: Theme.of(context).primaryColor,
+                          ),
+                        ),
+                      );
+  }
+
+  IconButton _addButton(BuildContext context) {
+    return IconButton(
+                        onPressed: () {
+                          if (_selectedIndexAvatar == -1) {
+                            context
+                                .read<CategorylistCubit>()
+                                .add(EventCategory(
+                                  _controller.text,
+                                  false,
+                                  kMyIcons[7],
+                                ));
+                            Navigator.pop(
+                              context,
+                            );
+                          } else {
+                            context
+                                .read<CategorylistCubit>()
+                                .add(EventCategory(
+                                  _controller.text,
+                                  false,
+                                  kMyIcons[_selectedIndexAvatar],
+                                ));
+                            Navigator.pop(
+                              context,
+                            );
+                          }
+                        },
+                        icon: const Icon(
+                          Icons.send,
+                          color: Colors.white,
+                        ),
+                      );
   }
 }

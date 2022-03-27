@@ -5,7 +5,12 @@ import 'categorylist_state.dart';
 class CategorylistCubit extends Cubit<CategoryListState> {
   CategorylistCubit()
       : super(
-            CategoryListState(categoryList: [], pinedList: [], allEvents: []));
+          CategoryListState(
+            categoryList: [],
+            pinedList: [],
+            allEvents: [],
+          ),
+        );
 
   void add(EventCategory category) {
     state.categoryList.add(category);
@@ -20,8 +25,8 @@ class CategorylistCubit extends Cubit<CategoryListState> {
   }
 
   void remove(EventCategory category) {
-    state.categoryList.removeWhere(
-        (element) => element.title.hashCode == category.title.hashCode);
+    state.categoryList
+        .removeWhere((element) => element.title == category.title);
     emit(
       CategoryListState(
         categoryList: state.categoryList,
@@ -45,7 +50,8 @@ class CategorylistCubit extends Cubit<CategoryListState> {
   void pin(EventCategory category) {
     state.pinedList.add(category);
     state.categoryList.removeWhere(
-        (element) => element.title.hashCode == category.title.hashCode);
+      (element) => element.title == category.title,
+    );
     emit(
       CategoryListState(
         categoryList: state.categoryList,
@@ -55,11 +61,14 @@ class CategorylistCubit extends Cubit<CategoryListState> {
     );
   }
 
-  void unPin(EventCategory category) {
+  void unpin(EventCategory category) {
     state.categoryList.add(category);
     state.pinedList.removeWhere(
-        (element) => element.title.hashCode == category.title.hashCode);
-    state.categoryList.where((element) => element.title == category.title);
+      (element) => element.title == category.title,
+    );
+    state.categoryList.where(
+      (element) => element.title == category.title,
+    );
     emit(
       CategoryListState(
         categoryList: state.categoryList,
@@ -72,11 +81,15 @@ class CategorylistCubit extends Cubit<CategoryListState> {
   void fetchAllEvents() {
     state.allEvents.clear();
     for (var i = 0; i < state.categoryList.length; i++) {
-      state.allEvents.addAll(state.categoryList[i].list);
+      state.allEvents.addAll(
+        state.categoryList[i].list,
+      );
     }
 
     for (var i = 0; i < state.pinedList.length; i++) {
-      state.allEvents.addAll(state.pinedList[i].list);
+      state.allEvents.addAll(
+        state.pinedList[i].list,
+      );
     }
 
     emit(
@@ -171,10 +184,5 @@ class CategorylistCubit extends Cubit<CategoryListState> {
         pinedList: state.pinedList,
       ),
     );
-  }
-
-  @override
-  void onChange(Change<CategoryListState> change) {
-    super.onChange(change);
   }
 }

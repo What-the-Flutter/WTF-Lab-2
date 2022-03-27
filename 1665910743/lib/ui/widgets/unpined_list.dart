@@ -14,7 +14,8 @@ class UnpinedCategory extends StatefulWidget {
 }
 
 class _UnpinedCategoryState extends State<UnpinedCategory> {
-  final controller = TextEditingController();
+  final TextEditingController _controller = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     final state = context.watch<CategorylistCubit>().state;

@@ -19,7 +19,10 @@ import 'move_event_tile.dart';
 class ChatScreenBody extends StatefulWidget {
   final int eventId;
 
-  const ChatScreenBody({Key? key, required this.eventId,}) : super(key: key);
+  const ChatScreenBody({
+    Key? key,
+    required this.eventId,
+  }) : super(key: key);
 
   @override
   State<ChatScreenBody> createState() => _ChatScreenBodyState();
@@ -54,7 +57,10 @@ class _ChatScreenBodyState extends State<ChatScreenBody> {
   void _copyToClipboard(String text) {
     Clipboard.setData(ClipboardData(text: text)).then((_) {
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Text copied to clipboard')));
+        const SnackBar(
+          content: Text('Text copied to clipboard'),
+        ),
+      );
     });
   }
 
