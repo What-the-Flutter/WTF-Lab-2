@@ -43,5 +43,11 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>NSAppleMusicUsageDescription</key>
+    <string>Music!</string>
+    <key>kTCCServiceMediaLibrary</key>
+    <string>media</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+    <string>photos</string>
 </dict>
 </plist>

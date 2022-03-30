@@ -166,7 +166,7 @@ class _TileWithImageState extends State<_TileWithImage> {
           ),
         ),
         SizedBox(
-          width: MediaQuery.of(context).size.width * 0.1,
+          width: _zoom ? 0 : MediaQuery.of(context).size.width * 0.1,
         ),
         _zoom
             ? const SizedBox()
