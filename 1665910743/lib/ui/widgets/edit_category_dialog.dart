@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../cubit/categorylist_cubit.dart';
-import '../../cubit/categorylist_state.dart';
+import '../../cubit/category_list_cubit.dart';
+import '../../models/event_category.dart';
 
 Future<void> displayTextInputDialog({
   required BuildContext context,
@@ -49,7 +49,7 @@ class _EditDialogState extends State<EditDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final cubit = context.read<CategorylistCubit>();
+    final cubit = context.read<CategoryListCubit>();
     return AlertDialog(
       elevation: 5,
       shape: const RoundedRectangleBorder(
@@ -60,9 +60,20 @@ class _EditDialogState extends State<EditDialog> {
       title: const Center(child: Text('Rename your event')),
       actionsAlignment: MainAxisAlignment.spaceEvenly,
       actions: [
-        _pinButton(context, cubit),
-        _renameButton(context, cubit),
-        _deleteButton(context, cubit)
+        _pinButton(
+          context,
+          cubit,
+          widget.categoryIndex,
+        ),
+        _renameButton(
+          context,
+          cubit,
+        ),
+        _deleteButton(
+          context,
+          cubit,
+          widget.categoryIndex,
+        )
       ],
       content: TextField(
         controller: _controller,
@@ -70,14 +81,14 @@ class _EditDialogState extends State<EditDialog> {
     );
   }
 
-  ElevatedButton _renameButton(BuildContext context, CategorylistCubit cubit) {
+  ElevatedButton _renameButton(BuildContext context, CategoryListCubit cubit) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         primary: Theme.of(context).primaryColor,
       ),
       onPressed: () {
         Navigator.pop(context);
-        context.read<CategorylistCubit>().categoryRename(
+        context.read<CategoryListCubit>().categoryRename(
               categoryIndex: widget.categoryIndex,
               newTitle: _controller.text,
             );
@@ -89,17 +100,18 @@ class _EditDialogState extends State<EditDialog> {
     );
   }
 
-  CircleAvatar _deleteButton(BuildContext context, CategorylistCubit cubit) {
+  CircleAvatar _deleteButton(
+      BuildContext context, CategoryListCubit cubit, int catIndex) {
     return CircleAvatar(
       foregroundColor: Colors.white,
       backgroundColor: Theme.of(context).primaryColor,
       child: IconButton(
         onPressed: () {
           if (cubit.state.categoryList[widget.categoryIndex].pined == false) {
-            context.read<CategorylistCubit>().remove(widget.category);
+            context.read<CategoryListCubit>().remove(widget.category);
           } else {
-            context.read<CategorylistCubit>().unpin(widget.category);
-            context.read<CategorylistCubit>().remove(widget.category);
+            context.read<CategoryListCubit>().unpin(widget.category, catIndex);
+            context.read<CategoryListCubit>().remove(widget.category);
           }
           Navigator.pop(context);
         },
@@ -108,22 +120,28 @@ class _EditDialogState extends State<EditDialog> {
     );
   }
 
-  Widget _pinButton(BuildContext context, CategorylistCubit cubit) {
+  Widget _pinButton(
+      BuildContext context, CategoryListCubit cubit, int catIndex) {
     return CircleAvatar(
       backgroundColor: Theme.of(context).primaryColor,
       foregroundColor: Colors.white,
       child: IconButton(
         onPressed: () {
+          Navigator.pop(context);
+
           if (widget.category.pined == false) {
             widget.category.pined = true;
-            context.read<CategorylistCubit>().pin(widget.category);
-            context.read<CategorylistCubit>().remove(widget.category);
+            context.read<CategoryListCubit>().pin(
+                  widget.category,
+                  catIndex,
+                );
           } else {
             widget.category.pined = false;
-            context.read<CategorylistCubit>().unpin(widget.category);
+            context.read<CategoryListCubit>().unpin(
+                  widget.category,
+                  catIndex,
+                );
           }
-
-          Navigator.pop(context);
         },
         icon: widget.pinned
             ? const Icon(Icons.push_pin)

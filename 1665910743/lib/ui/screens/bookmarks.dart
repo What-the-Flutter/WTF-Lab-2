@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../constants.dart';
-import '../../cubit/categorylist_cubit.dart';
-import '../../cubit/categorylist_state.dart';
+import '../../cubit/category_list_cubit.dart';
+import '../../cubit/category_list_state.dart';
 import '../widgets/event_tile.dart';
 
 class BookmarkEvents extends StatelessWidget {
@@ -22,8 +22,8 @@ class BookmarkEvents extends StatelessWidget {
       ),
       body: Padding(
         padding: kListViewPadding,
-        child: BlocBuilder<CategorylistCubit, CategoryListState>(
-          bloc: context.read<CategorylistCubit>(),
+        child: BlocBuilder<CategoryListCubit, CategoryListState>(
+          bloc: context.read<CategoryListCubit>(),
           builder: ((context, state) {
             final list = state.categoryList[id].list;
             return ListView.builder(
@@ -33,6 +33,7 @@ class BookmarkEvents extends StatelessWidget {
                   return Align(
                     alignment: Alignment.bottomLeft,
                     child: EventTile(
+                      iconCode: list[index].iconCode,
                       isSelected: list[index].isSelected,
                       title: list[index].title,
                       date: list[index].date,
