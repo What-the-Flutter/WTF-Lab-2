@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../cubit/categorylist_cubit.dart';
+import '../../cubit/category_list_cubit.dart';
 import '../screens/chat_screen.dart';
 
 Future<void> moveTile({
@@ -33,11 +33,11 @@ class MoveTile extends StatefulWidget {
 }
 
 class _MoveTileState extends State<MoveTile> {
-  var _counter = 0;
+  var _selectedCategory = 0;
 
   @override
   Widget build(BuildContext context) {
-    var state = context.watch<CategorylistCubit>().state;
+    var state = context.watch<CategoryListCubit>().state;
 
     return AlertDialog(
       elevation: 5,
@@ -54,12 +54,15 @@ class _MoveTileState extends State<MoveTile> {
           itemCount: state.categoryList.length,
           itemBuilder: ((context, index) => index != widget.categoryIndex
               ? ListTile(
-                  leading: _counter == index
-                      ? const Icon(Icons.circle)
-                      : const Icon(Icons.circle_outlined),
+                  leading: Icon(
+                    _selectedCategory == index
+                        ? Icons.circle
+                        : Icons.circle_outlined,
+                    color: Theme.of(context).primaryColor,
+                  ),
                   onTap: (() {
                     setState(() {
-                      _counter = index;
+                      _selectedCategory = index;
                     });
                   }),
                   title: Text(state.categoryList[index].title),
@@ -78,12 +81,12 @@ class _MoveTileState extends State<MoveTile> {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: ((context) => ChatScreen(eventId: _counter)),
+                builder: ((context) => ChatScreen(eventId: _selectedCategory)),
               ),
             );
-            context.read<CategorylistCubit>().moveEvent(
+            context.read<CategoryListCubit>().moveEvent(
                   widget.categoryIndex,
-                  _counter,
+                  _selectedCategory,
                   widget.eventIndex,
                 );
           }),

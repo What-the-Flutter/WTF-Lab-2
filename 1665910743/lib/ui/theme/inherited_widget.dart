@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'theme_data.dart';
 
@@ -46,7 +47,9 @@ class CustomThemeState extends State<CustomTheme> {
     super.initState();
   }
 
-  void changeTheme(MyThemeKeys themeKey) {
+  void changeTheme(MyThemeKeys themeKey) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setInt('theme', themeKey.index);
     setState(() {
       _theme = MyThemes.getThemeFromKey(themeKey);
     });

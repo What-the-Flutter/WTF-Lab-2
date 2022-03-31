@@ -15,11 +15,15 @@ class JourneyDrawer extends StatelessWidget {
               width: double.infinity,
               decoration: BoxDecoration(color: Theme.of(context).primaryColor),
               child: Align(
-                alignment: FractionalOffset.bottomLeft,
+                alignment: Alignment.bottomLeft,
                 child: Padding(
                   padding: const EdgeInsets.only(left: 10.0, bottom: 20.0),
                   child: Text(
-                    DateFormat.yMMMMd().format(DateTime.now()).toString(),
+                    DateFormat.yMMMMd()
+                        .format(
+                          DateTime.now(),
+                        )
+                        .toString(),
                     style: const TextStyle(
                       fontSize: 24,
                     ),

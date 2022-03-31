@@ -39,7 +39,6 @@ class _CategoryIconButtonState extends State<CategoryIconButton> {
     return Icon(
       widget.icon.icon,
       size: widget.size,
-      color: (widget.isSelected == true) ? Colors.lightGreen : Colors.black,
     );
   }
 }

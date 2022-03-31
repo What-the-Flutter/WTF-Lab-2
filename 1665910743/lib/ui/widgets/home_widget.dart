@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../cubit/categorylist_cubit.dart';
+import '../../cubit/category_list_cubit.dart';
 import '../screens/daily.dart';
 import '../screens/explore.dart';
 import '../screens/home.dart';
@@ -59,9 +59,9 @@ class _HomeState extends State<Home> {
 
   void _onItemTapped(int index) {
     if (index == 1) {
-      context.read<CategorylistCubit>().fetchAllEvents();
+      context.read<CategoryListCubit>().fetchAllEvents();
     }
-    context.read<CategorylistCubit>().exitSearch();
+    context.read<CategoryListCubit>().exitSearch();
     setState(
       () {
         _selectedIndex = index;
@@ -69,8 +69,8 @@ class _HomeState extends State<Home> {
     );
   }
 
-  AppBar _appBar(BuildContext context) {
-    return context.watch<CategorylistCubit>().state.searchMode
+  PreferredSizeWidget _appBar(BuildContext context) {
+    return context.watch<CategoryListCubit>().state.searchMode
         ? AppBar(
             leading: Hero(
               tag: 'search',
@@ -90,11 +90,11 @@ class _HomeState extends State<Home> {
               ),
               controller: _searchController,
               onChanged: (value) =>
-                  context.read<CategorylistCubit>().searchControll(value),
+                  context.read<CategoryListCubit>().searchControll(value),
             ),
             actions: [
               IconButton(
-                onPressed: () => context.read<CategorylistCubit>().exitSearch(),
+                onPressed: () => context.read<CategoryListCubit>().exitSearch(),
                 icon: const Icon(Icons.close_rounded),
               ),
             ],
@@ -109,7 +109,7 @@ class _HomeState extends State<Home> {
                       tag: 'search',
                       child: IconButton(
                         onPressed: (() => context
-                            .read<CategorylistCubit>()
+                            .read<CategoryListCubit>()
                             .enterSearchMode()),
                         icon: const Icon(Icons.search),
                       ),
@@ -130,9 +130,11 @@ class _HomeState extends State<Home> {
                                 },
                               );
                       },
-                      icon: CustomTheme.of(context).theme == MyThemes.lightTheme
-                          ? const Icon(Icons.mode_night)
-                          : const Icon(Icons.light_mode),
+                      icon: Icon(
+                        CustomTheme.of(context).theme == MyThemes.lightTheme
+                            ? Icons.nightlight_outlined
+                            : Icons.light_mode,
+                      ),
                     ),
             ],
           );

@@ -35,7 +35,11 @@ dependencies:
   flutter_slidable: ^1.2.0
   image_picker: ^0.8.4+11
   intl: ^0.17.0
+  path: ^1.8.0
+  path_provider: ^2.0.9
   provider: ^6.0.2
+  shared_preferences: ^2.0.13
+  sqflite: ^2.0.2
 
 dev_dependencies:
   flutter_lints: ^1.0.0
