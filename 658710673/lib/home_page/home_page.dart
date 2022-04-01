@@ -134,8 +134,15 @@ class _HomePageState extends State<HomePage> {
             await Navigator.push(
               context,
               MaterialPageRoute<void>(
-                builder: (_) => BlocProvider.value(
-                  value: BlocProvider.of<CategoryCubit>(context),
+                builder: (_) => MultiBlocProvider(
+                  providers: [
+                    BlocProvider.value(
+                      value: BlocProvider.of<CategoryCubit>(context),
+                    ),
+                    BlocProvider.value(
+                      value: BlocProvider.of<HomeCubit>(context),
+                    ),
+                  ],
                   child: CategoryPage(
                     category: category,
                   ),

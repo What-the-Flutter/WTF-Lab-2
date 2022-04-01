@@ -456,13 +456,12 @@ class _CategoryPageState extends State<CategoryPage> {
 
   void _replyEvents(BuildContext ctx, CategoryState state) {
     showDialog(
-      context: ctx,
+      context: context,
       builder: (context) {
         return Dialog(
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(20)),
           ),
-          //backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -478,16 +477,11 @@ class _CategoryPageState extends State<CategoryPage> {
                 ),
               ),
               const SizedBox(height: 10),
-              // BlocBuilder<HomeCubit, HomeState>(
-              //   builder: (ctx, state) {
-              //     return
               Container(
                 height: 200,
                 width: 300,
-                child: _replyEventListView(state),
+                child: _replyEventListView(ctx, state),
               ),
-              //   },
-              // ),
               _replyDialogButtons(state),
             ],
           ),
@@ -496,19 +490,18 @@ class _CategoryPageState extends State<CategoryPage> {
     );
   }
 
-  ListView _replyEventListView(CategoryState state) {
+  ListView _replyEventListView(BuildContext ctx, CategoryState state) {
     return ListView.builder(
       itemCount: context.read<HomeCubit>().state.categories.length,
       itemBuilder: (context, index) {
         return RadioListTile<int>(
           title: Text(
-            context.read<HomeCubit>().state.categories[index].title,
+            ctx.read<HomeCubit>().state.categories[index].title,
           ),
           activeColor: Theme.of(context).primaryColor,
           value: index,
           groupValue: state.replyCategoryIndex,
-          onChanged: (value) =>
-              context.read<CategoryCubit>().setReplyCategory(context, value as int),
+          onChanged: (value) => ctx.read<CategoryCubit>().setReplyCategory(ctx, value as int),
         );
       },
     );
