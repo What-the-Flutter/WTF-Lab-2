@@ -48,8 +48,7 @@ class CustomTheme extends StatefulWidget {
   final ThemeData themeData;
   final Widget child;
 
-  const CustomTheme({Key? key, required this.themeData, required this.child})
-      : super(key: key);
+  const CustomTheme({Key? key, required this.themeData, required this.child}) : super(key: key);
 
   @override
   CustomThemeState createState() => CustomThemeState();
@@ -59,17 +58,18 @@ class CustomThemeState extends State<CustomTheme> {
   ThemeData themeData = AppTheme.lightTheme;
 
   void switchTheme() {
-    setState(() => themeData = themeData == AppTheme.darkTheme
-        ? AppTheme.lightTheme
-        : AppTheme.darkTheme);
+    setState(() =>
+        themeData = themeData == AppTheme.darkTheme ? AppTheme.lightTheme : AppTheme.darkTheme);
   }
 
   @override
-  Widget build(BuildContext context) => InheritedCustomTheme(
-        themeData: widget.themeData,
-        child: widget.child,
-        state: this,
-      );
+  Widget build(BuildContext context) {
+    return InheritedCustomTheme(
+      themeData: widget.themeData,
+      child: widget.child,
+      state: this,
+    );
+  }
 }
 
 class InheritedCustomTheme extends InheritedWidget {
@@ -77,11 +77,11 @@ class InheritedCustomTheme extends InheritedWidget {
   final CustomThemeState state;
 
   InheritedCustomTheme(
-      {required this.themeData,
-      required this.state,
-      Key? key,
-      required Widget child})
-      : super(key: key, child: child);
+      {required this.themeData, required this.state, Key? key, required Widget child})
+      : super(
+          key: key,
+          child: child,
+        );
 
   static CustomThemeState of(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<InheritedCustomTheme>()!.state;

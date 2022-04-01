@@ -1,30 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
+import '../category_page/category_cubit.dart';
+import '../category_page/category_page.dart';
+import '../create_category_page/create_category_cubit.dart';
+import '../create_category_page/create_category_page.dart';
 import '../models/category.dart';
 import '../utils/app_theme.dart';
 import '../widgets/main_page_widgets/main_bottom_bar.dart';
-import 'category_page.dart';
-import 'create_category_page.dart';
-
-class ChatJournalApp extends StatefulWidget {
-  const ChatJournalApp({Key? key}) : super(key: key);
-
-  @override
-  State<ChatJournalApp> createState() => _ChatJournalAppState();
-}
-
-class _ChatJournalAppState extends State<ChatJournalApp> {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Chat journal',
-      theme: InheritedCustomTheme.of(context).themeData,
-      home: HomePage(),
-    );
-  }
-}
+import 'home_cubit.dart';
+import 'home_state.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key? key}) : super(key: key);
@@ -34,79 +20,83 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final List<Category> _categories = [];
-
   @override
   void initState() {
     super.initState();
-    _categories
-      ..add(Category('Journal', const Icon(Icons.book, color: Colors.white)))
-      ..add(Category('Gratitude', const Icon(Icons.grade, color: Colors.white)))
-      ..add(
-          Category('Notes', const Icon(Icons.menu_book, color: Colors.white)));
+    BlocProvider.of<HomeCubit>(context).init();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: <Widget>[
-          SliverAppBar(
-            pinned: true,
-            expandedHeight: 190,
-            leading: IconButton(
-              icon: const Icon(Icons.menu),
-              onPressed: () {},
-            ),
-            title: const Center(
-              child: Text('Home'),
-            ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.invert_colors),
-                onPressed: () => setState(() {
-                  InheritedCustomTheme.of(context).switchTheme();
-                }),
+    return BlocBuilder<HomeCubit, HomeState>(
+      builder: (context, state) {
+        return Scaffold(
+          body: CustomScrollView(
+            slivers: <Widget>[
+              SliverAppBar(
+                pinned: true,
+                expandedHeight: 190,
+                leading: IconButton(
+                  icon: const Icon(Icons.menu),
+                  onPressed: () {},
+                ),
+                title: const Center(
+                  child: Text('Home'),
+                ),
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.invert_colors),
+                    onPressed: () => setState(() {
+                      InheritedCustomTheme.of(context).switchTheme();
+                    }),
+                  ),
+                ],
+                flexibleSpace: FlexibleSpaceBar(
+                  background: (InheritedCustomTheme.of(context).themeData == AppTheme.lightTheme)
+                      ? Image.asset(
+                          'assets/images/app_bar_bg_light.jpg',
+                          fit: BoxFit.fill,
+                        )
+                      : Image.asset(
+                          'assets/images/app_bar_bg_dark.png',
+                          fit: BoxFit.fill,
+                        ),
+                ),
+              ),
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (_, index) => _categoryCard(state.categories[index], index, state),
+                  childCount: state.categories.length,
+                ),
               ),
             ],
-            flexibleSpace: FlexibleSpaceBar(
-              background: (InheritedCustomTheme.of(context).themeData ==
-                      AppTheme.lightTheme)
-                  ? Image.asset(
-                      'assets/images/app_bar_bg_light.jpg',
-                      fit: BoxFit.fill,
-                    )
-                  : Image.asset(
-                      'assets/images/app_bar_bg_dark.png',
-                      fit: BoxFit.fill,
-                    ),
-            ),
           ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (_, index) => _categoryCard(_categories[index], index),
-              childCount: _categories.length,
-            ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: _createPage,
+            child: const Icon(Icons.add),
           ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => CreateCategory(_categories, -1),
-            ),
-          );
-          setState(() {});
-        },
-        child: const Icon(Icons.add),
-      ),
-      bottomNavigationBar: const MainBottomBar(),
+          bottomNavigationBar: const MainBottomBar(),
+        );
+      },
     );
   }
 
-  Padding _categoryCard(Category category, int index) {
+  void _createPage() async {
+    final category = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => BlocProvider.value(
+          value: BlocProvider.of<CreateCategoryPageCubit>(context),
+          child: CreateCategoryPage(),
+        ),
+      ),
+    );
+    if (category is Category && mounted) {
+      BlocProvider.of<HomeCubit>(context).addCategory(category);
+    }
+  }
+
+  Padding _categoryCard(Category category, int index, HomeState state) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       child: Card(
@@ -134,10 +124,7 @@ class _HomePageState extends State<HomePage> {
           trailing: category.events.isEmpty
               ? const Text('')
               : Text(
-                  DateFormat()
-                      .add_jm()
-                      .format(category.events.last.timeOfCreation)
-                      .toString(),
+                  DateFormat().add_jm().format(category.events.last.timeOfCreation).toString(),
                   style: const TextStyle(
                     fontSize: 15,
                     color: Color(0xFF616161),
@@ -147,19 +134,23 @@ class _HomePageState extends State<HomePage> {
             await Navigator.push(
               context,
               MaterialPageRoute<void>(
-                builder: (context) =>
-                    CategoryPage(title: _categories[index].title),
+                builder: (_) => BlocProvider.value(
+                  value: BlocProvider.of<CategoryCubit>(context),
+                  child: CategoryPage(
+                    category: category,
+                  ),
+                ),
               ),
             );
             setState(() {});
           },
-          onLongPress: () => _modalBottomActions(context, index),
+          onLongPress: () => _modalBottomActions(context, index, state),
         ),
       ),
     );
   }
 
-  Future<dynamic> _modalBottomActions(BuildContext context, int index) {
+  Future<dynamic> _modalBottomActions(BuildContext context, int index, HomeState state) {
     return showModalBottomSheet(
       context: context,
       builder: (context) => Container(
@@ -170,7 +161,7 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           children: [
             ListTile(
-              onTap: () => infoDialog(context, index),
+              onTap: () => infoDialog(context, index, state),
               leading: const Icon(
                 Icons.info,
                 color: Colors.green,
@@ -198,16 +189,7 @@ class _HomePageState extends State<HomePage> {
                 color: Colors.blue,
               ),
               title: const Text('Edit Page'),
-              onTap: () async {
-                Navigator.pop(context);
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute<void>(
-                    builder: (context) => CreateCategory(_categories, index),
-                  ),
-                );
-                setState(() {});
-              },
+              onTap: () => _editPage(index, state),
             ),
             ListTile(
               leading: const Icon(
@@ -224,6 +206,25 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
+  }
+
+  void _editPage(int index, HomeState state) async {
+    Navigator.pop(context);
+    final category = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => BlocProvider.value(
+          value: BlocProvider.of<CreateCategoryPageCubit>(context),
+          child: CreateCategoryPage(editCategory: state.categories[index]),
+        ),
+      ),
+    );
+    if (category is Category) {
+      BlocProvider.of<HomeCubit>(context).editCategory(
+        index,
+        category,
+      );
+    }
   }
 
   Future<dynamic> modalBottomDeleteSheet(BuildContext context, int index) {
@@ -265,9 +266,7 @@ class _HomePageState extends State<HomePage> {
                       color: Colors.red,
                       iconSize: 30,
                       onPressed: () {
-                        setState(() {
-                          _categories.removeAt(index);
-                        });
+                        BlocProvider.of<HomeCubit>(context).deleteCategory(index);
                         Navigator.pop(context);
                       },
                       icon: const Icon(Icons.delete),
@@ -297,16 +296,16 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future<String?> infoDialog(BuildContext context, int index) {
+  Future<String?> infoDialog(BuildContext context, int index, HomeState state) {
     return showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
         title: ListTile(
           leading: CircleAvatar(
-            child: _categories[index].icon,
+            child: state.categories[index].icon,
             backgroundColor: Colors.grey,
           ),
-          title: Text(_categories[index].title),
+          title: Text(state.categories[index].title),
         ),
         content: SizedBox(
           height: 150,
@@ -318,18 +317,17 @@ class _HomePageState extends State<HomePage> {
                   subtitle: Text(
                     DateFormat()
                         .add_jms()
-                        .format(_categories[index].timeOfCreation)
+                        .format(state.categories[index].timeOfCreation)
                         .toString(),
                   ),
                 ),
                 ListTile(
                   title: const Text('Latest Event'),
-                  subtitle: _categories[index].events.isNotEmpty
+                  subtitle: state.categories[index].events.isNotEmpty
                       ? Text(
                           DateFormat()
                               .add_jms()
-                              .format(
-                                  _categories[index].events.last.timeOfCreation)
+                              .format(state.categories[index].events.last.timeOfCreation)
                               .toString(),
                         )
                       : const Text('No events at the time'),

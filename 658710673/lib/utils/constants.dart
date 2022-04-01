@@ -10,7 +10,7 @@ class Constants {
   static const dIconColor = Colors.white;
 }
 
-class CategoryIcons{
+class CategoryIcons {
   static const List<Icon> icons = [
     Icon(
       Icons.flight_takeoff,
@@ -134,3 +134,13 @@ class CategoryIcons{
     ),
   ];
 }
+
+const Map<String, IconData> sections = {
+  'Food': Icons.fastfood,
+  'Running': Icons.directions_run,
+  'Laundry': Icons.local_laundry_service,
+  'Sport': Icons.sports_basketball,
+  'Shopping': Icons.shopping_cart,
+  'Movie': Icons.movie,
+  'Fav': Icons.star,
+};
