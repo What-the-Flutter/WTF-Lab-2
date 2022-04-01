@@ -20,6 +20,8 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^1.0.0
+  bloc: ^8.0.3
+  flutter_bloc: ^8.0.1
 
 flutter:
   uses-material-design: true
