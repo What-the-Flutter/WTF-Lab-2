@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -7,13 +7,10 @@ import '../models/event.dart';
 import '../models/event_icon.dart';
 
 class DatabaseProvider {
-  static Database? _database;
+  Database? _database;
   final String chatsTable = 'chats';
   final String eventsTable = 'events';
   final String iconsTable = 'icons';
-
-  DatabaseProvider._();
-  static final DatabaseProvider db = DatabaseProvider._();
 
   Future<Database> get database async {
     if (_database != null) {
@@ -24,22 +21,19 @@ class DatabaseProvider {
   }
 
   Future<Database> initDB() async {
-    WidgetsFlutterBinding.ensureInitialized();
     return await openDatabase(
       join(await getDatabasesPath(), 'chats_journal_database.db'),
       version: 1,
       onCreate: (db, version) async {
-        db.execute(
-          'CREATE TABLE $chatsTable(icon INTEGER PRIMARY KEY NOT NULL, category TEXT);',
-        );
-        db.execute(
-          'CREATE TABLE $eventsTable(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, category TEXT, '
-          'description TEXT, isFavorite BOOL, isSelected BOOL, timeOfCreation TEXT, image TEXT); ',
-        );
+        await db.execute(
+            'CREATE TABLE $chatsTable(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, icon INTEGER, category TEXT);');
+        await db.execute(
+            'CREATE TABLE $eventsTable(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, category TEXT, '
+            'description TEXT, isFavorite BOOL, isSelected BOOL, timeOfCreation TEXT, image TEXT);');
+        await db.execute(
+            'CREATE TABLE $iconsTable(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, icon INTEGER, isSelected BOOL);');
 
-        db.execute(
-          'CREATE TABLE $iconsTable(icon INTEGER PRIMARY KEY, isSelected BOOL);',
-        );
+        addValues();
       },
     );
   }
@@ -61,16 +55,15 @@ class DatabaseProvider {
     );
   }
 
-  Future<void> updateEvent(Event previousEvent, Event newEvent) async {
+  Future<void> updateEvent(Event event) async {
     final db = await database;
 
     await db.update(
       eventsTable,
-      newEvent.toMap(),
-      where: 'category = ? and description = ?',
+      event.toMap(),
+      where: 'id = ?',
       whereArgs: [
-        previousEvent.category,
-        previousEvent.description,
+        event.id,
       ],
     );
   }
@@ -82,7 +75,7 @@ class DatabaseProvider {
       iconsTable,
       icon.toMap(),
       where: 'icon = ?',
-      whereArgs: [icon.icon.icon!.codePoint],
+      whereArgs: [icon],
     );
   }
 
@@ -175,7 +168,7 @@ class DatabaseProvider {
     await db.delete(
       iconsTable,
       where: 'icon = ?',
-      whereArgs: [icon.icon.icon!.codePoint],
+      whereArgs: [icon],
     );
   }
 
@@ -188,7 +181,8 @@ class DatabaseProvider {
   Future<List<Event>> getEvents() async {
     final db = await database;
 
-    final List<Map<String, dynamic>> maps = await db.query(eventsTable);
+    final List<Map<String, dynamic>> maps =
+        await db.rawQuery('SELECT * from events order by timeOfCreation');
 
     return List.generate(maps.length, (index) {
       bool flagFavorite, flagSelected;
@@ -203,12 +197,13 @@ class DatabaseProvider {
         flagSelected = false;
       }
       return Event(
-        description: maps[index]['description'],
-        image: maps[index]['image'],
-        isFavorite: flagFavorite,
-        isSelected: flagSelected,
-        category: maps[index]['category'],
-      );
+          id: maps[index]['id'],
+          description: maps[index]['description'],
+          image: maps[index]['image'],
+          isFavorite: flagFavorite,
+          isSelected: flagSelected,
+          category: maps[index]['category'],
+          timeOfCreation: maps[index]['timeOfCreation']);
     });
   }
 
@@ -221,10 +216,9 @@ class DatabaseProvider {
       maps.length,
       (index) {
         return Chat(
+          id: maps[index]['id'],
           category: maps[index]['category'],
-          icon: Icon(
-            IconData(maps[index]['icon'], fontFamily: 'MaterialIcons'),
-          ),
+          icon: maps[index]['icon'],
         );
       },
     );
@@ -243,118 +237,114 @@ class DatabaseProvider {
         flag = false;
       }
       return EventIcon(
-        icon: Icon(
-          IconData(maps[i]['icon'], fontFamily: 'MaterialIcons'),
-        ),
+        id: maps[i]['id'],
+        icon: maps[i]['icon'],
         isSelected: flag,
       );
     });
   }
 
   void addChats() {
-    db.insertChats(
+    insertChats(
       <Chat>[
         Chat(
+          id: 0,
           category: 'Travel',
-          icon: const Icon(Icons.flight_takeoff),
+          icon: 12,
         ),
         Chat(
+          id: 1,
           category: 'Family',
-          icon: const Icon(Icons.chair),
+          icon: 13,
         ),
         Chat(
+          id: 2,
           category: 'Sports',
-          icon: const Icon(Icons.sports_baseball),
+          icon: 14,
         ),
       ],
     );
   }
 
   void addEvents() {
-    db.insertEvents(<Event>[
+    insertEvents(<Event>[
       Event(
+        id: 0,
         category: 'Travel',
         description: 'qqqq',
         isFavorite: false,
         isSelected: false,
+        timeOfCreation: DateFormat('yyyy-MM-dd – kk:mm').format(DateTime.now()),
       ),
       Event(
+        id: 1,
         category: 'Family',
         description: 'wwww',
         isFavorite: false,
         isSelected: false,
+        timeOfCreation: DateFormat('yyyy-MM-dd – kk:mm').format(DateTime.now()),
       ),
       Event(
+        id: 2,
         category: 'Sports',
         description: 'eeee',
         isFavorite: false,
         isSelected: false,
+        timeOfCreation: DateFormat('yyyy-MM-dd – kk:mm').format(DateTime.now()),
       ),
     ]);
   }
 
   void addIcons() {
-    db.insertIcons(
+    insertIcons(
       <EventIcon>[
         EventIcon(
-          icon: const Icon(
-            Icons.ac_unit,
-          ),
+          id: 0,
+          icon: 0,
         ),
         EventIcon(
-          icon: const Icon(
-            Icons.access_alarm,
-          ),
+          id: 1,
+          icon: 1,
         ),
         EventIcon(
-          icon: const Icon(
-            Icons.access_time,
-          ),
+          id: 2,
+          icon: 2,
         ),
         EventIcon(
-          icon: const Icon(
-            Icons.accessibility,
-          ),
+          id: 3,
+          icon: 3,
         ),
         EventIcon(
-          icon: const Icon(
-            Icons.baby_changing_station,
-          ),
+          id: 4,
+          icon: 4,
         ),
         EventIcon(
-          icon: const Icon(
-            Icons.cabin,
-          ),
+          id: 5,
+          icon: 5,
         ),
         EventIcon(
-          icon: const Icon(
-            Icons.qr_code,
-          ),
+          id: 6,
+          icon: 6,
         ),
         EventIcon(
-          icon: const Icon(
-            Icons.wallet_giftcard,
-          ),
+          id: 7,
+          icon: 7,
         ),
         EventIcon(
-          icon: const Icon(
-            Icons.e_mobiledata,
-          ),
+          id: 8,
+          icon: 8,
         ),
         EventIcon(
-          icon: const Icon(
-            Icons.r_mobiledata,
-          ),
+          id: 9,
+          icon: 9,
         ),
         EventIcon(
-          icon: const Icon(
-            Icons.tab,
-          ),
+          id: 10,
+          icon: 10,
         ),
         EventIcon(
-          icon: const Icon(
-            Icons.yard,
-          ),
+          id: 11,
+          icon: 11,
         ),
       ],
     );

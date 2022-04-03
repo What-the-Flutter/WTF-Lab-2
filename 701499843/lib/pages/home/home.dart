@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../data/database_provider.dart';
+import '../../data/icons.dart';
 import '../../models/chat.dart';
-import '../../models/event.dart';
-import '../../themes/inherited_theme.dart';
 import '../new_category_page/new_category_page.dart';
+import '../settings_page/settings_cubit.dart';
+import '../settings_page/settings_page.dart';
 import 'home_cubit.dart';
 import 'home_state.dart';
 import 'widgets/hovered_item.dart';
@@ -23,15 +23,17 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  late final HomeCubit _cubit;
-  //late final List<Event> events;
+  late final HomeCubit _homeCubit;
+  late final SettingsCubit _settingsCubit;
 
   @override
   void initState() {
-    _cubit = BlocProvider.of<HomeCubit>(context);
-    _cubit.init();
-    //events = await DatabaseProvider.db.getEvents();
     super.initState();
+
+    _homeCubit = BlocProvider.of<HomeCubit>(context);
+    _settingsCubit = BlocProvider.of<SettingsCubit>(context);
+
+    _homeCubit.init();
   }
 
   @override
@@ -41,7 +43,6 @@ class _HomePageState extends State<HomePage> {
       primary: Theme.of(context).primaryColor,
       minimumSize: const Size(200, 40),
     );
-
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
@@ -53,7 +54,7 @@ class _HomePageState extends State<HomePage> {
         centerTitle: true,
         actions: [
           IconButton(
-            onPressed: (() => Inherited.of(context).changeTheme()),
+            onPressed: _settingsCubit.changeTheme,
             icon: const Icon(Icons.invert_colors),
           ),
           const Padding(
@@ -61,9 +62,9 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      drawer: Drawer(backgroundColor: Theme.of(context).primaryColor),
+      drawer: _drawer(),
       body: BlocBuilder<HomeCubit, HomeState>(
-        bloc: _cubit,
+        bloc: _homeCubit,
         builder: (context, state) {
           return _body(style, state);
         },
@@ -82,10 +83,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future<List<Event>> getEvents() async {
-    return await DatabaseProvider.db.getEvents();
-  }
-
   Widget _body(ButtonStyle style, HomeState state) {
     return Column(
       children: [
@@ -102,6 +99,10 @@ class _HomePageState extends State<HomePage> {
             shrinkWrap: true,
             itemCount: state.listOfChats.length,
             itemBuilder: (context, index) {
+              var events = state.events.where(
+                (element) =>
+                    element.category == state.listOfChats[index].category,
+              );
               return Column(
                 children: [
                   Divider(
@@ -111,12 +112,14 @@ class _HomePageState extends State<HomePage> {
                   ),
                   HoveredItem(
                     state.listOfChats[index].category,
-                    'No events. Click to create one.',
-                    state.listOfChats[index].icon.icon!,
+                    events.isEmpty
+                        ? 'No events. Tap to create one.'
+                        : events.last.description,
+                    icons.elementAt(state.listOfChats[index].icon).icon!,
                     _bottomSheet(
                       context,
                       state.listOfChats[index].category,
-                      state.listOfChats[index].icon,
+                      icons.elementAt(state.listOfChats[index].icon),
                       state,
                     ),
                     state.events,
@@ -144,7 +147,7 @@ class _HomePageState extends State<HomePage> {
     );
     if (result != null) {
       var res = List<Chat>.from(result);
-      _cubit.addChat(res.first);
+      _homeCubit.addChat(res.first);
     }
   }
 
@@ -211,7 +214,7 @@ class _HomePageState extends State<HomePage> {
     );
 
     var res = List<Chat>.from(result);
-    _cubit.addChat(res.first);
+    _homeCubit.addChat(res.first);
   }
 
   Widget _infoButton() {
@@ -319,7 +322,7 @@ class _HomePageState extends State<HomePage> {
       ]),
       onPressed: () {
         Navigator.pop(context);
-        _cubit.remove(title);
+        _homeCubit.remove(title);
       },
     );
   }
@@ -343,6 +346,62 @@ class _HomePageState extends State<HomePage> {
           _archieveButton(),
           _editPageButton(title, icon, state),
           _deletePageButton(title),
+        ],
+      ),
+    );
+  }
+
+  Widget _drawer() {
+    return Drawer(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      child: ListView(
+        children: [
+          SizedBox(
+            height: 145,
+            child: DrawerHeader(
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor,
+              ),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Chats Journal',
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: Theme.of(context).highlightColor,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const ListTile(
+            title: Text('Search'),
+            leading: Icon(Icons.search),
+          ),
+          const ListTile(
+            title: Text('Notifications'),
+            leading: Icon(Icons.notifications),
+          ),
+          const ListTile(
+            title: Text('Statistics'),
+            leading: Icon(Icons.timeline),
+          ),
+          ListTile(
+            title: const Text('Settings'),
+            leading: const Icon(Icons.settings),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const SettingsPage(
+                  title: 'Theme',
+                ),
+              ),
+            ),
+          ),
+          const ListTile(
+            title: Text('Feedback'),
+            leading: Icon(Icons.mail),
+          ),
         ],
       ),
     );
