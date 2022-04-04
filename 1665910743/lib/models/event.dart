@@ -7,14 +7,12 @@ class Event {
   String title;
   bool favorite = false;
   bool isSelected = false;
-  int categoryIndex;
   String categoryTitle;
 
   Event({
     required this.title,
     required this.date,
     required this.favorite,
-    required this.categoryIndex,
     required this.categoryTitle,
     required this.iconCode,
     this.image,
@@ -22,12 +20,12 @@ class Event {
 
   Map<String, dynamic> toMap() {
     return {
-      'imagePath' : image?.path ?? '',
+      'imagePath': image?.path ?? '',
       'icon': iconCode,
       'title': title,
       'favorite': favorite ? 1 : 0,
+      'isSelected': isSelected ? 1 : 0,
       'date': date.toIso8601String(),
-      'categoryIndex': categoryIndex,
       'categoryTitle': categoryTitle,
     };
   }

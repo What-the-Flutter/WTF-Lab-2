@@ -5,11 +5,11 @@ class EventCategory {
   final list = <Event>[];
   final Icon icon;
   String title;
-  bool pined;
+  bool pinned;
 
   EventCategory({
     required this.title,
-    required this.pined,
+    required this.pinned,
     required this.icon,
   });
 
@@ -17,7 +17,17 @@ class EventCategory {
     return {
       'icon': icon.icon!.codePoint,
       'title': title,
-      'pined': pined == false ? 0 : 1,
+      'pinned': pinned == true ? 0 : 1,
     };
+  }
+
+  factory EventCategory.fromRTDB(Map<String, dynamic> data) {
+    return EventCategory(
+      title: data['title'],
+      pinned: data['pinned'] == 0 ? false : true,
+      icon: Icon(
+        IconData(data['icon']),
+      ),
+    );
   }
 }

@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../cubit/category_list_cubit.dart';
 import '../widgets/chat_screen_body.dart';
 import '../widgets/home_widget.dart';
 
 class ChatScreen extends StatelessWidget {
-  final int eventId;
+  final String categoryTitle;
 
   const ChatScreen({
     Key? key,
-    required this.eventId,
+    required this.categoryTitle,
   }) : super(key: key);
 
   @override
@@ -18,7 +16,7 @@ class ChatScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          context.read<CategoryListCubit>().state.categoryList[eventId].title,
+          categoryTitle,
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -31,7 +29,7 @@ class ChatScreen extends StatelessWidget {
         ),
       ),
       body: ChatScreenBody(
-        eventId: eventId,
+        categoryTitle: categoryTitle,
       ),
     );
   }

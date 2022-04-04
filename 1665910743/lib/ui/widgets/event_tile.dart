@@ -18,8 +18,8 @@ class EventTile extends StatelessWidget {
     required this.date,
     required this.favorite,
     required this.isSelected,
-    this.image,
     required this.iconCode,
+    this.image,
   }) : super(key: key);
 
   @override
@@ -121,17 +121,16 @@ class _TileWithoutImage extends StatelessWidget {
 class _TileWithImage extends StatefulWidget {
   final File? image;
   final String title;
-  final String _formattedDate;
+  final String formattedDate;
   final bool favorite;
 
   _TileWithImage({
     Key? key,
     required this.image,
     required this.title,
-    required String formattedDate,
     required this.favorite,
-  })  : _formattedDate = formattedDate,
-        super(key: key);
+    required this.formattedDate,
+  }) : super(key: key);
 
   @override
   State<_TileWithImage> createState() => _TileWithImageState();
@@ -157,6 +156,7 @@ class _TileWithImageState extends State<_TileWithImage> {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Image.file(
+              //TODO: в два виджета
               File(widget.image!.path),
               filterQuality: _zoom ? FilterQuality.high : FilterQuality.medium,
               fit: _zoom ? BoxFit.fitHeight : BoxFit.cover,
@@ -185,7 +185,7 @@ class _TileWithImageState extends State<_TileWithImage> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        widget._formattedDate,
+                        widget.formattedDate,
                         style: const TextStyle(fontSize: 10),
                       ),
                       widget.favorite

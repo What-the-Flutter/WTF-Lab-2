@@ -1,8 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/services.dart';
 
-import '../../constants.dart';
-import '../../cubit/category_list_cubit.dart';
+import '../../models/event_category.dart';
 import '../screens/chat_screen.dart';
 import 'edit_category_dialog.dart';
 
@@ -15,6 +17,9 @@ class UnpinedCategory extends StatefulWidget {
 
 class _UnpinedCategoryState extends State<UnpinedCategory> {
   final TextEditingController _controller = TextEditingController();
+  final Query _database =
+      FirebaseDatabase.instance.ref().child('user/contacts');
+  final _user = FirebaseAuth.instance.currentUser;
 
   @override
   void dispose() {
@@ -24,99 +29,53 @@ class _UnpinedCategoryState extends State<UnpinedCategory> {
 
   @override
   Widget build(BuildContext context) {
-    final state = context.watch<CategoryListCubit>().state;
-
-    return Padding(
-      padding: kListViewPadding,
-      child: CustomScrollView(
-        slivers: [
-          SliverList(
-            delegate: SliverChildBuilderDelegate((context, i) {
-              if (state.categoryList[i].pined == true) {
-                return ListTile(
-                  leading: CircleAvatar(
-                    foregroundColor: Colors.white,
-                    child: state.categoryList[i].icon,
-                    backgroundColor: Theme.of(context).primaryColor,
+    return FirebaseAnimatedList(
+        padding: const EdgeInsets.all(5),
+        query: FirebaseDatabase.instance
+            .ref()
+            .child(_user?.uid ?? '')
+            .child('category')
+            .orderByChild('pinned'),
+        itemBuilder: (context, snapshot, animation, x) {
+          var categoryList = Map.from(snapshot.value as Map);
+          return GestureDetector(
+            onTap: (() => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: ((context) =>
+                        ChatScreen(categoryTitle: categoryList['title'])),
                   ),
-                  trailing: Icon(
-                    Icons.push_pin,
-                    color: Theme.of(context).primaryColor,
+                )),
+            onLongPress: () {
+              HapticFeedback.heavyImpact();
+              displayTextInputDialog(
+                  context: context,
+                  category: EventCategory(
+                    title: categoryList['title'],
+                    pinned: categoryList['pinned'] == 1 ? false : true,
+                    icon: const Icon(Icons.ads_click),
                   ),
-                  title: Text(state.categoryList[i].title),
-                  subtitle: state.categoryList[i].list.isEmpty
-                      ? const Text('No events')
-                      : Text(state.categoryList[i].list.last.title),
-                  onLongPress: () {
-                    displayTextInputDialog(
-                        category: context
-                            .read<CategoryListCubit>()
-                            .state
-                            .categoryList[i],
-                        categryIndex: i,
-                        context: context,
-                        pined: true);
-                  },
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ChatScreen(
-                          eventId: i,
-                        ),
-                      ),
-                    );
-                  },
-                );
-              } else {
-                return const SizedBox();
-              }
-            }, childCount: state.categoryList.length),
-          ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, i) {
-                if (state.categoryList[i].pined == false) {
-                  return ListTile(
-                    leading: CircleAvatar(
-                      foregroundColor: Colors.white,
-                      child: state.categoryList[i].icon,
-                      backgroundColor: Theme.of(context).primaryColor,
-                    ),
-                    title: Text(state.categoryList[i].title),
-                    subtitle: state.categoryList[i].list.isEmpty
-                        ? const Text('No events')
-                        : Text(state.categoryList[i].list.last.title),
-                    onLongPress: () {
-                      displayTextInputDialog(
-                          category: context
-                              .read<CategoryListCubit>()
-                              .state
-                              .categoryList[i],
-                          categryIndex: i,
-                          context: context,
-                          pined: false);
-                    },
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ChatScreen(
-                            eventId: i,
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                } else {
-                  return const SizedBox();
-                }
-              },
-              childCount: state.categoryList.length,
+                  pinned: categoryList['pinned'] == 1 ? false : true,
+                  key: snapshot.key!);
+            },
+            child: ListTile(
+              leading: CircleAvatar(
+                backgroundColor: Theme.of(context).primaryColor,
+                foregroundColor: Colors.white,
+                child: Icon(
+                  IconData(categoryList['icon'], fontFamily: 'MaterialIcons'),
+                ),
+              ),
+              title: Text(categoryList['title']),
+              subtitle: Text(categoryList['pinned'].toString()),
+              trailing: Icon(
+                Icons.push_pin_rounded,
+                color: categoryList['pinned'] == 1
+                    ? Theme.of(context).scaffoldBackgroundColor
+                    : Theme.of(context).primaryColor,
+              ),
             ),
-          ),
-        ],
-      ),
-    );
+          );
+        });
   }
 }

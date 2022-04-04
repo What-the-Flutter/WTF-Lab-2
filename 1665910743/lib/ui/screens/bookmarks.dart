@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../constants.dart';
-import '../../cubit/category_list_cubit.dart';
-import '../../cubit/category_list_state.dart';
+import '../../cubit/category_cubit/category_list_cubit.dart';
+import '../../cubit/category_cubit/category_list_state.dart';
 import '../widgets/event_tile.dart';
 
 class BookmarkEvents extends StatelessWidget {

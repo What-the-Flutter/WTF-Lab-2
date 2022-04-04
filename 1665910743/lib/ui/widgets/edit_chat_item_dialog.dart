@@ -1,36 +1,39 @@
+// ignore_for_file: unused_import
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../cubit/category_list_cubit.dart';
-import '../../cubit/category_list_state.dart';
+import '../../cubit/category_cubit/category_list_cubit.dart';
 
-Future<void> chatTileEditDialog({
-  required BuildContext context,
-  required int catIndex,
-  required int index,
-  required String title,
-}) async {
+
+
+Future<void> chatTileEditDialog(
+    {required BuildContext context,
+    required String title,
+    required String key,
+    required bool isBookmarked}) async {
   return showDialog(
       context: context,
       builder: (context) => EditChatTile(
             title: title,
             context: context,
-            index: index,
-            catIndex: catIndex,
+            eventKey: key,
+            isBookmarked: isBookmarked,
           ));
 }
 
 class EditChatTile extends StatefulWidget {
   final BuildContext context;
-  final int catIndex;
-  final int index;
+  final bool isBookmarked;
   final String title;
+  final String eventKey;
+
   const EditChatTile({
     Key? key,
     required this.context,
-    required this.index,
-    required this.catIndex,
     required this.title,
+    required this.eventKey,
+    required this.isBookmarked,
   }) : super(key: key);
 
   @override
@@ -48,8 +51,6 @@ class _EditChatTileState extends State<EditChatTile> {
 
   @override
   Widget build(BuildContext context) {
-    final state = context.watch<CategoryListCubit>().state;
-
     return AlertDialog(
       elevation: 5,
       shape: const RoundedRectangleBorder(
@@ -60,9 +61,9 @@ class _EditChatTileState extends State<EditChatTile> {
       title: const Center(child: Text('Rename your event')),
       actionsAlignment: MainAxisAlignment.spaceEvenly,
       actions: [
-        _bookmarkButton(context, state, widget.title),
-        _renameButton(context, state, widget.title),
-        _deleteButton(context, state)
+        _bookmarkButton(context, widget.eventKey, widget.isBookmarked),
+        _renameButton(context),
+        _deleteButton(context)
       ],
       content: TextField(
         controller: _renameController,
@@ -70,7 +71,7 @@ class _EditChatTileState extends State<EditChatTile> {
     );
   }
 
-  CircleAvatar _deleteButton(BuildContext context, CategoryListState state) {
+  CircleAvatar _deleteButton(BuildContext context) {
     return CircleAvatar(
       backgroundColor: Theme.of(context).primaryColor,
       foregroundColor: Colors.white,
@@ -78,9 +79,7 @@ class _EditChatTileState extends State<EditChatTile> {
         onPressed: () {
           Navigator.pop(context);
           context.read<CategoryListCubit>().removeEventInCategory(
-                categoryIndex: widget.catIndex,
-                eventIndex: widget.index,
-                title: widget.title,
+                key: widget.eventKey,
               );
         },
         icon: const Icon(Icons.delete_forever),
@@ -90,8 +89,6 @@ class _EditChatTileState extends State<EditChatTile> {
 
   ElevatedButton _renameButton(
     BuildContext context,
-    CategoryListState state,
-    String title,
   ) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
@@ -100,9 +97,7 @@ class _EditChatTileState extends State<EditChatTile> {
       onPressed: () {
         Navigator.pop(context);
         context.read<CategoryListCubit>().eventRename(
-              title: title,
-              categoryIndex: widget.catIndex,
-              eventIndex: widget.index,
+              key: widget.eventKey,
               newTitle: _renameController.text,
             );
       },
@@ -115,25 +110,20 @@ class _EditChatTileState extends State<EditChatTile> {
 
   CircleAvatar _bookmarkButton(
     BuildContext context,
-    CategoryListState state,
-    String title,
+    String key,
+    bool isBook,
   ) {
     return CircleAvatar(
       foregroundColor: Colors.white,
       backgroundColor: Theme.of(context).primaryColor,
       child: IconButton(
-        onPressed: () {
-          Navigator.pop(context);
-          context.read<CategoryListCubit>().bookMarkEvent(
-                title: title,
-                categoryIndex: widget.catIndex,
-                eventIndex: widget.index,
-              );
-        },
-        icon: state.categoryList[widget.catIndex].list[widget.index].favorite
-            ? const Icon(Icons.bookmark)
-            : const Icon(Icons.bookmark_border),
-      ),
+          onPressed: () {
+            Navigator.pop(context);
+            context
+                .read<CategoryListCubit>()
+                .bookMarkEvent(key: key, isBook: isBook);
+          },
+          icon: const Icon(Icons.bookmark)),
     );
   }
 }

@@ -1,11 +1,14 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../data/database_provider.dart';
-import '../models/event_category.dart';
+import '../../data/database_provider.dart';
+import '../../models/event.dart';
+import '../../models/event_category.dart';
+import '../../repository/database_repository.dart';
 import 'category_list_state.dart';
 
 class CategoryListCubit extends Cubit<CategoryListState> {
-  CategoryListCubit()
+  final DataBaseRepository dataBaseRepository;
+  CategoryListCubit({required this.dataBaseRepository})
       : super(
           CategoryListState(
             categoryList: [],
@@ -13,24 +16,10 @@ class CategoryListCubit extends Cubit<CategoryListState> {
           ),
         );
 
-  void init() async {
-    final _categoryList = await DataBase.db.getCategoryList();
-    for (var element in _categoryList) {
-      element.list.addAll(
-        await DataBase.db.getEventList(element.title),
-      );
-    }
-    emit(
-      CategoryListState(
-        categoryList: _categoryList,
-        allEvents: state.allEvents,
-      ),
-    );
-  }
-
   void fetchEventsInCategory(int categoryIndex) async {
-    final eventsFromDb =
-        await DataBase.db.getEventList(state.categoryList[categoryIndex].title);
+    final eventsFromDb = await DataBase.db.getEventList(
+      state.categoryList[categoryIndex].title,
+    );
     if (state.categoryList[categoryIndex].list.isEmpty) {
       state.categoryList[categoryIndex].list.addAll(eventsFromDb);
     }
@@ -43,8 +32,9 @@ class CategoryListCubit extends Cubit<CategoryListState> {
   }
 
   void add(EventCategory category) {
+    dataBaseRepository.addCategory(category);
+
     state.categoryList.add(category);
-    DataBase.db.addCategory(category);
 
     emit(
       CategoryListState(
@@ -54,10 +44,11 @@ class CategoryListCubit extends Cubit<CategoryListState> {
     );
   }
 
-  void remove(EventCategory category) {
-    state.categoryList
-        .removeWhere((element) => element.title == category.title);
-    DataBase.db.removeCategory(category.title);
+  void remove(EventCategory category, String key) {
+    state.categoryList.removeWhere(
+      (element) => element.title == category.title,
+    );
+    dataBaseRepository.removeCategory(key);
     emit(
       CategoryListState(
         categoryList: state.categoryList,
@@ -66,19 +57,13 @@ class CategoryListCubit extends Cubit<CategoryListState> {
     );
   }
 
-  void removeAt(int index) {
-    state.categoryList.removeAt(index);
-    emit(
-      CategoryListState(
-        categoryList: state.categoryList,
-        allEvents: state.allEvents,
-      ),
-    );
-  }
-
-  void pin(EventCategory category, int index) async {
-    state.categoryList.elementAt(index).pined = true;
-    DataBase.db.pinCategory(category.title);
+  void pin(EventCategory category, String key) async {
+    for (final element in state.categoryList) {
+      if (element.title == category.title) {
+        element.pinned = true;
+      }
+    }
+    dataBaseRepository.pinCategory(key);
     emit(
       CategoryListState(
         categoryList: await DataBase.db.getCategoryList(),
@@ -87,9 +72,13 @@ class CategoryListCubit extends Cubit<CategoryListState> {
     );
   }
 
-  void unpin(EventCategory category, int index) {
-    state.categoryList.elementAt(index).pined = false;
-    DataBase.db.unpinCategory(category.title);
+  void unpin(EventCategory category, String key) {
+    for (final element in state.categoryList) {
+      if (element.title == category.title) {
+        element.pinned = true;
+      }
+    }
+    dataBaseRepository.unpinCategory(key);
 
     emit(
       CategoryListState(
@@ -116,14 +105,13 @@ class CategoryListCubit extends Cubit<CategoryListState> {
   }
 
   void moveEvent(int oldCategory, int newCategory, int listIndex) {
-    DataBase.db.moveEvent(
+    dataBaseRepository.moveEvent(
       state.categoryList[oldCategory].list[listIndex].title,
       state.categoryList[newCategory].title,
     );
     state.categoryList[newCategory].list.add(
       state.categoryList[oldCategory].list[listIndex],
     );
-    state.categoryList[newCategory].list[listIndex].categoryIndex = newCategory;
     state.categoryList[newCategory].list[listIndex].categoryTitle =
         state.categoryList[newCategory].title;
     state.categoryList[oldCategory].list.removeAt(listIndex);
@@ -132,9 +120,10 @@ class CategoryListCubit extends Cubit<CategoryListState> {
   void enterSearchMode() {
     emit(
       CategoryListState(
-          allEvents: state.allEvents,
-          categoryList: state.categoryList,
-          searchMode: true),
+        allEvents: state.allEvents,
+        categoryList: state.categoryList,
+        searchMode: true,
+      ),
     );
   }
 
@@ -159,13 +148,23 @@ class CategoryListCubit extends Cubit<CategoryListState> {
     );
   }
 
-  void removeEventInCategory({
-    required int categoryIndex,
-    required int eventIndex,
-    required String title,
-  }) {
-    state.categoryList[categoryIndex].list.removeAt(eventIndex);
-    DataBase.db.removeEvent(title);
+  void addEvent({required String categoryTitle, required Event event}) {
+    for (var element in state.categoryList) {
+      if (element.title == categoryTitle) {
+        element.list.add(event);
+      }
+    }
+    dataBaseRepository.addEvent(event);
+    emit(
+      CategoryListState(
+        allEvents: state.allEvents,
+        categoryList: state.categoryList,
+      ),
+    );
+  }
+
+  void removeEventInCategory({required String key}) {
+    dataBaseRepository.removeEvent(key);
     emit(
       CategoryListState(
         allEvents: state.allEvents,
@@ -175,14 +174,10 @@ class CategoryListCubit extends Cubit<CategoryListState> {
   }
 
   void eventRename({
-    required String title,
-    required int categoryIndex,
-    required int eventIndex,
+    required String key,
     required String newTitle,
-  }) {
-    DataBase.db.renameEvent(title, newTitle);
-    state.categoryList[categoryIndex].list.elementAt(eventIndex).title =
-        newTitle;
+  }) async {
+    dataBaseRepository.renameEvent(key, newTitle);
 
     emit(
       CategoryListState(
@@ -193,15 +188,10 @@ class CategoryListCubit extends Cubit<CategoryListState> {
   }
 
   void bookMarkEvent({
-    required String title,
-    required int categoryIndex,
-    required int eventIndex,
+    required String key,
+    required bool isBook,
   }) {
-    state.categoryList[categoryIndex].list[eventIndex].favorite
-        ? DataBase.db.bookmarkEvent(title, true)
-        : DataBase.db.bookmarkEvent(title, false);
-    state.categoryList[categoryIndex].list[eventIndex].favorite =
-        !state.categoryList[categoryIndex].list[eventIndex].favorite;
+    dataBaseRepository.bookmarkEvent(key, isBook);
 
     emit(
       CategoryListState(
@@ -212,7 +202,7 @@ class CategoryListCubit extends Cubit<CategoryListState> {
   }
 
   void deleteAll() {
-    DataBase.db.delete();
+    dataBaseRepository.deleteDB();
 
     emit(
       CategoryListState(
@@ -223,12 +213,54 @@ class CategoryListCubit extends Cubit<CategoryListState> {
   }
 
   void categoryRename({
-    required int categoryIndex,
+    required String key,
     required String newTitle,
   }) async {
-    DataBase.db
-        .renameCategory(state.categoryList[categoryIndex].title, newTitle);
-    state.categoryList[categoryIndex].title = newTitle;
+    dataBaseRepository.renameCategory(key, newTitle);
+
+    emit(
+      CategoryListState(
+        allEvents: state.allEvents,
+        categoryList: state.categoryList,
+      ),
+    );
+  }
+
+  void eventSelect(String key) {
+    dataBaseRepository.eventSelected(key);
+
+    emit(
+      CategoryListState(
+        allEvents: state.allEvents,
+        categoryList: state.categoryList,
+      ),
+    );
+  }
+
+  void eventNotSelect(String key) {
+    dataBaseRepository.eventNotSelected(key);
+
+    emit(
+      CategoryListState(
+        allEvents: state.allEvents,
+        categoryList: state.categoryList,
+      ),
+    );
+  }
+
+  void getAuthKey() async {
+    final key = await dataBaseRepository.getAuthKey();
+    
+    emit(
+      CategoryListState(
+          allEvents: state.allEvents,
+          categoryList: state.categoryList,
+          authKey: key ?? false),
+    );
+  }
+
+  void setAuthKey(bool key) {
+    dataBaseRepository.setAuthKey(key);
 
     emit(
       CategoryListState(

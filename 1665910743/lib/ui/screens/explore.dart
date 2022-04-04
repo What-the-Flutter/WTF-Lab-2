@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../cubit/category_list_cubit.dart';
+import '../../cubit/category_cubit/category_list_cubit.dart';
+
 
 class Explore extends StatelessWidget {
   static const title = 'Explore';

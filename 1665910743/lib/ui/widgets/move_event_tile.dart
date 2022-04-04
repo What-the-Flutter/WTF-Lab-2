@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../cubit/category_list_cubit.dart';
+import '../../cubit/category_cubit/category_list_cubit.dart';
 import '../screens/chat_screen.dart';
 
 Future<void> moveTile({
@@ -81,7 +81,10 @@ class _MoveTileState extends State<MoveTile> {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: ((context) => ChatScreen(eventId: _selectedCategory)),
+                builder: ((context) => ChatScreen(
+                      categoryTitle:
+                          state.categoryList[_selectedCategory].title,
+                    )),
               ),
             );
             context.read<CategoryListCubit>().moveEvent(

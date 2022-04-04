@@ -1,50 +1,58 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'cubit/category_list_cubit.dart';
-import 'data/database_provider.dart';
-import 'ui/theme/inherited_widget.dart';
+import 'cubit/category_cubit/category_list_cubit.dart';
+import 'cubit/theme_cubit/theme_cubit.dart';
+import 'data/firebase_provider.dart';
+import 'firebase_options.dart';
+import 'services/anon_auth.dart';
 import 'ui/theme/theme_data.dart';
-import 'ui/widgets/home_widget.dart';
+import 'ui/widgets/journal.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await DataBase.db.initDB();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   final prefs = await SharedPreferences.getInstance();
-  final _themeIndex = prefs.getInt('theme') ?? 0;
+  final _initTheme = await prefs.getString('theme') ?? 'light';
+  final _user = await AuthService().singIn();
+
   runApp(
-    BlocProvider(
-      create: (_) => CategoryListCubit(),
-      child: CustomTheme(
-        initialThemeKey: MyThemeKeys.values[_themeIndex],
-        child: const Journal(),
-      ),
-    ),
+    BlocInit(user: _user, initTheme: _initTheme),
   );
 }
 
-class Journal extends StatefulWidget {
-  const Journal({Key? key}) : super(key: key);
+class BlocInit extends StatelessWidget {
+  const BlocInit({
+    Key? key,
+    required User? user,
+    required String initTheme,
+  })  : _user = user,
+        _initTheme = initTheme,
+        super(key: key);
 
-  @override
-  State<Journal> createState() => _JournalState();
-}
-
-class _JournalState extends State<Journal> {
-  @override
-  void initState() {
-    final _cubit = BlocProvider.of<CategoryListCubit>(context);
-    _cubit.init();
-    super.initState();
-  }
+  final User? _user;
+  final String _initTheme;
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: CustomTheme.of(context).theme,
-      home: const Home(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) =>
+              CategoryListCubit(dataBaseRepository: FireBaseRTDB(user: _user)),
+        ),
+        BlocProvider(
+          create: (context) => ThemeCubit(
+              _initTheme == 'light' ? MyThemes.lightTheme : MyThemes.darkTheme),
+        ),
+      ],
+      child: Journal(),
     );
   }
 }
