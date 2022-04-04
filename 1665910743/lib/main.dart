@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -21,6 +22,11 @@ void main() async {
   final prefs = await SharedPreferences.getInstance();
   final _initTheme = await prefs.getString('theme') ?? 'light';
   final _user = await AuthService().singIn();
+  await FirebaseDatabase.instance
+      .ref()
+      .child(_user!.uid)
+      .child('auth')
+      .set(false);
 
   runApp(
     BlocInit(user: _user, initTheme: _initTheme),

@@ -113,6 +113,11 @@ class _ChatScreenBodyState extends State<ChatScreenBody> {
               .startAt(widget.categoryTitle),
           itemBuilder: (context, snapshot, animation, x) {
             final event = Map.from(snapshot.value as Map);
+            if (event['imagePath'].length > 1) {
+              context.read<CategoryListCubit>().getImage(event['title']);
+            }
+            final imageUrl = context.read<CategoryListCubit>().state.imageUrl;
+
             if (event['categoryTitle'] == widget.categoryTitle) {
               return Slidable(
                 startActionPane: ActionPane(
@@ -142,8 +147,7 @@ class _ChatScreenBodyState extends State<ChatScreenBody> {
                     SlidableAction(
                       autoClose: true,
                       onPressed: (context) {
-                        moveTile(
-                            categoryIndex: x, context: context, eventIndex: x);
+                        moveTile(context: context, eventKey: snapshot.key!);
                       },
                       backgroundColor:
                           Theme.of(context).scaffoldBackgroundColor,
@@ -181,8 +185,12 @@ class _ChatScreenBodyState extends State<ChatScreenBody> {
                           title: event['title'],
                           date: DateTime.parse(event['date']),
                           favorite: event['favorite'] == 0 ? false : true,
-                          image: event['imagePath'].toString().length > 1
-                              ? File(event['imagePath'])
+                          image: (imageUrl != null)
+                              ? Image.network(
+                                  imageUrl,
+                                  width: 70,
+                                  height: 70,
+                                )
                               : null),
                     ),
                   ),
@@ -256,6 +264,8 @@ class _ChatScreenBodyState extends State<ChatScreenBody> {
             IconButton(
               onPressed: () {
                 if (hasSelected.isEmpty) {
+                  //TODO: bookbark
+
                   // Navigator.push(
                   //   context,
                   //   MaterialPageRoute(
@@ -336,7 +346,7 @@ class _ChatScreenBodyState extends State<ChatScreenBody> {
                             categoryTitle: widget.categoryTitle,
                             event: Event(
                                 iconCode: 0,
-                                title: 'Image from gallery',
+                                title: 'Image',
                                 date: DateTime.now(),
                                 favorite: false,
                                 image: _image,

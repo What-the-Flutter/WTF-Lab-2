@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 
 import '../../extensions/date_extension.dart';
@@ -8,7 +6,7 @@ class EventTile extends StatelessWidget {
   final String title;
   final DateTime date;
   final bool favorite;
-  final File? image;
+  final Image? image;
   final bool isSelected;
   final int iconCode;
 
@@ -119,7 +117,7 @@ class _TileWithoutImage extends StatelessWidget {
 }
 
 class _TileWithImage extends StatefulWidget {
-  final File? image;
+  final Image? image;
   final String title;
   final String formattedDate;
   final bool favorite;
@@ -152,18 +150,10 @@ class _TileWithImageState extends State<_TileWithImage> {
                 () => _zoom = !_zoom,
               )),
           child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Image.file(
-              //TODO: в два виджета
-              File(widget.image!.path),
-              filterQuality: _zoom ? FilterQuality.high : FilterQuality.medium,
-              fit: _zoom ? BoxFit.fitHeight : BoxFit.cover,
-              width: _zoom ? _zoomSize : 70,
-              height: _zoom ? _zoomSize : 70,
-            ),
-          ),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: widget.image),
         ),
         SizedBox(
           width: _zoom ? 0 : MediaQuery.of(context).size.width * 0.1,

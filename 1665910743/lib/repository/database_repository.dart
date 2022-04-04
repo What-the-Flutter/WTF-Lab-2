@@ -14,9 +14,13 @@ abstract class DataBaseRepository {
   Future<void> moveEvent(String key, String newCategory) async {}
   Future<void> eventSelected(String key) async {}
   Future<void> eventNotSelected(String key) async {}
- Future<void> deleteDB() async {}
- Future<void> setAuthKey(bool key) async {}
- Future<bool?> getAuthKey() async {
-   return null;
- }
+  Future<void> deleteDB() async {}
+  Future<void> setAuthKey(bool key) async {}
+  Future<bool?> getAuthKey() async {
+    return null;
+  }
+
+  Future<String?> getImageUrl(String name) async {
+    return null;
+  }
 }

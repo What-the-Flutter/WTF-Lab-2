@@ -17,8 +17,7 @@ class UnpinedCategory extends StatefulWidget {
 
 class _UnpinedCategoryState extends State<UnpinedCategory> {
   final TextEditingController _controller = TextEditingController();
-  final Query _database =
-      FirebaseDatabase.instance.ref().child('user/contacts');
+  
   final _user = FirebaseAuth.instance.currentUser;
 
   @override

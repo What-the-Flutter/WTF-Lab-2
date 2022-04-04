@@ -117,7 +117,13 @@ class _BioAuthState extends State<BioAuth> {
           children: [
             Container(
               decoration: BoxDecoration(
-                  color: Colors.black, border: Border.all(width: 0)),
+                  image: const DecorationImage(
+                    opacity: 0.5,
+                    image: AssetImage('assets/auth_back.jpg'),
+                    fit: BoxFit.fitWidth,
+                  ),
+                  color: Colors.black,
+                  border: Border.all(width: 0)),
               height: MediaQuery.of(context).size.height * 0.3,
             ),
             Container(
@@ -158,6 +164,11 @@ class _BioAuthState extends State<BioAuth> {
               margin: EdgeInsets.only(
                   top: MediaQuery.of(context).size.height * 0.3),
               decoration: BoxDecoration(
+                  image: const DecorationImage(
+                    opacity: 0.1,
+                    image: AssetImage('assets/auth_back.jpg'),
+                    fit: BoxFit.cover,
+                  ),
                   border: Border.all(
                     width: 0,
                   ),

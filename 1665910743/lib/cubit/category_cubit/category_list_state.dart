@@ -6,9 +6,11 @@ class CategoryListState {
   final bool searchMode;
   final String searchResult;
   final bool authKey;
+  final String? imageUrl;
   final List<EventCategory> categoryList;
 
   CategoryListState( {
+    this.imageUrl,
     this.authKey = false,
     this.searchResult = '',
     this.searchMode = false,

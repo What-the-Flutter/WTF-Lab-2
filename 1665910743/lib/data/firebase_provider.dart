@@ -32,8 +32,8 @@ class FireBaseRTDB implements DataBaseRepository {
 
   @override
   Future<void> addEvent(Event event) async {
-    final isImage = await event.image!.length();
-    if (isImage > 1) {
+    final isImage = await event.image;
+    if (isImage != null) {
       try {
         final storageRef =
             FirebaseStorage.instance.ref('${user?.uid}/${event.title}');
@@ -67,9 +67,16 @@ class FireBaseRTDB implements DataBaseRepository {
   }
 
   @override
-  Future<void> moveEvent(String key, String newCategory) {
-    // TODO: implement moveEvent
-    throw UnimplementedError();
+  Future<void> moveEvent(String key, String newCategory) async {
+    try {
+      await ref
+          .child(user!.uid)
+          .child('events')
+          .child(key)
+          .update({'categoryTitle': newCategory});
+    } catch (e) {
+      print(e);
+    }
   }
 
   @override
@@ -183,7 +190,18 @@ class FireBaseRTDB implements DataBaseRepository {
 
     authKey = await ref.child(user!.uid).child('auth').get();
 
-    return authKey.value as bool ;
+    return authKey.value as bool;
+  }
+
+  @override
+  Future<String> getImageUrl(String name) async {
+    final url = await FirebaseStorage.instance
+        .ref()
+        .child(user!.uid)
+        .child(name)
+        .getDownloadURL();
+
+    return url;
   }
 
   @override

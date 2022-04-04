@@ -38,7 +38,6 @@ class BookmarkEvents extends StatelessWidget {
                       title: list[index].title,
                       date: list[index].date,
                       favorite: list[index].favorite,
-                      image: list[index].image,
                     ),
                   );
                 } else {

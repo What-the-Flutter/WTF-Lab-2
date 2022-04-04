@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -68,7 +67,7 @@ class BodyList extends StatelessWidget {
                 SlidableAction(
                   autoClose: true,
                   onPressed: (context) {
-                    moveTile(categoryIndex: x, context: context, eventIndex: x);
+                    moveTile(context: context, eventKey: snapshot.key!);
                   },
                   backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                   foregroundColor: Theme.of(context).primaryColor,
@@ -86,9 +85,7 @@ class BodyList extends StatelessWidget {
                     title: event['title'],
                     date: DateTime.parse(event['date']),
                     favorite: event['favorite'] == 0 ? false : true,
-                    image: event['imagePath'].toString().length > 1
-                        ? File(event['imagePath'])
-                        : null),
+                    image: null),
               ),
             ),
           );
@@ -136,8 +133,7 @@ class SearchResultList extends StatelessWidget {
                   SlidableAction(
                     autoClose: true,
                     onPressed: (context) {
-                      moveTile(
-                          categoryIndex: x, context: context, eventIndex: x);
+                      moveTile(context: context, eventKey: snapshot.key!);
                     },
                     backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                     foregroundColor: Theme.of(context).primaryColor,
@@ -158,9 +154,7 @@ class SearchResultList extends StatelessWidget {
                           title: event['title'],
                           date: DateTime.parse(event['date']),
                           favorite: event['favorite'] == 0 ? false : true,
-                          image: event['imagePath'].toString().length > 1
-                              ? File(event['imagePath'])
-                              : null),
+                          image: null),
                       Text(' from ${event['categoryTitle']}'),
                     ],
                   ),

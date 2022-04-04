@@ -104,17 +104,23 @@ class CategoryListCubit extends Cubit<CategoryListState> {
     );
   }
 
-  void moveEvent(int oldCategory, int newCategory, int listIndex) {
+  void moveEvent(String key, String newCategory) {
     dataBaseRepository.moveEvent(
-      state.categoryList[oldCategory].list[listIndex].title,
-      state.categoryList[newCategory].title,
+      key,
+      newCategory,
     );
-    state.categoryList[newCategory].list.add(
-      state.categoryList[oldCategory].list[listIndex],
+  }
+
+  void getImage(String name) async {
+  final url = await dataBaseRepository.getImageUrl(name);
+
+    emit(
+      CategoryListState(
+        allEvents: state.allEvents,
+        categoryList: state.categoryList,
+       imageUrl: url
+      ),
     );
-    state.categoryList[newCategory].list[listIndex].categoryTitle =
-        state.categoryList[newCategory].title;
-    state.categoryList[oldCategory].list.removeAt(listIndex);
   }
 
   void enterSearchMode() {
@@ -250,7 +256,7 @@ class CategoryListCubit extends Cubit<CategoryListState> {
 
   void getAuthKey() async {
     final key = await dataBaseRepository.getAuthKey();
-    
+
     emit(
       CategoryListState(
           allEvents: state.allEvents,
