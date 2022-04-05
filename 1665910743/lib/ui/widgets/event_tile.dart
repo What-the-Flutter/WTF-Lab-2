@@ -135,62 +135,46 @@ class _TileWithImage extends StatefulWidget {
 }
 
 class _TileWithImageState extends State<_TileWithImage> {
-  bool _zoom = false;
-
   @override
   Widget build(BuildContext context) {
-    final _zoomSize = MediaQuery.of(context).size.width * 0.7;
-
     return Row(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        GestureDetector(
-          onDoubleTap: (() => setState(
-                () => _zoom = !_zoom,
-              )),
-          child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: widget.image),
-        ),
+        Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: widget.image),
         SizedBox(
-          width: _zoom ? 0 : MediaQuery.of(context).size.width * 0.1,
+          width: MediaQuery.of(context).size.width * 0.1,
         ),
-        _zoom
-            ? const SizedBox()
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.5,
-                    child: Text(
-                      widget.title,
-                      style: const TextStyle(
-                          fontSize: 20, overflow: TextOverflow.fade),
-                    ),
-                  ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        widget.formattedDate,
-                        style: const TextStyle(fontSize: 10),
-                      ),
-                      widget.favorite
-                          ? const Icon(
-                              Icons.star,
-                              size: 10,
-                            )
-                          : const Icon(
-                              Icons.star_border,
-                              size: 10,
-                            ),
-                    ],
-                  ),
-                ],
-              )
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: MediaQuery.of(context).size.width * 0.5,
+              child: Text(
+                widget.title,
+                style:
+                    const TextStyle(fontSize: 20, overflow: TextOverflow.fade),
+              ),
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  widget.formattedDate,
+                  style: const TextStyle(fontSize: 10),
+                ),
+                Icon(
+                  widget.favorite ? Icons.star : Icons.star_border,
+                  size: 10,
+                )
+              ],
+            ),
+          ],
+        )
       ],
     );
   }

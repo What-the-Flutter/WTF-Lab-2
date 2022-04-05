@@ -109,6 +109,8 @@ class _BioAuthState extends State<BioAuth> {
 
   @override
   Widget build(BuildContext context) {
+    final _heigth = MediaQuery.of(context).size.height;
+    final _width = MediaQuery.of(context).size.width;
     return Scaffold(
       body: Container(
         color: Theme.of(context).primaryColor,
@@ -124,7 +126,7 @@ class _BioAuthState extends State<BioAuth> {
                   ),
                   color: Colors.black,
                   border: Border.all(width: 0)),
-              height: MediaQuery.of(context).size.height * 0.3,
+              height: _heigth * 0.3,
             ),
             Container(
               width: double.infinity,
@@ -138,31 +140,33 @@ class _BioAuthState extends State<BioAuth> {
                 ),
               ),
               decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Theme.of(context).primaryColor.withOpacity(0.7),
-                      Theme.of(context).primaryColor,
-                    ],
-                    begin: Alignment.topRight,
-                    end: Alignment.bottomLeft,
-                  ),
-                  border: Border.all(
-                    width: 0,
-                    color: Theme.of(context).primaryColor,
-                  ),
-                  borderRadius: const BorderRadius.only(
-                      bottomRight: Radius.circular(75))),
-              height: MediaQuery.of(context).size.height * 0.3,
+                gradient: LinearGradient(
+                  colors: [
+                    Theme.of(context).primaryColor.withOpacity(0.7),
+                    Theme.of(context).primaryColor,
+                  ],
+                  begin: Alignment.topRight,
+                  end: Alignment.bottomLeft,
+                ),
+                border: Border.all(
+                  width: 0,
+                  color: Theme.of(context).primaryColor,
+                ),
+                borderRadius: const BorderRadius.only(
+                  bottomRight: Radius.circular(75),
+                ),
+              ),
+              height: _heigth * 0.3,
             ),
             Container(
               margin: EdgeInsets.only(
-                  top: MediaQuery.of(context).size.height * 0.2,
-                  left: MediaQuery.of(context).size.width * 0.7),
+                  top: _heigth * 0.2,
+                  left: _width * 0.7),
             ),
             Container(
               child: _authButton(context),
               margin: EdgeInsets.only(
-                  top: MediaQuery.of(context).size.height * 0.3),
+                  top: _heigth * 0.3),
               decoration: BoxDecoration(
                   image: const DecorationImage(
                     opacity: 0.1,
@@ -176,7 +180,7 @@ class _BioAuthState extends State<BioAuth> {
                   borderRadius:
                       const BorderRadius.only(topLeft: Radius.circular(75))),
               width: double.infinity,
-              height: MediaQuery.of(context).size.height * 0.7,
+              height: _heigth * 0.7,
             )
           ],
         ),

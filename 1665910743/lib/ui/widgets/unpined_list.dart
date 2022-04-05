@@ -17,7 +17,7 @@ class UnpinedCategory extends StatefulWidget {
 
 class _UnpinedCategoryState extends State<UnpinedCategory> {
   final TextEditingController _controller = TextEditingController();
-  
+
   final _user = FirebaseAuth.instance.currentUser;
 
   @override
@@ -36,13 +36,16 @@ class _UnpinedCategoryState extends State<UnpinedCategory> {
             .child('category')
             .orderByChild('pinned'),
         itemBuilder: (context, snapshot, animation, x) {
-          var categoryList = Map.from(snapshot.value as Map);
+          var category = EventCategory.fromMap(
+            Map.from(snapshot.value as Map),
+          );
+          print(category.pinned);
           return GestureDetector(
             onTap: (() => Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: ((context) =>
-                        ChatScreen(categoryTitle: categoryList['title'])),
+                        ChatScreen(categoryTitle: category.title)),
                   ),
                 )),
             onLongPress: () {
@@ -50,29 +53,25 @@ class _UnpinedCategoryState extends State<UnpinedCategory> {
               displayTextInputDialog(
                   context: context,
                   category: EventCategory(
-                    title: categoryList['title'],
-                    pinned: categoryList['pinned'] == 1 ? false : true,
+                    title: category.title,
+                    pinned: category.pinned,
                     icon: const Icon(Icons.ads_click),
                   ),
-                  pinned: categoryList['pinned'] == 1 ? false : true,
+                  pinned: category.pinned,
                   key: snapshot.key!);
             },
             child: ListTile(
               leading: CircleAvatar(
-                backgroundColor: Theme.of(context).primaryColor,
-                foregroundColor: Colors.white,
-                child: Icon(
-                  IconData(categoryList['icon'], fontFamily: 'MaterialIcons'),
-                ),
-              ),
-              title: Text(categoryList['title']),
-              subtitle: Text(categoryList['pinned'].toString()),
-              trailing: Icon(
-                Icons.push_pin_rounded,
-                color: categoryList['pinned'] == 1
-                    ? Theme.of(context).scaffoldBackgroundColor
-                    : Theme.of(context).primaryColor,
-              ),
+                  backgroundColor: Theme.of(context).primaryColor,
+                  foregroundColor: Colors.white,
+                  child: category.icon),
+              title: Text(category.title),
+              trailing: (category.pinned)
+                  ? Icon(
+                      Icons.push_pin_rounded,
+                      color: Theme.of(context).primaryColor,
+                    )
+                  : null,
             ),
           );
         });

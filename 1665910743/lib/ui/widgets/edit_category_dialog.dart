@@ -133,17 +133,21 @@ class _EditDialogState extends State<EditDialog> {
           Navigator.pop(context);
 
           if (widget.category.pinned == false) {
-            widget.category.pinned = true;
-            context.read<CategoryListCubit>().pin(
-                  widget.category,
-                  widget.dbKey,
-                );
+            
+            setState(() {
+              context.read<CategoryListCubit>().pin(
+                    widget.category,
+                    widget.dbKey,
+                  );
+            });
           } else {
-            widget.category.pinned = false;
-            context.read<CategoryListCubit>().unpin(
-                  widget.category,
-                  widget.dbKey,
-                );
+            
+            setState(() {
+              context.read<CategoryListCubit>().unpin(
+                    widget.category,
+                    widget.dbKey,
+                  );
+            });
           }
         },
         icon: widget.pinned

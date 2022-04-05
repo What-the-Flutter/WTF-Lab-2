@@ -58,9 +58,7 @@ class _HomeState extends State<Home> {
   }
 
   void _onItemTapped(int index) {
-    if (index == 1) {
-      context.read<CategoryListCubit>().fetchAllEvents();
-    }
+    
     context.read<CategoryListCubit>().exitSearch();
     setState(
       () {

@@ -20,11 +20,9 @@ class FireBaseRTDB implements DataBaseRepository {
     EventCategory event,
   ) async {
     try {
-      await ref
-          .child(user?.uid ?? 'user')
-          .child('category')
-          .push()
-          .set(event.toMap());
+      await ref.child(user?.uid ?? 'user').child('category').push().set(
+            event.toMap(),
+          );
     } catch (e) {
       print(e);
     }
@@ -37,17 +35,17 @@ class FireBaseRTDB implements DataBaseRepository {
       try {
         final storageRef =
             FirebaseStorage.instance.ref('${user?.uid}/${event.title}');
-        await storageRef.putFile(File(event.image!.path));
+        await storageRef.putFile(
+          File(event.image!),
+        );
       } catch (e) {
         print(e);
       }
     }
     try {
-      await ref
-          .child(user?.uid ?? 'user')
-          .child('events')
-          .push()
-          .set(event.toMap());
+      await ref.child(user?.uid ?? 'user').child('events').push().set(
+            event.toMap(),
+          );
     } catch (e) {
       print(e);
     }

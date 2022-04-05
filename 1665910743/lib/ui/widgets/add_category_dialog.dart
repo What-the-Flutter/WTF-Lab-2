@@ -7,6 +7,7 @@ import '../../cubit/theme_cubit/theme_cubit.dart';
 import '../../models/event_category.dart';
 import '../../models/icons_pack.dart';
 import '../theme/theme_data.dart';
+import 'category_icon_button.dart';
 
 Future<dynamic> addTaskDialog(BuildContext context) {
   return showModalBottomSheet(
@@ -174,9 +175,9 @@ class _ModalBodyState extends State<ModalBody> {
           );
         }
       },
-      icon: const Icon(
+      icon: Icon(
         Icons.send,
-        color: Colors.white,
+        color: Theme.of(context).scaffoldBackgroundColor,
       ),
     );
   }

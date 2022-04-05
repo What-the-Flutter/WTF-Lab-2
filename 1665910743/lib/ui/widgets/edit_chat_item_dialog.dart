@@ -5,8 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../cubit/category_cubit/category_list_cubit.dart';
 
-
-
 Future<void> chatTileEditDialog(
     {required BuildContext context,
     required String title,
@@ -61,7 +59,11 @@ class _EditChatTileState extends State<EditChatTile> {
       title: const Center(child: Text('Rename your event')),
       actionsAlignment: MainAxisAlignment.spaceEvenly,
       actions: [
-        _bookmarkButton(context, widget.eventKey, widget.isBookmarked),
+        _bookmarkButton(
+          context,
+          widget.eventKey,
+          widget.isBookmarked,
+        ),
         _renameButton(context),
         _deleteButton(context)
       ],
@@ -71,7 +73,7 @@ class _EditChatTileState extends State<EditChatTile> {
     );
   }
 
-  CircleAvatar _deleteButton(BuildContext context) {
+  Widget _deleteButton(BuildContext context) {
     return CircleAvatar(
       backgroundColor: Theme.of(context).primaryColor,
       foregroundColor: Colors.white,
@@ -87,7 +89,7 @@ class _EditChatTileState extends State<EditChatTile> {
     );
   }
 
-  ElevatedButton _renameButton(
+  Widget _renameButton(
     BuildContext context,
   ) {
     return ElevatedButton(
@@ -108,7 +110,7 @@ class _EditChatTileState extends State<EditChatTile> {
     );
   }
 
-  CircleAvatar _bookmarkButton(
+  Widget _bookmarkButton(
     BuildContext context,
     String key,
     bool isBook,
@@ -117,13 +119,16 @@ class _EditChatTileState extends State<EditChatTile> {
       foregroundColor: Colors.white,
       backgroundColor: Theme.of(context).primaryColor,
       child: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-            context
-                .read<CategoryListCubit>()
-                .bookMarkEvent(key: key, isBook: isBook);
-          },
-          icon: const Icon(Icons.bookmark)),
+        onPressed: () {
+          Navigator.pop(context);
+          context
+              .read<CategoryListCubit>()
+              .bookMarkEvent(key: key, isBook: isBook);
+        },
+        icon: Icon(
+          widget.isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+        ),
+      ),
     );
   }
 }

@@ -1,8 +1,6 @@
-import 'dart:io';
-
 class Event {
   final DateTime date;
-  final File? image;
+  final String? image;
   final int iconCode;
   String title;
   bool favorite = false;
@@ -18,9 +16,17 @@ class Event {
     this.image,
   });
 
+  Event.fromMap(Map<dynamic, dynamic> map)
+      : title = map['title'],
+        date = DateTime.parse(map['date']),
+        favorite = map['favorite'] == 0 ? false : true,
+        iconCode = map['icon'],
+        categoryTitle = map['categoryTitle'],
+        image = map['imagePath'];
+
   Map<String, dynamic> toMap() {
     return {
-      'imagePath': image?.path ?? '',
+      'imagePath': image ?? '',
       'icon': iconCode,
       'title': title,
       'favorite': favorite ? 1 : 0,

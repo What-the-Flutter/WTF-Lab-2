@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 
@@ -25,12 +23,12 @@ class _BottomNavBarState extends State<BottomNavBar> {
       color: Theme.of(context).primaryColor,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       buttonBackgroundColor: Theme.of(context).primaryColor,
-      height: Platform.isIOS ? 70 : 60,
+      height: 60,
       items: const [
         Icon(Icons.book),
         Icon(Icons.assignment),
         Icon(Icons.map),
-        Icon(Icons.add_to_drive_rounded),
+        Icon(Icons.explore),
       ],
       onTap: widget.onTap,
     );

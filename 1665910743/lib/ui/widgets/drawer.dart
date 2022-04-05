@@ -47,7 +47,7 @@ class _JourneyDrawerState extends State<JourneyDrawer> {
                   value: authValue,
                   onChanged: (value) async {
                     context.read<CategoryListCubit>().setAuthKey(value);
-                      context.read<CategoryListCubit>().getAuthKey();
+                    context.read<CategoryListCubit>().getAuthKey();
                   }),
             ],
           ),
@@ -100,7 +100,7 @@ class _JourneyDrawerState extends State<JourneyDrawer> {
                       )
                       .toString(),
                   style: const TextStyle(
-                    fontSize: 15,
+                    fontSize: 10,
                   ),
                 ),
               ],

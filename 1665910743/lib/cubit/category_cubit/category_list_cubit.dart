@@ -1,6 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../data/database_provider.dart';
 import '../../models/event.dart';
 import '../../models/event_category.dart';
 import '../../repository/database_repository.dart';
@@ -11,98 +10,59 @@ class CategoryListCubit extends Cubit<CategoryListState> {
   CategoryListCubit({required this.dataBaseRepository})
       : super(
           CategoryListState(
-            categoryList: [],
-            allEvents: [],
+            
           ),
         );
 
-  void fetchEventsInCategory(int categoryIndex) async {
-    final eventsFromDb = await DataBase.db.getEventList(
-      state.categoryList[categoryIndex].title,
-    );
-    if (state.categoryList[categoryIndex].list.isEmpty) {
-      state.categoryList[categoryIndex].list.addAll(eventsFromDb);
-    }
-    emit(
-      CategoryListState(
-        categoryList: state.categoryList,
-        allEvents: state.allEvents,
-      ),
-    );
-  }
+  
 
   void add(EventCategory category) {
     dataBaseRepository.addCategory(category);
 
-    state.categoryList.add(category);
 
     emit(
       CategoryListState(
-        categoryList: state.categoryList,
-        allEvents: state.allEvents,
+          
+         
       ),
     );
   }
 
   void remove(EventCategory category, String key) {
-    state.categoryList.removeWhere(
-      (element) => element.title == category.title,
-    );
+    
     dataBaseRepository.removeCategory(key);
     emit(
       CategoryListState(
-        categoryList: state.categoryList,
-        allEvents: state.allEvents,
+          
+         
       ),
     );
   }
 
   void pin(EventCategory category, String key) async {
-    for (final element in state.categoryList) {
-      if (element.title == category.title) {
-        element.pinned = true;
-      }
-    }
+    
     dataBaseRepository.pinCategory(key);
     emit(
       CategoryListState(
-        categoryList: await DataBase.db.getCategoryList(),
-        allEvents: state.allEvents,
+        
+         
       ),
     );
   }
 
   void unpin(EventCategory category, String key) {
-    for (final element in state.categoryList) {
-      if (element.title == category.title) {
-        element.pinned = true;
-      }
-    }
+    
     dataBaseRepository.unpinCategory(key);
 
     emit(
       CategoryListState(
-        categoryList: state.categoryList,
-        allEvents: state.allEvents,
+          
+         
       ),
     );
   }
 
-  void fetchAllEvents() {
-    state.allEvents.clear();
-    for (var i = 0; i < state.categoryList.length; i++) {
-      state.allEvents.addAll(
-        state.categoryList[i].list,
-      );
-    }
-
-    emit(
-      CategoryListState(
-        categoryList: state.categoryList,
-        allEvents: state.allEvents,
-      ),
-    );
-  }
+  
 
   void moveEvent(String key, String newCategory) {
     dataBaseRepository.moveEvent(
@@ -116,8 +76,8 @@ class CategoryListCubit extends Cubit<CategoryListState> {
 
     emit(
       CategoryListState(
-        allEvents: state.allEvents,
-        categoryList: state.categoryList,
+        
+          
        imageUrl: url
       ),
     );
@@ -126,8 +86,8 @@ class CategoryListCubit extends Cubit<CategoryListState> {
   void enterSearchMode() {
     emit(
       CategoryListState(
-        allEvents: state.allEvents,
-        categoryList: state.categoryList,
+         
+          
         searchMode: true,
       ),
     );
@@ -136,8 +96,8 @@ class CategoryListCubit extends Cubit<CategoryListState> {
   void searchControll(String value) {
     emit(
       CategoryListState(
-        allEvents: state.allEvents,
-        categoryList: state.categoryList,
+         
+          
         searchMode: state.searchMode,
         searchResult: value,
       ),
@@ -147,24 +107,20 @@ class CategoryListCubit extends Cubit<CategoryListState> {
   void exitSearch() {
     emit(
       CategoryListState(
-        allEvents: state.allEvents,
-        categoryList: state.categoryList,
+         
+          
         searchMode: false,
       ),
     );
   }
 
   void addEvent({required String categoryTitle, required Event event}) {
-    for (var element in state.categoryList) {
-      if (element.title == categoryTitle) {
-        element.list.add(event);
-      }
-    }
+   
     dataBaseRepository.addEvent(event);
     emit(
       CategoryListState(
-        allEvents: state.allEvents,
-        categoryList: state.categoryList,
+         
+          
       ),
     );
   }
@@ -173,8 +129,8 @@ class CategoryListCubit extends Cubit<CategoryListState> {
     dataBaseRepository.removeEvent(key);
     emit(
       CategoryListState(
-        allEvents: state.allEvents,
-        categoryList: state.categoryList,
+         
+          
       ),
     );
   }
@@ -187,8 +143,8 @@ class CategoryListCubit extends Cubit<CategoryListState> {
 
     emit(
       CategoryListState(
-        allEvents: state.allEvents,
-        categoryList: state.categoryList,
+         
+          
       ),
     );
   }
@@ -201,8 +157,8 @@ class CategoryListCubit extends Cubit<CategoryListState> {
 
     emit(
       CategoryListState(
-        allEvents: state.allEvents,
-        categoryList: state.categoryList,
+         
+          
       ),
     );
   }
@@ -212,8 +168,7 @@ class CategoryListCubit extends Cubit<CategoryListState> {
 
     emit(
       CategoryListState(
-        categoryList: [],
-        allEvents: [],
+        
       ),
     );
   }
@@ -226,8 +181,8 @@ class CategoryListCubit extends Cubit<CategoryListState> {
 
     emit(
       CategoryListState(
-        allEvents: state.allEvents,
-        categoryList: state.categoryList,
+         
+          
       ),
     );
   }
@@ -237,8 +192,8 @@ class CategoryListCubit extends Cubit<CategoryListState> {
 
     emit(
       CategoryListState(
-        allEvents: state.allEvents,
-        categoryList: state.categoryList,
+         
+          
       ),
     );
   }
@@ -248,8 +203,8 @@ class CategoryListCubit extends Cubit<CategoryListState> {
 
     emit(
       CategoryListState(
-        allEvents: state.allEvents,
-        categoryList: state.categoryList,
+         
+          
       ),
     );
   }
@@ -259,8 +214,8 @@ class CategoryListCubit extends Cubit<CategoryListState> {
 
     emit(
       CategoryListState(
-          allEvents: state.allEvents,
-          categoryList: state.categoryList,
+           
+            
           authKey: key ?? false),
     );
   }
@@ -270,8 +225,8 @@ class CategoryListCubit extends Cubit<CategoryListState> {
 
     emit(
       CategoryListState(
-        allEvents: state.allEvents,
-        categoryList: state.categoryList,
+         
+          
       ),
     );
   }

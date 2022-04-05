@@ -11,12 +11,11 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../constants.dart';
 import '../../cubit/category_cubit/category_list_cubit.dart';
-import '../../cubit/category_cubit/category_list_state.dart';
 import '../../models/event.dart';
 import '../../models/icons_pack.dart';
-import 'edit_chat_item_dialog.dart';
+import '../screens/bookmarks.dart';
 import 'event_tile.dart';
-import 'move_event_tile.dart';
+import 'event_tile_actions.dart';
 
 class ChatScreenBody extends StatefulWidget {
   final String categoryTitle;
@@ -112,48 +111,27 @@ class _ChatScreenBodyState extends State<ChatScreenBody> {
               .orderByChild('categoryTitle')
               .startAt(widget.categoryTitle),
           itemBuilder: (context, snapshot, animation, x) {
-            final event = Map.from(snapshot.value as Map);
-            if (event['imagePath'].length > 1) {
-              context.read<CategoryListCubit>().getImage(event['title']);
+            final event = Event.fromMap(
+              Map.from(snapshot.value as Map),
+            );
+            print(event.favorite);
+
+            if (event.image!.length > 1) {
+              context.read<CategoryListCubit>().getImage(event.title);
             }
             final imageUrl = context.read<CategoryListCubit>().state.imageUrl;
 
-            if (event['categoryTitle'] == widget.categoryTitle) {
+            if (event.categoryTitle == widget.categoryTitle) {
               return Slidable(
                 startActionPane: ActionPane(
                   motion: const ScrollMotion(),
                   children: [
-                    SlidableAction(
-                      onPressed: (context) => chatTileEditDialog(
-                        isBookmarked: event['favorite'] == 0 ? false : true,
-                        key: snapshot.key!,
-                        title: event['title'],
-                        context: context,
-                      ),
-                      backgroundColor:
-                          Theme.of(context).scaffoldBackgroundColor,
-                      foregroundColor: Theme.of(context).primaryColor,
-                      icon: Icons.edit,
+                    EditAction(
+                      event: event,
+                      eventKey: snapshot.key!,
                     ),
-                    SlidableAction(
-                      onPressed: (context) => context
-                          .read<CategoryListCubit>()
-                          .removeEventInCategory(key: snapshot.key!),
-                      backgroundColor:
-                          Theme.of(context).scaffoldBackgroundColor,
-                      foregroundColor: Theme.of(context).primaryColor,
-                      icon: Icons.delete,
-                    ),
-                    SlidableAction(
-                      autoClose: true,
-                      onPressed: (context) {
-                        moveTile(context: context, eventKey: snapshot.key!);
-                      },
-                      backgroundColor:
-                          Theme.of(context).scaffoldBackgroundColor,
-                      foregroundColor: Theme.of(context).primaryColor,
-                      icon: Icons.move_down,
-                    ),
+                    RemoveAction(eventKey: snapshot.key!),
+                    MoveAction(eventKey: snapshot.key!),
                   ],
                 ),
                 child: Container(
@@ -161,31 +139,32 @@ class _ChatScreenBodyState extends State<ChatScreenBody> {
                   child: Align(
                     alignment: Alignment.bottomLeft,
                     child: GestureDetector(
-                      onDoubleTap: () => _copyToClipboard(event['title']),
+                      onDoubleTap: () => _copyToClipboard(event.title),
                       onLongPress: () {
-                        setState(() {
-                          if (event['isSelected'] == 0) {
-                            hasSelected.add(snapshot.key);
-                            context
-                                .read<CategoryListCubit>()
-                                .eventSelect(snapshot.key!);
-                          } else {
-                            hasSelected.remove(snapshot.key);
-                            context
-                                .read<CategoryListCubit>()
-                                .eventNotSelect(snapshot.key!);
-                          }
-
-                          HapticFeedback.heavyImpact();
-                        });
+                        setState(
+                          () {
+                            if (event.isSelected == 0) {
+                              hasSelected.add(snapshot.key);
+                              context
+                                  .read<CategoryListCubit>()
+                                  .eventSelect(snapshot.key!);
+                            } else {
+                              hasSelected.remove(snapshot.key);
+                              context
+                                  .read<CategoryListCubit>()
+                                  .eventNotSelect(snapshot.key!);
+                            }
+                            HapticFeedback.heavyImpact();
+                          },
+                        );
                       },
                       child: EventTile(
-                          iconCode: event['icon'],
-                          isSelected: event['isSelected'] == 0 ? false : true,
-                          title: event['title'],
-                          date: DateTime.parse(event['date']),
-                          favorite: event['favorite'] == 0 ? false : true,
-                          image: (imageUrl != null)
+                          iconCode: event.iconCode,
+                          isSelected: event.isSelected,
+                          title: event.title,
+                          date: event.date,
+                          favorite: event.favorite,
+                          image: (imageUrl != null && event.image!.length > 1)
                               ? Image.network(
                                   imageUrl,
                                   width: 70,
@@ -254,115 +233,105 @@ class _ChatScreenBodyState extends State<ChatScreenBody> {
       );
 
   Widget _chatScreenNavBar() {
-    final state = context.read<CategoryListCubit>();
-
     return SafeArea(
-      child: BlocBuilder<CategoryListCubit, CategoryListState>(
-        bloc: state,
-        builder: (context, state) => Row(
-          children: [
-            IconButton(
-              onPressed: () {
-                if (hasSelected.isEmpty) {
-                  //TODO: bookbark
-
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(
-                  //     builder: (context) => BookmarkEvents(
-                  //       id: eventid,
-                  //     ),
-                  //   ),
-                  // );
-                } else {
-                  for (final el in hasSelected) {
-                    context
-                        .read<CategoryListCubit>()
-                        .removeEventInCategory(key: el);
-                  }
-                  hasSelected.clear();
+      child: Row(
+        children: [
+          IconButton(
+            onPressed: () {
+              if (hasSelected.isEmpty) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => BookmarkEvents(),
+                  ),
+                );
+              } else {
+                for (final el in hasSelected) {
+                  context
+                      .read<CategoryListCubit>()
+                      .removeEventInCategory(key: el);
                 }
-              },
-              icon: Icon(
-                hasSelected.isNotEmpty ? Icons.delete : Icons.bookmark,
-                color: Theme.of(context).primaryColor,
-              ),
+                hasSelected.clear();
+              }
+            },
+            icon: Icon(
+              hasSelected.isNotEmpty ? Icons.delete : Icons.bookmark,
+              color: Theme.of(context).primaryColor,
             ),
-            IconButton(
-              onPressed: () {
-                setState(() {
-                  _iconAdd = !_iconAdd;
-                });
-              },
-              icon: Icon(
-                (_selectedIcon == -1)
-                    ? Icons.bubble_chart
-                    : kMyIcons[_selectedIcon].icon,
-                color: Theme.of(context).primaryColor,
-              ),
+          ),
+          IconButton(
+            onPressed: () {
+              setState(() {
+                _iconAdd = !_iconAdd;
+              });
+            },
+            icon: Icon(
+              (_selectedIcon == -1)
+                  ? Icons.bubble_chart
+                  : kMyIcons[_selectedIcon].icon,
+              color: Theme.of(context).primaryColor,
             ),
-            Expanded(
-              child: TextField(
-                decoration: const InputDecoration(
-                  hintText: ' Enter event',
-                  border: InputBorder.none,
-                ),
-                controller: _controller,
+          ),
+          Expanded(
+            child: TextField(
+              decoration: const InputDecoration(
+                hintText: ' Enter event',
+                border: InputBorder.none,
               ),
+              controller: _controller,
             ),
-            IconButton(
-                onPressed: () async {
-                  if (_controller.value.text.isNotEmpty) {
-                    if (_selectedIcon == -1) {
-                      context.read<CategoryListCubit>().addEvent(
+          ),
+          IconButton(
+              onPressed: () async {
+                if (_controller.value.text.isNotEmpty) {
+                  if (_selectedIcon == -1) {
+                    context.read<CategoryListCubit>().addEvent(
+                          categoryTitle: widget.categoryTitle,
+                          event: Event(
+                            iconCode: 0,
+                            title: _controller.text,
+                            date: DateTime.now(),
+                            favorite: false,
                             categoryTitle: widget.categoryTitle,
-                            event: Event(
-                              iconCode: 0,
+                          ),
+                        );
+                  } else {
+                    context.read<CategoryListCubit>().addEvent(
+                          categoryTitle: widget.categoryTitle,
+                          event: Event(
                               title: _controller.text,
                               date: DateTime.now(),
                               favorite: false,
-                              categoryTitle: widget.categoryTitle,
-                            ),
-                          );
-                    } else {
-                      context.read<CategoryListCubit>().addEvent(
-                            categoryTitle: widget.categoryTitle,
-                            event: Event(
-                                title: _controller.text,
-                                date: DateTime.now(),
-                                favorite: false,
-                                iconCode:
-                                    kMyIcons[_selectedIcon].icon!.codePoint,
-                                categoryTitle: widget.categoryTitle),
-                          );
-                    }
-                    _selectedIcon = -1;
-
-                    _controller.clear();
-                  } else if (_controller.value.text.isEmpty) {
-                    await getImage();
-                    if (_image != null) {
-                      context.read<CategoryListCubit>().addEvent(
-                            categoryTitle: widget.categoryTitle,
-                            event: Event(
-                                iconCode: 0,
-                                title: 'Image',
-                                date: DateTime.now(),
-                                favorite: false,
-                                image: _image,
-                                categoryTitle: widget.categoryTitle),
-                          );
-                    }
+                              iconCode: kMyIcons[_selectedIcon].icon!.codePoint,
+                              categoryTitle: widget.categoryTitle),
+                        );
                   }
-                },
-                icon: Icon(
-                  _controller.value.text.isEmpty
-                      ? Icons.photo_camera
-                      : Icons.send,
-                  color: Theme.of(context).primaryColor,
-                ))
-          ],
-        ),
+                  _selectedIcon = -1;
+
+                  _controller.clear();
+                } else if (_controller.value.text.isEmpty) {
+                  await getImage();
+                  if (_image != null) {
+                    context.read<CategoryListCubit>().addEvent(
+                          categoryTitle: widget.categoryTitle,
+                          event: Event(
+                              iconCode: 0,
+                              title: 'Image',
+                              date: DateTime.now(),
+                              favorite: false,
+                              image: _image!.path,
+                              categoryTitle: widget.categoryTitle),
+                        );
+                  }
+                }
+              },
+              icon: Icon(
+                _controller.value.text.isEmpty
+                    ? Icons.photo_camera
+                    : Icons.send,
+                color: Theme.of(context).primaryColor,
+              ))
+        ],
       ),
     );
   }

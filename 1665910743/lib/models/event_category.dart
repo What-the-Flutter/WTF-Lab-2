@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'event.dart';
 
 class EventCategory {
-  final list = <Event>[];
   final Icon icon;
   String title;
   bool pinned;
@@ -21,13 +19,13 @@ class EventCategory {
     };
   }
 
-  factory EventCategory.fromRTDB(Map<String, dynamic> data) {
-    return EventCategory(
-      title: data['title'],
-      pinned: data['pinned'] == 0 ? false : true,
-      icon: Icon(
-        IconData(data['icon']),
-      ),
-    );
-  }
+  EventCategory.fromMap(Map<dynamic, dynamic> data)
+      : title = data['title'],
+        pinned = data['pinned'] == 0 ? true : false,
+        icon = Icon(
+          IconData(
+            data['icon'],
+            fontFamily: 'MaterialIcons',
+          ),
+        );
 }

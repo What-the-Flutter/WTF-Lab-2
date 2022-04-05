@@ -172,7 +172,7 @@ class DataBase {
       (i) {
         final String imagePath = events[i]['imagePath'];
         return Event(
-          image: imagePath.length > 1 ? File(imagePath) : null,
+          image: imagePath.length > 1 ? File(imagePath).path : null,
           iconCode: events[i]['icon'],
           title: events[i]['title'],
           date: DateTime.parse(events[i]['date']),
