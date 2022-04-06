@@ -44,7 +44,7 @@ class _JourneyDrawerState extends State<JourneyDrawer> {
               const Text('Enable Bio auth'),
               Switch.adaptive(
                   activeColor: Theme.of(context).primaryColor,
-                  value: authValue,
+                  value: authValue!,
                   onChanged: (value) async {
                     context.read<CategoryListCubit>().setAuthKey(value);
                     context.read<CategoryListCubit>().getAuthKey();

@@ -75,7 +75,6 @@ class _ChatScreenBodyState extends State<ChatScreenBody> {
 
     setState(() {
       if (_newImage != null) {
-        print(_newImage.path);
         _image = _newImage;
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -114,7 +113,6 @@ class _ChatScreenBodyState extends State<ChatScreenBody> {
             final event = Event.fromMap(
               Map.from(snapshot.value as Map),
             );
-            print(event.favorite);
 
             if (event.image!.length > 1) {
               context.read<CategoryListCubit>().getImage(event.title);

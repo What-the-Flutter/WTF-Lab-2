@@ -33,7 +33,7 @@ class _JournalState extends State<Journal> {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
           theme: state,
-          home: (authKey) ? const BioAuth() : const Home(),
+          home: (authKey ?? false) ? const BioAuth() : const Home(),
         );
       }),
     );

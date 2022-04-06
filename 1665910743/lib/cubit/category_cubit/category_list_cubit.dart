@@ -9,60 +9,38 @@ class CategoryListCubit extends Cubit<CategoryListState> {
   final DataBaseRepository dataBaseRepository;
   CategoryListCubit({required this.dataBaseRepository})
       : super(
-          CategoryListState(
-            
-          ),
+          CategoryListState(),
         );
-
-  
 
   void add(EventCategory category) {
     dataBaseRepository.addCategory(category);
 
-
     emit(
-      CategoryListState(
-          
-         
-      ),
+      CategoryListState(),
     );
   }
 
   void remove(EventCategory category, String key) {
-    
     dataBaseRepository.removeCategory(key);
     emit(
-      CategoryListState(
-          
-         
-      ),
+      CategoryListState(),
     );
   }
 
   void pin(EventCategory category, String key) async {
-    
     dataBaseRepository.pinCategory(key);
     emit(
-      CategoryListState(
-        
-         
-      ),
+      CategoryListState(),
     );
   }
 
   void unpin(EventCategory category, String key) {
-    
     dataBaseRepository.unpinCategory(key);
 
     emit(
-      CategoryListState(
-          
-         
-      ),
+      CategoryListState(),
     );
   }
-
-  
 
   void moveEvent(String key, String newCategory) {
     dataBaseRepository.moveEvent(
@@ -72,22 +50,16 @@ class CategoryListCubit extends Cubit<CategoryListState> {
   }
 
   void getImage(String name) async {
-  final url = await dataBaseRepository.getImageUrl(name);
+    final url = await dataBaseRepository.getImageUrl(name);
 
     emit(
-      CategoryListState(
-        
-          
-       imageUrl: url
-      ),
+      CategoryListState(imageUrl: url),
     );
   }
 
   void enterSearchMode() {
     emit(
       CategoryListState(
-         
-          
         searchMode: true,
       ),
     );
@@ -96,8 +68,6 @@ class CategoryListCubit extends Cubit<CategoryListState> {
   void searchControll(String value) {
     emit(
       CategoryListState(
-         
-          
         searchMode: state.searchMode,
         searchResult: value,
       ),
@@ -107,31 +77,22 @@ class CategoryListCubit extends Cubit<CategoryListState> {
   void exitSearch() {
     emit(
       CategoryListState(
-         
-          
         searchMode: false,
       ),
     );
   }
 
   void addEvent({required String categoryTitle, required Event event}) {
-   
     dataBaseRepository.addEvent(event);
     emit(
-      CategoryListState(
-         
-          
-      ),
+      CategoryListState(),
     );
   }
 
   void removeEventInCategory({required String key}) {
     dataBaseRepository.removeEvent(key);
     emit(
-      CategoryListState(
-         
-          
-      ),
+      CategoryListState(),
     );
   }
 
@@ -142,10 +103,7 @@ class CategoryListCubit extends Cubit<CategoryListState> {
     dataBaseRepository.renameEvent(key, newTitle);
 
     emit(
-      CategoryListState(
-         
-          
-      ),
+      CategoryListState(),
     );
   }
 
@@ -156,10 +114,7 @@ class CategoryListCubit extends Cubit<CategoryListState> {
     dataBaseRepository.bookmarkEvent(key, isBook);
 
     emit(
-      CategoryListState(
-         
-          
-      ),
+      CategoryListState(),
     );
   }
 
@@ -167,9 +122,7 @@ class CategoryListCubit extends Cubit<CategoryListState> {
     dataBaseRepository.deleteDB();
 
     emit(
-      CategoryListState(
-        
-      ),
+      CategoryListState(),
     );
   }
 
@@ -180,10 +133,7 @@ class CategoryListCubit extends Cubit<CategoryListState> {
     dataBaseRepository.renameCategory(key, newTitle);
 
     emit(
-      CategoryListState(
-         
-          
-      ),
+      CategoryListState(),
     );
   }
 
@@ -191,10 +141,7 @@ class CategoryListCubit extends Cubit<CategoryListState> {
     dataBaseRepository.eventSelected(key);
 
     emit(
-      CategoryListState(
-         
-          
-      ),
+      CategoryListState(),
     );
   }
 
@@ -202,10 +149,7 @@ class CategoryListCubit extends Cubit<CategoryListState> {
     dataBaseRepository.eventNotSelected(key);
 
     emit(
-      CategoryListState(
-         
-          
-      ),
+      CategoryListState(),
     );
   }
 
@@ -213,10 +157,7 @@ class CategoryListCubit extends Cubit<CategoryListState> {
     final key = await dataBaseRepository.getAuthKey();
 
     emit(
-      CategoryListState(
-           
-            
-          authKey: key ?? false),
+      CategoryListState(authKey: key ?? false),
     );
   }
 
@@ -224,10 +165,7 @@ class CategoryListCubit extends Cubit<CategoryListState> {
     dataBaseRepository.setAuthKey(key);
 
     emit(
-      CategoryListState(
-         
-          
-      ),
+      CategoryListState(authKey: key),
     );
   }
 }

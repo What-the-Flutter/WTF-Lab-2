@@ -39,7 +39,6 @@ class _UnpinedCategoryState extends State<UnpinedCategory> {
           var category = EventCategory.fromMap(
             Map.from(snapshot.value as Map),
           );
-          print(category.pinned);
           return GestureDetector(
             onTap: (() => Navigator.push(
                   context,
