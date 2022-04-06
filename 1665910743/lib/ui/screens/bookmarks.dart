@@ -30,7 +30,7 @@ class BookmarkEvents extends StatelessWidget {
                 Map.from(snapshot.value as Map),
               );
 
-              if (event.favorite == 1) {
+              if (event.favorite == true) {
                 return Slidable(
                   startActionPane: ActionPane(
                     motion: const ScrollMotion(),
