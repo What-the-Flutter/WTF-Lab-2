@@ -1,37 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../cubit/category_list_cubit.dart';
+import '../../cubit/category_cubit/category_list_cubit.dart';
 import '../../models/event_category.dart';
 
 Future<void> displayTextInputDialog({
   required BuildContext context,
-  required int categryIndex,
   required EventCategory category,
-  required bool pined,
+  required bool pinned,
+  required String key,
 }) async {
   return showDialog(
       context: context,
       builder: (context) => EditDialog(
-            categoryIndex: categryIndex,
             context: context,
             category: category,
-            pinned: pined,
+            pinned: pinned,
+            dbKey: key,
           ));
 }
 
 class EditDialog extends StatefulWidget {
   final BuildContext context;
-  final int categoryIndex;
   final bool pinned;
   final EventCategory category;
+  final String dbKey;
 
   const EditDialog({
     Key? key,
     required this.context,
-    required this.categoryIndex,
     required this.pinned,
     required this.category,
+    required this.dbKey,
   }) : super(key: key);
 
   @override
@@ -63,7 +63,6 @@ class _EditDialogState extends State<EditDialog> {
         _pinButton(
           context,
           cubit,
-          widget.categoryIndex,
         ),
         _renameButton(
           context,
@@ -72,7 +71,6 @@ class _EditDialogState extends State<EditDialog> {
         _deleteButton(
           context,
           cubit,
-          widget.categoryIndex,
         )
       ],
       content: TextField(
@@ -81,7 +79,7 @@ class _EditDialogState extends State<EditDialog> {
     );
   }
 
-  ElevatedButton _renameButton(BuildContext context, CategoryListCubit cubit) {
+  Widget _renameButton(BuildContext context, CategoryListCubit cubit) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         primary: Theme.of(context).primaryColor,
@@ -89,7 +87,7 @@ class _EditDialogState extends State<EditDialog> {
       onPressed: () {
         Navigator.pop(context);
         context.read<CategoryListCubit>().categoryRename(
-              categoryIndex: widget.categoryIndex,
+              key: widget.dbKey,
               newTitle: _controller.text,
             );
       },
@@ -100,19 +98,22 @@ class _EditDialogState extends State<EditDialog> {
     );
   }
 
-  CircleAvatar _deleteButton(
-      BuildContext context, CategoryListCubit cubit, int catIndex) {
+  Widget _deleteButton(
+    BuildContext context,
+    CategoryListCubit cubit,
+  ) {
     return CircleAvatar(
       foregroundColor: Colors.white,
       backgroundColor: Theme.of(context).primaryColor,
       child: IconButton(
         onPressed: () {
-          if (cubit.state.categoryList[widget.categoryIndex].pined == false) {
-            context.read<CategoryListCubit>().remove(widget.category);
-          } else {
-            context.read<CategoryListCubit>().unpin(widget.category, catIndex);
-            context.read<CategoryListCubit>().remove(widget.category);
-          }
+          context
+              .read<CategoryListCubit>()
+              .unpin(widget.category, widget.dbKey);
+          context
+              .read<CategoryListCubit>()
+              .remove(widget.category, widget.dbKey);
+
           Navigator.pop(context);
         },
         icon: const Icon(Icons.delete_forever),
@@ -121,7 +122,9 @@ class _EditDialogState extends State<EditDialog> {
   }
 
   Widget _pinButton(
-      BuildContext context, CategoryListCubit cubit, int catIndex) {
+    BuildContext context,
+    CategoryListCubit cubit,
+  ) {
     return CircleAvatar(
       backgroundColor: Theme.of(context).primaryColor,
       foregroundColor: Colors.white,
@@ -129,18 +132,22 @@ class _EditDialogState extends State<EditDialog> {
         onPressed: () {
           Navigator.pop(context);
 
-          if (widget.category.pined == false) {
-            widget.category.pined = true;
-            context.read<CategoryListCubit>().pin(
-                  widget.category,
-                  catIndex,
-                );
+          if (widget.category.pinned == false) {
+            
+            setState(() {
+              context.read<CategoryListCubit>().pin(
+                    widget.category,
+                    widget.dbKey,
+                  );
+            });
           } else {
-            widget.category.pined = false;
-            context.read<CategoryListCubit>().unpin(
-                  widget.category,
-                  catIndex,
-                );
+            
+            setState(() {
+              context.read<CategoryListCubit>().unpin(
+                    widget.category,
+                    widget.dbKey,
+                  );
+            });
           }
         },
         icon: widget.pinned

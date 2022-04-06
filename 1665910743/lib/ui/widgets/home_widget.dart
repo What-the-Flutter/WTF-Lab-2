@@ -1,18 +1,17 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../cubit/category_list_cubit.dart';
+import '../../cubit/category_cubit/category_list_cubit.dart';
+import '../../cubit/theme_cubit/theme_cubit.dart';
 import '../screens/daily.dart';
 import '../screens/explore.dart';
 import '../screens/home.dart';
 import '../screens/timeline.dart';
-import '../theme/inherited_widget.dart';
 import '../theme/theme_data.dart';
 import 'add_category_dialog.dart';
 import 'bottom_nav_bar.dart';
+import 'drawer.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -27,8 +26,8 @@ class _HomeState extends State<Home> {
 
   final List<List> _selectedItems = [
     [const HomeScreen(), 'Home'],
-    [const Daily(), 'Daily'],
-    [const Timeline(), 'Timeline'],
+    [Daily(), 'Daily'],
+    [Timeline(), 'Timeline'],
     [const Explore(), 'Explore'],
   ];
 
@@ -41,6 +40,7 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const JourneyDrawer(),
       appBar: _appBar(context),
       body: _selectedItems.elementAt(_selectedIndex).first,
       floatingActionButton: FloatingActionButton(
@@ -58,9 +58,7 @@ class _HomeState extends State<Home> {
   }
 
   void _onItemTapped(int index) {
-    if (index == 1) {
-      context.read<CategoryListCubit>().fetchAllEvents();
-    }
+    
     context.read<CategoryListCubit>().exitSearch();
     setState(
       () {
@@ -72,13 +70,7 @@ class _HomeState extends State<Home> {
   PreferredSizeWidget _appBar(BuildContext context) {
     return context.watch<CategoryListCubit>().state.searchMode
         ? AppBar(
-            leading: Hero(
-              tag: 'search',
-              child: IconButton(
-                icon: const Icon(Icons.search),
-                onPressed: () {},
-              ),
-            ),
+            automaticallyImplyLeading: false,
             title: TextField(
               decoration: const InputDecoration(
                 border: InputBorder.none,
@@ -89,8 +81,9 @@ class _HomeState extends State<Home> {
                 hintText: 'Enter a search term',
               ),
               controller: _searchController,
-              onChanged: (value) =>
-                  context.read<CategoryListCubit>().searchControll(value),
+              onChanged: (value) {
+                context.read<CategoryListCubit>().searchControll(value);
+              },
             ),
             actions: [
               IconButton(
@@ -101,8 +94,7 @@ class _HomeState extends State<Home> {
           )
         : AppBar(
             title: Text(_selectedItems.elementAt(_selectedIndex).last),
-            centerTitle: Platform.isIOS,
-            automaticallyImplyLeading: false,
+            centerTitle: true,
             actions: [
               _selectedIndex == 1
                   ? Hero(
@@ -116,22 +108,19 @@ class _HomeState extends State<Home> {
                     )
                   : IconButton(
                       onPressed: () {
-                        CustomTheme.of(context).theme == MyThemes.lightTheme
-                            ? setState(
-                                () {
-                                  CustomTheme.of(context)
-                                      .changeTheme(MyThemeKeys.dark);
-                                },
-                              )
-                            : setState(
-                                () {
-                                  CustomTheme.of(context)
-                                      .changeTheme(MyThemeKeys.light);
-                                },
-                              );
+                        setState(() {
+                          context.read<ThemeCubit>().state ==
+                                  MyThemes.lightTheme
+                              ? context
+                                  .read<ThemeCubit>()
+                                  .themeChanged(MyThemeKeys.dark)
+                              : context
+                                  .read<ThemeCubit>()
+                                  .themeChanged(MyThemeKeys.light);
+                        });
                       },
                       icon: Icon(
-                        CustomTheme.of(context).theme == MyThemes.lightTheme
+                        context.read<ThemeCubit>().state == MyThemes.lightTheme
                             ? Icons.nightlight_outlined
                             : Icons.light_mode,
                       ),

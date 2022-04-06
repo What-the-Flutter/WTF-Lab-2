@@ -1,5 +1,8 @@
 import 'dart:io';
 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,22 +10,19 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../constants.dart';
-import '../../cubit/category_list_cubit.dart';
-import '../../cubit/category_list_state.dart';
-import '../../data/database_provider.dart';
+import '../../cubit/category_cubit/category_list_cubit.dart';
 import '../../models/event.dart';
 import '../../models/icons_pack.dart';
 import '../screens/bookmarks.dart';
-import 'edit_chat_item_dialog.dart';
 import 'event_tile.dart';
-import 'move_event_tile.dart';
+import 'event_tile_actions.dart';
 
 class ChatScreenBody extends StatefulWidget {
-  final int eventId;
+  final String categoryTitle;
 
   const ChatScreenBody({
     Key? key,
-    required this.eventId,
+    required this.categoryTitle,
   }) : super(key: key);
 
   @override
@@ -30,6 +30,8 @@ class ChatScreenBody extends StatefulWidget {
 }
 
 class _ChatScreenBodyState extends State<ChatScreenBody> {
+  final _user = FirebaseAuth.instance.currentUser;
+
   final _controller = TextEditingController();
   final _renameController = TextEditingController();
   final picker = ImagePicker();
@@ -45,8 +47,7 @@ class _ChatScreenBodyState extends State<ChatScreenBody> {
         setState(() {});
       }
     });
-    final _cubit = BlocProvider.of<CategoryListCubit>(context);
-    _cubit.fetchEventsInCategory(widget.eventId);
+
     super.initState();
   }
 
@@ -74,113 +75,108 @@ class _ChatScreenBodyState extends State<ChatScreenBody> {
 
     setState(() {
       if (_newImage != null) {
-        print(_newImage.path);
         _image = _newImage;
       } else {
-        print('No image selected.');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No image selected'),
+          ),
+        );
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<CategoryListCubit, CategoryListState>(
-      bloc: context.read<CategoryListCubit>(),
-      builder: (context, state) {
-        final eventList = state.categoryList[widget.eventId].list;
-
-        return Container(
-          padding: kListViewPadding,
-          child: Column(
-            children: [
-              _listBody(eventList),
-              _iconAdd ? _iconsGrid() : const SizedBox(),
-              _chatScreenNavBar(widget.eventId),
-            ],
-          ),
-        );
-      },
+    return Container(
+      padding: kListViewPadding,
+      child: Column(
+        children: [
+          _listBody(widget.categoryTitle),
+          _iconAdd ? _iconsGrid() : const SizedBox(),
+          _chatScreenNavBar(),
+        ],
+      ),
     );
   }
 
-  Widget _listBody(List<Event> eventList) {
+  Widget _listBody(String categoryTitle) {
     return Expanded(
-      child: ListView.builder(
-        physics: const BouncingScrollPhysics(),
-        itemCount: eventList.length,
-        itemBuilder: (context, index) {
-          return Slidable(
-            startActionPane: ActionPane(
-              motion: const ScrollMotion(),
-              children: [
-                SlidableAction(
-                  onPressed: (context) => chatTileEditDialog(
-                      title: eventList[index].title,
-                      context: context,
-                      catIndex: widget.eventId,
-                      index: index),
-                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                  foregroundColor: Theme.of(context).primaryColor,
-                  icon: Icons.edit,
-                ),
-                SlidableAction(
-                  onPressed: (context) =>
-                      context.read<CategoryListCubit>().removeEventInCategory(
-                            title: eventList[index].title,
-                            categoryIndex: widget.eventId,
-                            eventIndex: index,
-                          ),
-                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                  foregroundColor: Theme.of(context).primaryColor,
-                  icon: Icons.delete,
-                ),
-                SlidableAction(
-                  autoClose: true,
-                  onPressed: (context) {
-                    moveTile(
-                        categoryIndex: widget.eventId,
-                        context: context,
-                        eventIndex: index);
-                  },
-                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                  foregroundColor: Theme.of(context).primaryColor,
-                  icon: Icons.move_down,
-                ),
-              ],
-            ),
-            child: Container(
-              width: MediaQuery.of(context).size.width * 0.9,
-              child: Align(
-                alignment: Alignment.bottomLeft,
-                child: GestureDetector(
-                  onDoubleTap: () => _copyToClipboard(eventList[index].title),
-                  onLongPress: () {
-                    setState(() {
-                      if (eventList[index].isSelected == false) {
-                        hasSelected.add(eventList[index].title);
-                      } else {
-                        hasSelected.remove(eventList[index].title);
-                      }
+      child: FirebaseAnimatedList(
+          query: FirebaseDatabase.instance
+              .ref()
+              .child(_user?.uid ?? '')
+              .child('events')
+              .orderByChild('categoryTitle')
+              .startAt(widget.categoryTitle),
+          itemBuilder: (context, snapshot, animation, x) {
+            final event = Event.fromMap(
+              Map.from(snapshot.value as Map),
+            );
 
-                      eventList[index].isSelected =
-                          !eventList[index].isSelected;
-                      HapticFeedback.heavyImpact();
-                    });
-                  },
-                  child: EventTile(
-                    iconCode: eventList[index].iconCode,
-                    isSelected: eventList[index].isSelected,
-                    title: eventList[index].title,
-                    date: eventList[index].date,
-                    favorite: eventList[index].favorite,
-                    image: eventList[index].image,
+            if (event.image!.length > 1) {
+              context.read<CategoryListCubit>().getImage(event.title);
+            }
+            final imageUrl = context.read<CategoryListCubit>().state.imageUrl;
+
+            if (event.categoryTitle == widget.categoryTitle) {
+              return Slidable(
+                startActionPane: ActionPane(
+                  motion: const ScrollMotion(),
+                  children: [
+                    EditAction(
+                      event: event,
+                      eventKey: snapshot.key!,
+                    ),
+                    RemoveAction(eventKey: snapshot.key!),
+                    MoveAction(eventKey: snapshot.key!),
+                  ],
+                ),
+                child: Container(
+                  width: MediaQuery.of(context).size.width * 0.9,
+                  child: Align(
+                    alignment: Alignment.bottomLeft,
+                    child: GestureDetector(
+                      onDoubleTap: () => _copyToClipboard(event.title),
+                      onLongPress: () {
+                        setState(
+                          () {
+                            if (event.isSelected == 0) {
+                              hasSelected.add(snapshot.key);
+                              context
+                                  .read<CategoryListCubit>()
+                                  .eventSelect(snapshot.key!);
+                            } else {
+                              hasSelected.remove(snapshot.key);
+                              context
+                                  .read<CategoryListCubit>()
+                                  .eventNotSelect(snapshot.key!);
+                            }
+                            HapticFeedback.heavyImpact();
+                          },
+                        );
+                      },
+                      child: EventTile(
+                          iconCode: event.iconCode,
+                          isSelected: event.isSelected,
+                          title: event.title,
+                          date: event.date,
+                          favorite: event.favorite,
+                          image: (imageUrl != null && event.image!.length > 1)
+                              ? Image.network(
+                                  imageUrl,
+                                  width: 70,
+                                  height: 70,
+                                )
+                              : null),
+                    ),
                   ),
                 ),
-              ),
-            ),
-          );
-        },
-      ),
+              );
+            } else {
+              return const SizedBox();
+            }
+          }),
     );
   }
 
@@ -234,148 +230,106 @@ class _ChatScreenBodyState extends State<ChatScreenBody> {
         ),
       );
 
-  Widget _chatScreenNavBar(int eventid) {
-    final state = context.read<CategoryListCubit>();
-
+  Widget _chatScreenNavBar() {
     return SafeArea(
-      child: BlocBuilder<CategoryListCubit, CategoryListState>(
-        bloc: state,
-        builder: (context, state) => Row(
-          children: [
-            IconButton(
-              onPressed: () {
-                if (hasSelected.isEmpty) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => BookmarkEvents(
-                        id: eventid,
-                      ),
-                    ),
-                  );
-                } else {
-                  for (final element in hasSelected) {
-                    setState(() {
-                      state.categoryList[eventid].list
-                          .removeWhere((e) => e.title == element);
-                      DataBase.db.removeEvent(element);
-                    });
+      child: Row(
+        children: [
+          IconButton(
+            onPressed: () {
+              if (hasSelected.isEmpty) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => BookmarkEvents(),
+                  ),
+                );
+              } else {
+                for (final el in hasSelected) {
+                  context
+                      .read<CategoryListCubit>()
+                      .removeEventInCategory(key: el);
+                }
+                hasSelected.clear();
+              }
+            },
+            icon: Icon(
+              hasSelected.isNotEmpty ? Icons.delete : Icons.bookmark,
+              color: Theme.of(context).primaryColor,
+            ),
+          ),
+          IconButton(
+            onPressed: () {
+              setState(() {
+                _iconAdd = !_iconAdd;
+              });
+            },
+            icon: Icon(
+              (_selectedIcon == -1)
+                  ? Icons.bubble_chart
+                  : kMyIcons[_selectedIcon].icon,
+              color: Theme.of(context).primaryColor,
+            ),
+          ),
+          Expanded(
+            child: TextField(
+              decoration: const InputDecoration(
+                hintText: ' Enter event',
+                border: InputBorder.none,
+              ),
+              controller: _controller,
+            ),
+          ),
+          IconButton(
+              onPressed: () async {
+                if (_controller.value.text.isNotEmpty) {
+                  if (_selectedIcon == -1) {
+                    context.read<CategoryListCubit>().addEvent(
+                          categoryTitle: widget.categoryTitle,
+                          event: Event(
+                            iconCode: 0,
+                            title: _controller.text,
+                            date: DateTime.now(),
+                            favorite: false,
+                            categoryTitle: widget.categoryTitle,
+                          ),
+                        );
+                  } else {
+                    context.read<CategoryListCubit>().addEvent(
+                          categoryTitle: widget.categoryTitle,
+                          event: Event(
+                              title: _controller.text,
+                              date: DateTime.now(),
+                              favorite: false,
+                              iconCode: kMyIcons[_selectedIcon].icon!.codePoint,
+                              categoryTitle: widget.categoryTitle),
+                        );
                   }
-                  hasSelected.clear();
+                  _selectedIcon = -1;
+
+                  _controller.clear();
+                } else if (_controller.value.text.isEmpty) {
+                  await getImage();
+                  if (_image != null) {
+                    context.read<CategoryListCubit>().addEvent(
+                          categoryTitle: widget.categoryTitle,
+                          event: Event(
+                              iconCode: 0,
+                              title: 'Image',
+                              date: DateTime.now(),
+                              favorite: false,
+                              image: _image!.path,
+                              categoryTitle: widget.categoryTitle),
+                        );
+                  }
                 }
               },
               icon: Icon(
-                hasSelected.isNotEmpty ? Icons.delete : Icons.bookmark,
+                _controller.value.text.isEmpty
+                    ? Icons.photo_camera
+                    : Icons.send,
                 color: Theme.of(context).primaryColor,
-              ),
-            ),
-            IconButton(
-              onPressed: () {
-                setState(() {
-                  _iconAdd = !_iconAdd;
-                });
-              },
-              icon: Icon(
-                (_selectedIcon == -1)
-                    ? Icons.bubble_chart
-                    : kMyIcons[_selectedIcon].icon,
-                color: Theme.of(context).primaryColor,
-              ),
-            ),
-            Expanded(
-              child: TextField(
-                decoration: const InputDecoration(
-                  hintText: ' Enter event',
-                  border: InputBorder.none,
-                ),
-                controller: _controller,
-              ),
-            ),
-            IconButton(
-                onPressed: () async {
-                  if (_controller.value.text.isNotEmpty) {
-                    if (_selectedIcon == -1) {
-                      DataBase.db.addEvent(
-                        Event(
-                          iconCode: 0,
-                          title: _controller.text,
-                          date: DateTime.now(),
-                          favorite: false,
-                          categoryIndex: eventid,
-                          categoryTitle: state.categoryList[eventid].title,
-                        ),
-                      );
-                      state.categoryList[eventid].list.add(
-                        Event(
-                          iconCode: 0,
-                          title: _controller.text,
-                          date: DateTime.now(),
-                          favorite: false,
-                          categoryIndex: eventid,
-                          categoryTitle: state.categoryList[eventid].title,
-                        ),
-                      );
-                    } else {
-                      DataBase.db.addEvent(
-                        Event(
-                          iconCode: kMyIcons[_selectedIcon].icon!.codePoint,
-                          title: _controller.text,
-                          date: DateTime.now(),
-                          favorite: false,
-                          categoryIndex: eventid,
-                          categoryTitle: state.categoryList[eventid].title,
-                        ),
-                      );
-                      state.categoryList[eventid].list.add(
-                        Event(
-                          title: _controller.text,
-                          date: DateTime.now(),
-                          favorite: false,
-                          iconCode: kMyIcons[_selectedIcon].icon!.codePoint,
-                          categoryIndex: eventid,
-                          categoryTitle: state.categoryList[eventid].title,
-                        ),
-                      );
-                    }
-                    _selectedIcon = -1;
-
-                    _controller.clear();
-                  } else if (_controller.value.text.isEmpty) {
-                    await getImage();
-                    if (_image != null) {
-                      DataBase.db.addEvent(
-                        Event(
-                          iconCode: 0,
-                          title: 'Image from gallery',
-                          date: DateTime.now(),
-                          favorite: false,
-                          image: _image,
-                          categoryIndex: eventid,
-                          categoryTitle: state.categoryList[eventid].title,
-                        ),
-                      );
-                      state.categoryList[eventid].list.add(
-                        Event(
-                          iconCode: 0,
-                          title: 'Image from gallery',
-                          date: DateTime.now(),
-                          favorite: false,
-                          image: _image,
-                          categoryIndex: eventid,
-                          categoryTitle: state.categoryList[eventid].title,
-                        ),
-                      );
-                    }
-                  }
-                },
-                icon: Icon(
-                  _controller.value.text.isEmpty
-                      ? Icons.photo_camera
-                      : Icons.send,
-                  color: Theme.of(context).primaryColor,
-                ))
-          ],
-        ),
+              ))
+        ],
       ),
     );
   }

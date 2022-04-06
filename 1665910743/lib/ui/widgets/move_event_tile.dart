@@ -1,31 +1,29 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../cubit/category_list_cubit.dart';
-import '../screens/chat_screen.dart';
+import '../../cubit/category_cubit/category_list_cubit.dart';
 
 Future<void> moveTile({
   required BuildContext context,
-  required int categoryIndex,
-  required int eventIndex,
+  required String eventKey,
 }) async {
   return showDialog(
     context: context,
     builder: (context) => MoveTile(
-      eventIndex: eventIndex,
-      categoryIndex: categoryIndex,
+      eventKey: eventKey,
     ),
   );
 }
 
 class MoveTile extends StatefulWidget {
-  final int categoryIndex;
-  final int eventIndex;
+  final String eventKey;
 
   MoveTile({
     Key? key,
-    required this.categoryIndex,
-    required this.eventIndex,
+    required this.eventKey,
   }) : super(key: key);
 
   @override
@@ -33,12 +31,9 @@ class MoveTile extends StatefulWidget {
 }
 
 class _MoveTileState extends State<MoveTile> {
-  var _selectedCategory = 0;
-
+  final _user = FirebaseAuth.instance.currentUser;
   @override
   Widget build(BuildContext context) {
-    var state = context.watch<CategoryListCubit>().state;
-
     return AlertDialog(
       elevation: 5,
       shape: const RoundedRectangleBorder(
@@ -46,53 +41,36 @@ class _MoveTileState extends State<MoveTile> {
           Radius.circular(25.0),
         ),
       ),
-      title: Container(
+      title: const Text('Move event to...'),
+      content: Container(
         height: MediaQuery.of(context).size.height * 0.3,
-        width: MediaQuery.of(context).size.width * 0.8,
-        child: ListView.builder(
-          shrinkWrap: true,
-          itemCount: state.categoryList.length,
-          itemBuilder: ((context, index) => index != widget.categoryIndex
-              ? ListTile(
-                  leading: Icon(
-                    _selectedCategory == index
-                        ? Icons.circle
-                        : Icons.circle_outlined,
-                    color: Theme.of(context).primaryColor,
-                  ),
-                  onTap: (() {
-                    setState(() {
-                      _selectedCategory = index;
-                    });
-                  }),
-                  title: Text(state.categoryList[index].title),
-                )
-              : const SizedBox()),
-        ),
-      ),
-      actionsAlignment: MainAxisAlignment.center,
-      actions: [
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.all(10),
-            primary: Theme.of(context).primaryColor,
-          ),
-          onPressed: (() {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: ((context) => ChatScreen(eventId: _selectedCategory)),
+        width: MediaQuery.of(context).size.width * 0.5,
+        child: FirebaseAnimatedList(
+          query: FirebaseDatabase.instance
+              .ref()
+              .child(_user?.uid ?? '')
+              .child('category'),
+          itemBuilder: (context, snapshot, animation, x) {
+            var categoryList = Map.from(snapshot.value as Map);
+
+            return GestureDetector(
+              onTap: () {
+                context
+                    .read<CategoryListCubit>()
+                    .moveEvent(widget.eventKey, categoryList['title']);
+                Navigator.pop(context);
+              },
+              child: ListTile(
+                leading: Icon(
+                  Icons.circle,
+                  color: Theme.of(context).primaryColor,
+                ),
+                title: Text(categoryList['title']),
               ),
             );
-            context.read<CategoryListCubit>().moveEvent(
-                  widget.categoryIndex,
-                  _selectedCategory,
-                  widget.eventIndex,
-                );
-          }),
-          child: const Text('Move'),
-        )
-      ],
+          },
+        ),
+      ),
     );
   }
 }

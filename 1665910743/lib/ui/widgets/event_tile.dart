@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 
 import '../../extensions/date_extension.dart';
@@ -8,7 +6,7 @@ class EventTile extends StatelessWidget {
   final String title;
   final DateTime date;
   final bool favorite;
-  final File? image;
+  final Image? image;
   final bool isSelected;
   final int iconCode;
 
@@ -18,8 +16,8 @@ class EventTile extends StatelessWidget {
     required this.date,
     required this.favorite,
     required this.isSelected,
-    this.image,
     required this.iconCode,
+    this.image,
   }) : super(key: key);
 
   @override
@@ -119,88 +117,64 @@ class _TileWithoutImage extends StatelessWidget {
 }
 
 class _TileWithImage extends StatefulWidget {
-  final File? image;
+  final Image? image;
   final String title;
-  final String _formattedDate;
+  final String formattedDate;
   final bool favorite;
 
   _TileWithImage({
     Key? key,
     required this.image,
     required this.title,
-    required String formattedDate,
     required this.favorite,
-  })  : _formattedDate = formattedDate,
-        super(key: key);
+    required this.formattedDate,
+  }) : super(key: key);
 
   @override
   State<_TileWithImage> createState() => _TileWithImageState();
 }
 
 class _TileWithImageState extends State<_TileWithImage> {
-  bool _zoom = false;
-
   @override
   Widget build(BuildContext context) {
-    final _zoomSize = MediaQuery.of(context).size.width * 0.7;
-
     return Row(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        GestureDetector(
-          onDoubleTap: (() => setState(
-                () => _zoom = !_zoom,
-              )),
-          child: Container(
+        Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
             ),
-            child: Image.file(
-              File(widget.image!.path),
-              filterQuality: _zoom ? FilterQuality.high : FilterQuality.medium,
-              fit: _zoom ? BoxFit.fitHeight : BoxFit.cover,
-              width: _zoom ? _zoomSize : 70,
-              height: _zoom ? _zoomSize : 70,
-            ),
-          ),
-        ),
+            child: widget.image),
         SizedBox(
-          width: _zoom ? 0 : MediaQuery.of(context).size.width * 0.1,
+          width: MediaQuery.of(context).size.width * 0.1,
         ),
-        _zoom
-            ? const SizedBox()
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.5,
-                    child: Text(
-                      widget.title,
-                      style: const TextStyle(
-                          fontSize: 20, overflow: TextOverflow.fade),
-                    ),
-                  ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        widget._formattedDate,
-                        style: const TextStyle(fontSize: 10),
-                      ),
-                      widget.favorite
-                          ? const Icon(
-                              Icons.star,
-                              size: 10,
-                            )
-                          : const Icon(
-                              Icons.star_border,
-                              size: 10,
-                            ),
-                    ],
-                  ),
-                ],
-              )
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: MediaQuery.of(context).size.width * 0.5,
+              child: Text(
+                widget.title,
+                style:
+                    const TextStyle(fontSize: 20, overflow: TextOverflow.fade),
+              ),
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  widget.formattedDate,
+                  style: const TextStyle(fontSize: 10),
+                ),
+                Icon(
+                  widget.favorite ? Icons.star : Icons.star_border,
+                  size: 10,
+                )
+              ],
+            ),
+          ],
+        )
       ],
     );
   }

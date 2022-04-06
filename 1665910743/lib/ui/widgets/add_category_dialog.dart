@@ -2,11 +2,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../cubit/category_list_cubit.dart';
+import '../../cubit/category_cubit/category_list_cubit.dart';
+import '../../cubit/theme_cubit/theme_cubit.dart';
 import '../../models/event_category.dart';
 import '../../models/icons_pack.dart';
-import '../theme/inherited_widget.dart';
 import '../theme/theme_data.dart';
+import 'category_icon_button.dart';
 
 Future<dynamic> addTaskDialog(BuildContext context) {
   return showModalBottomSheet(
@@ -48,10 +49,10 @@ class _ModalBodyState extends State<ModalBody> {
 
   @override
   Widget build(BuildContext context) {
-    final _screenSize = MediaQuery.of(context).size;
+    final screenSize = MediaQuery.of(context).size;
     return Container(
-      constraints: BoxConstraints(maxHeight: _screenSize.height * 0.95),
-      margin: EdgeInsets.only(top: _screenSize.height * 0.05),
+      constraints: BoxConstraints(maxHeight: screenSize.height * 0.95),
+      margin: EdgeInsets.only(top: screenSize.height * 0.05),
       decoration: BoxDecoration(
         color: Theme.of(context).scaffoldBackgroundColor,
         borderRadius: const BorderRadius.only(
@@ -59,7 +60,7 @@ class _ModalBodyState extends State<ModalBody> {
           topRight: Radius.circular(30),
         ),
       ),
-      height: _screenSize.height * 0.45,
+      height: screenSize.height * 0.45,
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -78,22 +79,22 @@ class _ModalBodyState extends State<ModalBody> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _addTextField(_screenSize, context),
+                  _addTextField(screenSize, context),
                   _addButton(context)
                 ],
               ),
             ),
             SizedBox(
-              height: _screenSize.height * 0.02,
+              height: screenSize.height * 0.02,
             ),
-            _iconGrid(_screenSize)
+            _iconGrid(screenSize)
           ],
         ),
       ),
     );
   }
 
-  Container _iconGrid(Size _screenSize) {
+  Widget _iconGrid(Size _screenSize) {
     return Container(
       constraints: BoxConstraints(maxHeight: _screenSize.height * 0.30),
       child: GridView.builder(
@@ -118,7 +119,7 @@ class _ModalBodyState extends State<ModalBody> {
                   ? Theme.of(context).primaryColor
                   : Theme.of(context).scaffoldBackgroundColor,
               foregroundColor:
-                  (CustomTheme.of(context).theme == MyThemes.darkTheme)
+                  (context.read<ThemeCubit>().state == MyThemes.darkTheme)
                       ? ((_selectedIndexAvatar == i)
                           ? Colors.white
                           : Theme.of(context).primaryColor)
@@ -137,7 +138,7 @@ class _ModalBodyState extends State<ModalBody> {
     );
   }
 
-  Container _addTextField(Size _screenSize, BuildContext context) {
+  Widget _addTextField(Size _screenSize, BuildContext context) {
     return Container(
       width: _screenSize.width * 0.7,
       child: CupertinoTextField(
@@ -151,13 +152,13 @@ class _ModalBodyState extends State<ModalBody> {
     );
   }
 
-  IconButton _addButton(BuildContext context) {
+  Widget _addButton(BuildContext context) {
     return IconButton(
       onPressed: () {
         if (_selectedIndexAvatar == -1) {
           context.read<CategoryListCubit>().add(EventCategory(
                 title: _controller.text,
-                pined: false,
+                pinned: false,
                 icon: kMyIcons[7],
               ));
           Navigator.pop(
@@ -166,7 +167,7 @@ class _ModalBodyState extends State<ModalBody> {
         } else {
           context.read<CategoryListCubit>().add(EventCategory(
                 title: _controller.text,
-                pined: false,
+                pinned: false,
                 icon: kMyIcons[_selectedIndexAvatar],
               ));
           Navigator.pop(
@@ -174,9 +175,9 @@ class _ModalBodyState extends State<ModalBody> {
           );
         }
       },
-      icon: const Icon(
+      icon: Icon(
         Icons.send,
-        color: Colors.white,
+        color: Theme.of(context).scaffoldBackgroundColor,
       ),
     );
   }

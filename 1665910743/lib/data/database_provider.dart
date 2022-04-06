@@ -9,8 +9,8 @@ import '../models/event_category.dart';
 
 class DataBase {
   static Database? _database;
-  final String categoryTable = 'category';
-  final String eventsTable = 'events';
+  static const String categoryTable = 'category';
+  static const String eventsTable = 'events';
 
   DataBase._();
   static final DataBase db = DataBase._();
@@ -26,11 +26,11 @@ class DataBase {
   Future<Database> initDB() async {
     WidgetsFlutterBinding.ensureInitialized();
     return await openDatabase(
-      join(await getDatabasesPath(), 'journal_db.db'),
+      join(await getDatabasesPath(), 'journal_db2.db'),
       version: 1,
       onCreate: (db, version) async {
         await db.execute(
-          'CREATE TABLE $categoryTable(icon INTEGER, title TEXT, pined BOOL)',
+          'CREATE TABLE $categoryTable(icon INTEGER, title TEXT, pinned BOOL)',
         );
         await db.execute(
           'CREATE TABLE $eventsTable(imagePath TEXT, icon INTEGER, title TEXT, '
@@ -50,7 +50,8 @@ class DataBase {
     );
   }
 
-  Future<void> removeCategory(String title) async {
+  Future<void> removeCategory(EventCategory event) async {
+    final title = event.title;
     final db = await database;
 
     await db.delete(
@@ -88,7 +89,7 @@ class DataBase {
     final db = await database;
     await db.update(
       categoryTable,
-      {'pined': 1},
+      {'CategoryListCubit': 1},
       where: 'title = ?',
       whereArgs: [title],
     );
@@ -98,7 +99,7 @@ class DataBase {
     final db = await database;
     await db.update(
       categoryTable,
-      {'pined': 0},
+      {'CategoryListCubit': 0},
       where: 'title = ?',
       whereArgs: [title],
     );
@@ -110,7 +111,6 @@ class DataBase {
     await db.insert(
       eventsTable,
       event.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
 
@@ -159,7 +159,7 @@ class DataBase {
 
   Future<List<Event>> getEventList(String title) async {
     final db = await database;
-//
+
     final List<Map<String, dynamic>> events = await db.query(
       eventsTable,
       where: 'categoryTitle = ?',
@@ -172,12 +172,11 @@ class DataBase {
       (i) {
         final String imagePath = events[i]['imagePath'];
         return Event(
-          image: imagePath.length > 1 ? File(imagePath) : null,
+          image: imagePath.length > 1 ? File(imagePath).path : null,
           iconCode: events[i]['icon'],
           title: events[i]['title'],
           date: DateTime.parse(events[i]['date']),
           favorite: events[i]['favorite'] == 0 ? false : true,
-          categoryIndex: events[i]['categoryIndex'],
           categoryTitle: events[i]['categoryTitle'],
         );
       },
@@ -200,13 +199,13 @@ class DataBase {
           icon: Icon(
             IconData(maps[i]['icon'], fontFamily: 'MaterialIcons'),
           ),
-          pined: maps[i]['pined'] == 0 ? false : true,
+          pinned: maps[i]['CategoryListCubit'] == 0 ? false : true,
         );
       },
     );
   }
 
-  void delete() async {
+  Future<void> deleteDB() async {
     final db = await database;
 
     await deleteDatabase(db.path);

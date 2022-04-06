@@ -1,17 +1,18 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 import '../../constants.dart';
-import '../../cubit/category_list_cubit.dart';
-import '../../cubit/category_list_state.dart';
+import '../../models/event.dart';
 import '../widgets/event_tile.dart';
+import '../widgets/event_tile_actions.dart';
 
 class BookmarkEvents extends StatelessWidget {
-  final int id;
-
-  const BookmarkEvents({
+  final _user = FirebaseAuth.instance.currentUser!.uid;
+  BookmarkEvents({
     Key? key,
-    required this.id,
   }) : super(key: key);
 
   @override
@@ -22,32 +23,47 @@ class BookmarkEvents extends StatelessWidget {
       ),
       body: Padding(
         padding: kListViewPadding,
-        child: BlocBuilder<CategoryListCubit, CategoryListState>(
-          bloc: context.read<CategoryListCubit>(),
-          builder: ((context, state) {
-            final list = state.categoryList[id].list;
-            return ListView.builder(
-              itemCount: list.length,
-              itemBuilder: (context, index) {
-                if (list[index].favorite == true) {
-                  return Align(
-                    alignment: Alignment.bottomLeft,
-                    child: EventTile(
-                      iconCode: list[index].iconCode,
-                      isSelected: list[index].isSelected,
-                      title: list[index].title,
-                      date: list[index].date,
-                      favorite: list[index].favorite,
-                      image: list[index].image,
+        child: FirebaseAnimatedList(
+            query: FirebaseDatabase.instance.ref().child(_user).child('events'),
+            itemBuilder: (context, snapshot, animation, x) {
+              final event = Event.fromMap(
+                Map.from(snapshot.value as Map),
+              );
+
+              if (event.favorite == true) {
+                return Slidable(
+                  startActionPane: ActionPane(
+                    motion: const ScrollMotion(),
+                    children: [
+                      EditAction(event: event, eventKey: snapshot.key!),
+                      RemoveAction(eventKey: snapshot.key!),
+                      MoveAction(eventKey: snapshot.key!),
+                    ],
+                  ),
+                  child: Container(
+                    width: MediaQuery.of(context).size.width * 0.9,
+                    child: Align(
+                      alignment: Alignment.bottomLeft,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          EventTile(
+                              iconCode: event.iconCode,
+                              isSelected: event.isSelected == 0 ? false : true,
+                              title: event.title,
+                              date: event.date,
+                              favorite: event.favorite == 0 ? false : true,
+                              image: null),
+                          Text(' from ${event.categoryTitle}'),
+                        ],
+                      ),
                     ),
-                  );
-                } else {
-                  return Container();
-                }
-              },
-            );
-          }),
-        ),
+                  ),
+                );
+              } else {
+                return const SizedBox();
+              }
+            }),
       ),
     );
   }
