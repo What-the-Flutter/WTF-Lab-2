@@ -1,11 +1,7 @@
-import '../../data/repositories/chats_repository.dart';
-import '../../data/repositories/events_repository.dart';
 import '../../models/chat.dart';
 import '../../models/event.dart';
 
 class EventPageState {
-  final EventsRepository eventsRepository;
-  final ChatsRepository chatsRepository;
   final List<Event> events;
   final bool editMode;
   final bool favoriteMode;
@@ -21,8 +17,6 @@ class EventPageState {
   final String title;
 
   EventPageState({
-    required this.eventsRepository,
-    required this.chatsRepository,
     required this.events,
     this.image,
     required this.writingMode,
@@ -54,8 +48,6 @@ class EventPageState {
     String? title,
   }) {
     return EventPageState(
-      chatsRepository: chatsRepository,
-      eventsRepository: eventsRepository,
       events: events ?? this.events,
       editMode: editMode ?? this.editMode,
       favoriteMode: favoriteMode ?? this.favoriteMode,

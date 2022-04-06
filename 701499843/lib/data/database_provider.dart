@@ -26,13 +26,11 @@ class DatabaseProvider {
       version: 1,
       onCreate: (db, version) async {
         await db.execute(
-            'CREATE TABLE $chatsTable(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, icon INTEGER, category TEXT);');
-        await db.execute(
-            'CREATE TABLE $eventsTable(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, category TEXT, '
-            'description TEXT, isFavorite BOOL, isSelected BOOL, timeOfCreation TEXT, image TEXT);');
-        await db.execute(
-            'CREATE TABLE $iconsTable(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, icon INTEGER, isSelected BOOL);');
-
+          'CREATE TABLE $chatsTable(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, icon INTEGER, category TEXT);'
+          'CREATE TABLE $eventsTable(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, category TEXT, '
+          'description TEXT, isFavorite BOOL, isSelected BOOL, timeOfCreation TEXT, image TEXT);'
+          'CREATE TABLE $iconsTable(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, icon INTEGER, isSelected BOOL);',
+        );
         addValues();
       },
     );
@@ -90,7 +88,7 @@ class DatabaseProvider {
   }
 
   Future<void> insertChats(List<Chat> chats) async {
-    for (var element in chats) {
+    for (final element in chats) {
       insertChat(element);
     }
   }
@@ -106,7 +104,7 @@ class DatabaseProvider {
   }
 
   void removeChats(List<Chat> chats) {
-    for (var element in chats) {
+    for (final element in chats) {
       removeChat(element);
     }
   }
@@ -122,7 +120,7 @@ class DatabaseProvider {
   }
 
   Future<void> insertEvents(List<Event> events) async {
-    for (var element in events) {
+    for (final element in events) {
       insertEvent(element);
     }
   }
@@ -141,7 +139,7 @@ class DatabaseProvider {
   }
 
   void removeEvents(List<Event> events) {
-    for (var element in events) {
+    for (final element in events) {
       removeEvent(element);
     }
   }
@@ -157,7 +155,7 @@ class DatabaseProvider {
   }
 
   Future<void> insertIcons(List<EventIcon> icons) async {
-    for (var element in icons) {
+    for (final element in icons) {
       insertIcon(element);
     }
   }
@@ -173,7 +171,7 @@ class DatabaseProvider {
   }
 
   void removeIcons(List<EventIcon> icons) {
-    for (var element in icons) {
+    for (final element in icons) {
       removeIcon(element);
     }
   }
@@ -184,27 +182,31 @@ class DatabaseProvider {
     final List<Map<String, dynamic>> maps =
         await db.rawQuery('SELECT * from events order by timeOfCreation');
 
-    return List.generate(maps.length, (index) {
-      bool flagFavorite, flagSelected;
-      if (maps[index]['isFavorite'] == 1) {
-        flagFavorite = true;
-      } else {
-        flagFavorite = false;
-      }
-      if (maps[index]['isSelected'] == 1) {
-        flagSelected = true;
-      } else {
-        flagSelected = false;
-      }
-      return Event(
+    return List.generate(
+      maps.length,
+      (index) {
+        bool flagFavorite, flagSelected;
+        if (maps[index]['isFavorite'] == 1) {
+          flagFavorite = true;
+        } else {
+          flagFavorite = false;
+        }
+        if (maps[index]['isSelected'] == 1) {
+          flagSelected = true;
+        } else {
+          flagSelected = false;
+        }
+        return Event(
           id: maps[index]['id'],
           description: maps[index]['description'],
           image: maps[index]['image'],
           isFavorite: flagFavorite,
           isSelected: flagSelected,
           category: maps[index]['category'],
-          timeOfCreation: maps[index]['timeOfCreation']);
-    });
+          timeOfCreation: maps[index]['timeOfCreation'],
+        );
+      },
+    );
   }
 
   Future<List<Chat>> getChats() async {
@@ -229,19 +231,22 @@ class DatabaseProvider {
 
     final List<Map<String, dynamic>> maps = await db.query(iconsTable);
 
-    return List.generate(maps.length, (i) {
-      bool flag;
-      if (maps[i]['isSelected'] == 1) {
-        flag = true;
-      } else {
-        flag = false;
-      }
-      return EventIcon(
-        id: maps[i]['id'],
-        icon: maps[i]['icon'],
-        isSelected: flag,
-      );
-    });
+    return List.generate(
+      maps.length,
+      (i) {
+        bool flag;
+        if (maps[i]['isSelected'] == 1) {
+          flag = true;
+        } else {
+          flag = false;
+        }
+        return EventIcon(
+          id: maps[i]['id'],
+          icon: maps[i]['icon'],
+          isSelected: flag,
+        );
+      },
+    );
   }
 
   void addChats() {
@@ -267,86 +272,45 @@ class DatabaseProvider {
   }
 
   void addEvents() {
-    insertEvents(<Event>[
-      Event(
-        id: 0,
-        category: 'Travel',
-        description: 'qqqq',
-        isFavorite: false,
-        isSelected: false,
-        timeOfCreation: DateFormat('yyyy-MM-dd – kk:mm').format(DateTime.now()),
-      ),
-      Event(
-        id: 1,
-        category: 'Family',
-        description: 'wwww',
-        isFavorite: false,
-        isSelected: false,
-        timeOfCreation: DateFormat('yyyy-MM-dd – kk:mm').format(DateTime.now()),
-      ),
-      Event(
-        id: 2,
-        category: 'Sports',
-        description: 'eeee',
-        isFavorite: false,
-        isSelected: false,
-        timeOfCreation: DateFormat('yyyy-MM-dd – kk:mm').format(DateTime.now()),
-      ),
-    ]);
+    insertEvents(
+      <Event>[
+        Event(
+          id: 0,
+          category: 'Travel',
+          description: 'qqqq',
+          isFavorite: false,
+          isSelected: false,
+          timeOfCreation:
+              DateFormat('yyyy-MM-dd – kk:mm').format(DateTime.now()),
+        ),
+        Event(
+          id: 1,
+          category: 'Family',
+          description: 'wwww',
+          isFavorite: false,
+          isSelected: false,
+          timeOfCreation:
+              DateFormat('yyyy-MM-dd – kk:mm').format(DateTime.now()),
+        ),
+        Event(
+          id: 2,
+          category: 'Sports',
+          description: 'eeee',
+          isFavorite: false,
+          isSelected: false,
+          timeOfCreation:
+              DateFormat('yyyy-MM-dd – kk:mm').format(DateTime.now()),
+        ),
+      ],
+    );
   }
 
   void addIcons() {
     insertIcons(
-      <EventIcon>[
-        EventIcon(
-          id: 0,
-          icon: 0,
-        ),
-        EventIcon(
-          id: 1,
-          icon: 1,
-        ),
-        EventIcon(
-          id: 2,
-          icon: 2,
-        ),
-        EventIcon(
-          id: 3,
-          icon: 3,
-        ),
-        EventIcon(
-          id: 4,
-          icon: 4,
-        ),
-        EventIcon(
-          id: 5,
-          icon: 5,
-        ),
-        EventIcon(
-          id: 6,
-          icon: 6,
-        ),
-        EventIcon(
-          id: 7,
-          icon: 7,
-        ),
-        EventIcon(
-          id: 8,
-          icon: 8,
-        ),
-        EventIcon(
-          id: 9,
-          icon: 9,
-        ),
-        EventIcon(
-          id: 10,
-          icon: 10,
-        ),
-        EventIcon(
-          id: 11,
-          icon: 11,
-        ),
-      ],
+      List.generate(
+        11,
+        (index) => EventIcon(id: index, icon: index),
+      ),
     );
   }
 }

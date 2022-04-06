@@ -4,10 +4,10 @@ import '../../data/repositories/icons_repository.dart';
 import 'new_category_page_state.dart';
 
 class NewCategoryPageCubit extends Cubit<NewCategoryPageState> {
-  NewCategoryPageCubit(IconsRepository repository)
+  final IconsRepository iconsRepository;
+  NewCategoryPageCubit(this.iconsRepository)
       : super(
           NewCategoryPageState(
-            repository: repository,
             iconsList: [],
             writingMode: false,
           ),
@@ -16,7 +16,7 @@ class NewCategoryPageCubit extends Cubit<NewCategoryPageState> {
   void init() async {
     emit(
       state.copyWith(
-        iconsList: await state.repository.getIcons(),
+        iconsList: await iconsRepository.getIcons(),
       ),
     );
   }
@@ -29,7 +29,7 @@ class NewCategoryPageCubit extends Cubit<NewCategoryPageState> {
 
   void selectIcon(int index) async {
     state.iconsList.clear();
-    state.iconsList.addAll(await state.repository.getIcons());
+    state.iconsList.addAll(await iconsRepository.getIcons());
 
     state.iconsList[index] = state.iconsList[index].copyWith(
       isSelected: true,
@@ -38,9 +38,7 @@ class NewCategoryPageCubit extends Cubit<NewCategoryPageState> {
 
     emit(
       NewCategoryPageState(
-          repository: state.repository,
-          iconsList: state.iconsList,
-          writingMode: state.writingMode),
+          iconsList: state.iconsList, writingMode: state.writingMode),
     );
   }
 }

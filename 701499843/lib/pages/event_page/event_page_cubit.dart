@@ -11,8 +11,10 @@ import '../../models/event.dart';
 import 'event_page_state.dart';
 
 class EventPageCubit extends Cubit<EventPageState> {
-  EventPageCubit(
-      EventsRepository eventsRepository, ChatsRepository chatsRepository)
+  final EventsRepository eventsRepository;
+  final ChatsRepository chatsRepository;
+
+  EventPageCubit(this.eventsRepository, this.chatsRepository)
       : super(
           EventPageState(
             events: [],
@@ -28,19 +30,17 @@ class EventPageCubit extends Cubit<EventPageState> {
             isScrollbarVisible: false,
             selectedCategory: '',
             title: '',
-            eventsRepository: eventsRepository,
-            chatsRepository: chatsRepository,
           ),
         );
 
   void initValues(String title) async {
-    final events = await state.eventsRepository.getEvents();
+    final events = await eventsRepository.getEvents();
     emit(state.copyWith(
       title: title,
       selectedCategory: title,
       events:
           events.where((element) => element.category.contains(title)).toList(),
-      chats: await state.chatsRepository.getChats(),
+      chats: await chatsRepository.getChats(),
     ));
   }
 
@@ -57,7 +57,7 @@ class EventPageCubit extends Cubit<EventPageState> {
         isSelected: false,
       );
     }
-    final events = await state.eventsRepository.getEvents();
+    final events = await eventsRepository.getEvents();
     emit(
       state.copyWith(
         events: events
@@ -142,7 +142,9 @@ class EventPageCubit extends Cubit<EventPageState> {
       var id = Random.secure().nextInt(100000);
       var event = Event(
         id: id,
-        timeOfCreation: DateFormat('yyyy-MM-dd – kk:mm').format(DateTime.now()),
+        timeOfCreation: DateFormat('yyyy-MM-dd – kk:mm').format(
+          DateTime.now(),
+        ),
       );
       state.image == null
           ? event = Event(
@@ -150,8 +152,9 @@ class EventPageCubit extends Cubit<EventPageState> {
               description: text,
               image: null,
               category: state.selectedCategory,
-              timeOfCreation:
-                  DateFormat('yyyy-MM-dd – kk:mm').format(DateTime.now()),
+              timeOfCreation: DateFormat('yyyy-MM-dd – kk:mm').format(
+                DateTime.now(),
+              ),
             )
           : event = Event(
               id: id,
@@ -161,9 +164,9 @@ class EventPageCubit extends Cubit<EventPageState> {
               timeOfCreation:
                   DateFormat('yyyy-MM-dd – kk:mm').format(DateTime.now()),
             );
-      state.eventsRepository.insertEvent(event);
+      eventsRepository.insertEvent(event);
     }
-    final events = await state.eventsRepository.getEvents();
+    final events = await eventsRepository.getEvents();
     emit(
       state.copyWith(
         editMode: false,
@@ -205,12 +208,12 @@ class EventPageCubit extends Cubit<EventPageState> {
   }
 
   void selectEvent(int index) async {
-    state.eventsRepository.updateEvent(
+    eventsRepository.updateEvent(
       state.events[index].copyWith(
         isSelected: !state.events[index].isSelected,
       ),
     );
-    final events = await state.eventsRepository.getEvents();
+    final events = await eventsRepository.getEvents();
     emit(
       state.copyWith(
         editMode: true,
@@ -223,11 +226,11 @@ class EventPageCubit extends Cubit<EventPageState> {
   }
 
   void removeEvents() async {
-    var events = await state.eventsRepository.getEvents();
-    state.eventsRepository.removeEvents(
+    var events = await eventsRepository.getEvents();
+    eventsRepository.removeEvents(
       events.where((element) => element.isSelected == true).toList(),
     );
-    events = await state.eventsRepository.getEvents();
+    events = await eventsRepository.getEvents();
     emit(
       state.copyWith(
         events: events
@@ -275,10 +278,10 @@ class EventPageCubit extends Cubit<EventPageState> {
       );
 
   void migrate() async {
-    final events = await state.eventsRepository.getEvents();
-    for (var element in state.events) {
+    final events = await eventsRepository.getEvents();
+    for (final element in state.events) {
       if (element.isSelected) {
-        state.eventsRepository.updateEvent(
+        eventsRepository.updateEvent(
           element.copyWith(
             isSelected: false,
             category: state.migrateCategory,
@@ -307,10 +310,10 @@ class EventPageCubit extends Cubit<EventPageState> {
       );
 
   void cancelSelection() async {
-    final events = await state.eventsRepository.getEvents();
-    for (var element in state.events) {
+    final events = await eventsRepository.getEvents();
+    for (final element in state.events) {
       if (element.isSelected) {
-        state.eventsRepository.updateEvent(
+        eventsRepository.updateEvent(
           element.copyWith(
             isSelected: false,
           ),
@@ -328,8 +331,8 @@ class EventPageCubit extends Cubit<EventPageState> {
   }
 
   void removeEvent(int index) async {
-    final events = await state.eventsRepository.getEvents();
-    state.eventsRepository.removeEvent(
+    final events = await eventsRepository.getEvents();
+    eventsRepository.removeEvent(
       state.events[index],
     );
 
