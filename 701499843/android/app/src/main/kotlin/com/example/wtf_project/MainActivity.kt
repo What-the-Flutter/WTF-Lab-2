@@ -1,6 +1,6 @@
-package com.example.wtf_project
+import io.flutter.app.FlutterActivity;
 
-import io.flutter.embedding.android.FlutterActivity
 
 class MainActivity: FlutterActivity() {
+
 }

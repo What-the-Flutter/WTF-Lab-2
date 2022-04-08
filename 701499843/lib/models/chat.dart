@@ -1,19 +1,29 @@
-import 'package:flutter/material.dart';
-
 class Chat {
+  final int id;
   final String category;
-  final Icon icon;
+  final int icon;
 
   Chat({
+    required this.id,
     required this.category,
     required this.icon,
   });
 
+  factory Chat.fromFirebase(Map<dynamic, dynamic> map) {
+    return Chat(
+      id: map['id'],
+      category: map['category'],
+      icon: map['icon'],
+    );
+  }
+
   Chat copyWith({
+    int? id,
     String? category,
-    Icon? icon,
+    int? icon,
   }) {
     return Chat(
+      id: id ?? this.id,
       category: category ?? this.category,
       icon: icon ?? this.icon,
     );
@@ -21,7 +31,8 @@ class Chat {
 
   Map<String, dynamic> toMap() {
     return {
-      'icon': icon.icon!.codePoint,
+      'id': id,
+      'icon': icon,
       'category': category,
     };
   }

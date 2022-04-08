@@ -1,11 +1,11 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../data/database_provider.dart';
+import '../../data/repositories/icons_repository.dart';
 import 'new_category_page_state.dart';
 
 class NewCategoryPageCubit extends Cubit<NewCategoryPageState> {
-  NewCategoryPageCubit()
+  final IconsRepository iconsRepository;
+  NewCategoryPageCubit(this.iconsRepository)
       : super(
           NewCategoryPageState(
             iconsList: [],
@@ -16,7 +16,7 @@ class NewCategoryPageCubit extends Cubit<NewCategoryPageState> {
   void init() async {
     emit(
       state.copyWith(
-        iconsList: await DatabaseProvider.db.getIcons(),
+        iconsList: await iconsRepository.getIcons(),
       ),
     );
   }
@@ -29,13 +29,11 @@ class NewCategoryPageCubit extends Cubit<NewCategoryPageState> {
 
   void selectIcon(int index) async {
     state.iconsList.clear();
-    state.iconsList.addAll(await DatabaseProvider.db.getIcons());
+    state.iconsList.addAll(await iconsRepository.getIcons());
 
     state.iconsList[index] = state.iconsList[index].copyWith(
       isSelected: true,
-      icon: Icon(
-        state.iconsList[index].icon.icon,
-      ),
+      icon: state.iconsList[index].icon,
     );
 
     emit(

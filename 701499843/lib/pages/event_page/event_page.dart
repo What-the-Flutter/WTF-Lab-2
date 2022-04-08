@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 
+import '../../data/icons.dart';
 import '../../models/event.dart';
 import 'event_page_cubit.dart';
 import 'event_page_state.dart';
@@ -31,10 +31,10 @@ class _EventPageState extends State<EventPage> {
 
   @override
   void initState() {
-    _cubit = BlocProvider.of<EventPageCubit>(context);
-    _cubit.initValues(widget.title);
-
     super.initState();
+    _cubit = BlocProvider.of<EventPageCubit>(context);
+
+    _cubit.initValues(widget.title);
   }
 
   @override
@@ -128,7 +128,7 @@ class _EventPageState extends State<EventPage> {
                         backgroundColor:
                             Theme.of(context).colorScheme.secondary,
                         child: IconButton(
-                          icon: state.chats[index].icon,
+                          icon: icons.elementAt(state.chats[index].icon),
                           onPressed: () => _cubit.selectCategory(index),
                           iconSize: 45,
                         ),
@@ -324,48 +324,7 @@ class _EventPageState extends State<EventPage> {
             onLongPress: () {
               _cubit.selectEvent(index);
             },
-            child: Align(
-              alignment: Alignment.topLeft,
-              child: Container(
-                margin: const EdgeInsets.all(8),
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: state.events[index].isFavorite
-                      ? Colors.green[300]
-                      : Colors.green[100],
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (state.image != null)
-                      Image.file(
-                        File(state.image!),
-                        width: 100,
-                        height: 100,
-                      ),
-                    Text(
-                      state.events[index].description,
-                      style: TextStyle(
-                          fontSize: 18,
-                          color: Theme.of(context).scaffoldBackgroundColor),
-                    ),
-                    Text(
-                      DateFormat()
-                          .add_jm()
-                          .format(state.events[index].timeOfCreation)
-                          .toString(),
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: Color(0xFF616161),
-                      ),
-                    ),
-                    if (state.events[index].isFavorite)
-                      const Icon(Icons.bookmark_add, size: 12)
-                  ],
-                ),
-              ),
-            ),
+            child: _eventMessage(index, state),
           ),
         ),
       ),
@@ -380,7 +339,7 @@ class _EventPageState extends State<EventPage> {
             : state.events.length,
         itemBuilder: (context, index) {
           return Dismissible(
-            key: UniqueKey(),
+            key: Key(state.events[index].toString()),
             child: Align(
               alignment: Alignment.centerLeft,
               child: GestureDetector(
@@ -419,8 +378,12 @@ class _EventPageState extends State<EventPage> {
               if (direction == DismissDirection.startToEnd) {
                 _cubit.setSelectedIndex(index, _controller);
                 _cubit.copyEventText(_controller);
-              } else {
                 _cubit.removeEvent(index);
+              } else if (direction == DismissDirection.endToStart) {
+                {
+                  state.events.removeAt(index);
+                  _cubit.removeEvent(index);
+                }
               }
             },
           );
@@ -540,10 +503,7 @@ class _EventPageState extends State<EventPage> {
                 fontSize: 18, color: Theme.of(context).scaffoldBackgroundColor),
           ),
           Text(
-            DateFormat()
-                .add_jm()
-                .format(state.events[index].timeOfCreation)
-                .toString(),
+            state.events[index].timeOfCreation,
             style: const TextStyle(
               fontSize: 11,
               color: Color(0xFF616161),

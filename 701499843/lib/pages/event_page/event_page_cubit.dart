@@ -1,15 +1,20 @@
+import 'dart:math';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 
-import '../../data/database_provider.dart';
+import '../../data/repositories/chats_repository.dart';
+import '../../data/repositories/events_repository.dart';
 import '../../models/event.dart';
 import 'event_page_state.dart';
 
 class EventPageCubit extends Cubit<EventPageState> {
-  List<Event> eventsFromDb = [];
+  final EventsRepository eventsRepository;
+  final ChatsRepository chatsRepository;
 
-  EventPageCubit()
+  EventPageCubit(this.eventsRepository, this.chatsRepository)
       : super(
           EventPageState(
             events: [],
@@ -29,18 +34,17 @@ class EventPageCubit extends Cubit<EventPageState> {
         );
 
   void initValues(String title) async {
-    eventsFromDb = await DatabaseProvider.db.getEvents();
+    final events = await eventsRepository.getEvents();
     emit(state.copyWith(
       title: title,
       selectedCategory: title,
-      events: eventsFromDb
-          .where((element) => element.category.contains(title))
-          .toList(),
-      chats: await DatabaseProvider.db.getChats(),
+      events:
+          events.where((element) => element.category.contains(title)).toList(),
+      chats: await chatsRepository.getChats(),
     ));
   }
 
-  void copy() {
+  void copy() async {
     state.events
         .where((element) => element.isSelected == true)
         .forEach((element) {
@@ -53,9 +57,10 @@ class EventPageCubit extends Cubit<EventPageState> {
         isSelected: false,
       );
     }
+    final events = await eventsRepository.getEvents();
     emit(
       state.copyWith(
-        events: eventsFromDb
+        events: events
             .where((element) => element.category.contains(state.title))
             .toList(),
       ),
@@ -134,27 +139,40 @@ class EventPageCubit extends Cubit<EventPageState> {
         description: text,
       );
     } else {
-      var event = Event();
+      var id = Random.secure().nextInt(100000);
+      var event = Event(
+        id: id,
+        timeOfCreation: DateFormat('yyyy-MM-dd – kk:mm').format(
+          DateTime.now(),
+        ),
+      );
       state.image == null
           ? event = Event(
+              id: id,
               description: text,
               image: null,
               category: state.selectedCategory,
+              timeOfCreation: DateFormat('yyyy-MM-dd – kk:mm').format(
+                DateTime.now(),
+              ),
             )
-          : Event(
+          : event = Event(
+              id: id,
               description: text,
               image: state.image,
               category: state.selectedCategory,
+              timeOfCreation:
+                  DateFormat('yyyy-MM-dd – kk:mm').format(DateTime.now()),
             );
-      DatabaseProvider.db.insertEvent(event);
-      eventsFromDb = await DatabaseProvider.db.getEvents();
+      eventsRepository.insertEvent(event);
     }
+    final events = await eventsRepository.getEvents();
     emit(
       state.copyWith(
         editMode: false,
         image: null,
         writingMode: false,
-        events: eventsFromDb
+        events: events
             .where((element) => element.category.contains(state.title))
             .toList(),
       ),
@@ -190,33 +208,32 @@ class EventPageCubit extends Cubit<EventPageState> {
   }
 
   void selectEvent(int index) async {
-    /*DatabaseProvider.db.updateEvent(
-      state.events[index],
+    eventsRepository.updateEvent(
       state.events[index].copyWith(
-        isSelected: true,
+        isSelected: !state.events[index].isSelected,
       ),
-    );*/
-    print('object');
-    eventsFromDb = await DatabaseProvider.db.getEvents();
+    );
+    final events = await eventsRepository.getEvents();
     emit(
       state.copyWith(
         editMode: true,
         selectedIndex: index,
-        events: eventsFromDb
+        events: events
             .where((element) => element.category.contains(state.title))
             .toList(),
       ),
     );
   }
 
-  void removeEvents() {
-    DatabaseProvider.db.removeEvents(
-      eventsFromDb.where((element) => element.isSelected == true).toList(),
+  void removeEvents() async {
+    var events = await eventsRepository.getEvents();
+    eventsRepository.removeEvents(
+      events.where((element) => element.isSelected == true).toList(),
     );
-
+    events = await eventsRepository.getEvents();
     emit(
       state.copyWith(
-        events: eventsFromDb
+        events: events
             .where(
               (element) => element.category.contains(
                 state.title,
@@ -260,11 +277,11 @@ class EventPageCubit extends Cubit<EventPageState> {
         state.copyWith(migrateCategory: index as String),
       );
 
-  void migrate() {
-    for (var element in state.events) {
+  void migrate() async {
+    final events = await eventsRepository.getEvents();
+    for (final element in state.events) {
       if (element.isSelected) {
-        DatabaseProvider.db.updateEvent(
-          eventsFromDb[eventsFromDb.indexOf(element)],
+        eventsRepository.updateEvent(
           element.copyWith(
             isSelected: false,
             category: state.migrateCategory,
@@ -275,7 +292,7 @@ class EventPageCubit extends Cubit<EventPageState> {
 
     emit(
       state.copyWith(
-        events: eventsFromDb
+        events: events
             .where((element) => element.category.contains(state.title))
             .toList(),
       ),
@@ -292,11 +309,11 @@ class EventPageCubit extends Cubit<EventPageState> {
         state.copyWith(isScrollbarVisible: !state.isScrollbarVisible),
       );
 
-  void cancelSelection() {
-    for (var element in state.events) {
+  void cancelSelection() async {
+    final events = await eventsRepository.getEvents();
+    for (final element in state.events) {
       if (element.isSelected) {
-        DatabaseProvider.db.updateEvent(
-          element,
+        eventsRepository.updateEvent(
           element.copyWith(
             isSelected: false,
           ),
@@ -306,21 +323,22 @@ class EventPageCubit extends Cubit<EventPageState> {
 
     emit(
       state.copyWith(
-        events: eventsFromDb
+        events: events
             .where((element) => element.category.contains(state.title))
             .toList(),
       ),
     );
   }
 
-  void removeEvent(int index) {
-    DatabaseProvider.db.removeEvent(
+  void removeEvent(int index) async {
+    final events = await eventsRepository.getEvents();
+    eventsRepository.removeEvent(
       state.events[index],
     );
 
     emit(
       state.copyWith(
-        events: eventsFromDb
+        events: events
             .where((element) => element.category.contains(state.title))
             .toList(),
       ),

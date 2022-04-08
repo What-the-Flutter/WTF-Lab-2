@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../data/icons.dart';
 import '../../models/chat.dart';
 import 'new_category_page_cubit.dart';
 import 'new_category_page_state.dart';
@@ -32,9 +33,10 @@ class _NewCategoryPageState extends State<NewCategoryPage> {
 
   @override
   void initState() {
+    super.initState();
+
     _cubit = BlocProvider.of<NewCategoryPageCubit>(context);
     _cubit.init();
-    super.initState();
   }
 
   @override
@@ -73,6 +75,10 @@ class _NewCategoryPageState extends State<NewCategoryPage> {
               context,
               {
                 Chat(
+                  id: state.iconsList
+                      .where((element) => element.isSelected == true)
+                      .first
+                      .id,
                   category: _controller.text,
                   icon: state.iconsList
                       .where((element) => element.isSelected == true)
@@ -137,7 +143,7 @@ Please, enter new value'''
               CircleAvatar(
                 backgroundColor: Theme.of(context).colorScheme.secondary,
                 child: IconButton(
-                  icon: state.iconsList[index].icon,
+                  icon: icons.elementAt(state.iconsList[index].icon),
                   onPressed: () => _cubit.selectIcon(index),
                   iconSize: 25,
                 ),
