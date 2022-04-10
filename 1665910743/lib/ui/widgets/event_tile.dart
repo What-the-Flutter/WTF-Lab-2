@@ -26,16 +26,6 @@ class EventTile extends StatelessWidget {
       margin: const EdgeInsets.all(5),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.black38
-                  : Colors.grey,
-              blurRadius: 2.0,
-              spreadRadius: 0.0,
-              offset: const Offset(2.0, 2.0), // shadow direction: bottom right
-            )
-          ],
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(15),
             topRight: Radius.circular(15),
@@ -94,18 +84,19 @@ class _TileWithoutImage extends StatelessWidget {
           children: [
             Text(
               title,
-              style: const TextStyle(fontSize: 20),
+              style: Theme.of(context).textTheme.bodyText1,
             ),
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   _formattedDate,
-                  style: const TextStyle(fontSize: 10),
+                  style: Theme.of(context).textTheme.bodyText2,
                 ),
                 Icon(
                   favorite ? Icons.star : Icons.star_border,
-                  size: 10,
+                  size: 15,
+                  color: Theme.of(context).scaffoldBackgroundColor,
                 )
               ],
             ),
@@ -156,8 +147,7 @@ class _TileWithImageState extends State<_TileWithImage> {
               width: MediaQuery.of(context).size.width * 0.5,
               child: Text(
                 widget.title,
-                style:
-                    const TextStyle(fontSize: 20, overflow: TextOverflow.fade),
+                style: Theme.of(context).textTheme.bodyText1,
               ),
             ),
             Row(
@@ -165,11 +155,12 @@ class _TileWithImageState extends State<_TileWithImage> {
               children: [
                 Text(
                   widget.formattedDate,
-                  style: const TextStyle(fontSize: 10),
+                  style: Theme.of(context).textTheme.bodyText2,
                 ),
                 Icon(
                   widget.favorite ? Icons.star : Icons.star_border,
-                  size: 10,
+                  size: 15,
+                  color: Theme.of(context).scaffoldBackgroundColor,
                 )
               ],
             ),

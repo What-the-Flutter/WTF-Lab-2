@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
-import '../../cubit/category_cubit/category_list_cubit.dart';
 import '../../models/event.dart';
-import 'edit_chat_item_dialog.dart';
-import 'move_event_tile.dart';
+import '../screens/Chat_Screen/edit_chat_item_dialog.dart';
+import '../screens/Chat_Screen/move_event_tile.dart';
+import '../screens/chat_screen/cubit/event_cubit.dart';
 
 class EditAction extends StatelessWidget {
   final Event event;
@@ -26,7 +26,7 @@ class EditAction extends StatelessWidget {
         title: event.title,
         context: context,
       ),
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Colors.transparent,
       foregroundColor: Theme.of(context).primaryColor,
       icon: Icons.edit,
     );
@@ -47,7 +47,7 @@ class MoveAction extends StatelessWidget {
       onPressed: (context) {
         moveTile(context: context, eventKey: eventKey);
       },
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Colors.transparent,
       foregroundColor: Theme.of(context).primaryColor,
       icon: Icons.move_down,
     );
@@ -65,10 +65,9 @@ class RemoveAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SlidableAction(
-      onPressed: (context) => context
-          .read<CategoryListCubit>()
-          .removeEventInCategory(key: eventKey),
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      onPressed: (context) =>
+          context.read<EventCubit>().removeEventInCategory(key: eventKey),
+      backgroundColor: Colors.transparent,
       foregroundColor: Theme.of(context).primaryColor,
       icon: Icons.delete,
     );
