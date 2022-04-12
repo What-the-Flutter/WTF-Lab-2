@@ -1,4 +1,4 @@
-List<String> kMyTags = [
+const List<String> kMyTags = [
   '#track',
   '#money',
   '#party',

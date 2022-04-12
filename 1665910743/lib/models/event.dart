@@ -8,6 +8,7 @@ class Event {
   String categoryTitle;
   String? id;
   String? imageUrl;
+  int tag;
 
   Event({
     required this.title,
@@ -16,6 +17,7 @@ class Event {
     required this.categoryTitle,
     required this.iconCode,
     required this.image,
+    required this.tag,
   });
 
   Event.fromMap(Map<dynamic, dynamic> map)
@@ -24,7 +26,8 @@ class Event {
         favorite = map['favorite'] == 0 ? false : true,
         iconCode = map['icon'],
         categoryTitle = map['categoryTitle'],
-        image = map['imagePath'];
+        image = map['imagePath'],
+        tag = map['tag'] ?? -1;
 
   Map<String, dynamic> toMap() {
     return {
@@ -35,6 +38,7 @@ class Event {
       'isSelected': isSelected ? 1 : 0,
       'date': date.toIso8601String(),
       'categoryTitle': categoryTitle,
+      'tag': tag
     };
   }
 }

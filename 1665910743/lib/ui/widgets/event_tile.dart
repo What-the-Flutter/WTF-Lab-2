@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../extensions/date_extension.dart';
+import '../../models/tags.dart';
 
 class EventTile extends StatelessWidget {
   final String title;
@@ -9,6 +10,7 @@ class EventTile extends StatelessWidget {
   final Image? image;
   final bool isSelected;
   final int iconCode;
+  final int tag;
 
   EventTile({
     Key? key,
@@ -17,6 +19,7 @@ class EventTile extends StatelessWidget {
     required this.favorite,
     required this.isSelected,
     required this.iconCode,
+    required this.tag,
     this.image,
   }) : super(key: key);
 
@@ -45,7 +48,9 @@ class EventTile extends StatelessWidget {
               title: title,
               formattedDate: date.mmddyy(),
               favorite: favorite,
-              iconCode: iconCode),
+              iconCode: iconCode,
+              tag: tag,
+            ),
     );
   }
 }
@@ -55,12 +60,15 @@ class _TileWithoutImage extends StatelessWidget {
   final String _formattedDate;
   final bool favorite;
   final int iconCode;
+  final int tag;
+
   const _TileWithoutImage({
     Key? key,
     required this.title,
     required String formattedDate,
     required this.favorite,
     required this.iconCode,
+    required this.tag,
   })  : _formattedDate = formattedDate,
         super(key: key);
 
@@ -86,6 +94,12 @@ class _TileWithoutImage extends StatelessWidget {
               title,
               style: Theme.of(context).textTheme.bodyText1,
             ),
+            (tag != -1)
+                ? Text(
+                    kMyTags[tag],
+                    style: Theme.of(context).textTheme.bodyText2,
+                  )
+                : const SizedBox(),
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -93,10 +107,13 @@ class _TileWithoutImage extends StatelessWidget {
                   _formattedDate,
                   style: Theme.of(context).textTheme.bodyText2,
                 ),
-                Icon(
-                  favorite ? Icons.star : Icons.star_border,
-                  size: 15,
-                  color: Theme.of(context).scaffoldBackgroundColor,
+                Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: Icon(
+                    favorite ? Icons.star : Icons.star_border,
+                    size: 15,
+                    color: Theme.of(context).scaffoldBackgroundColor,
+                  ),
                 )
               ],
             ),

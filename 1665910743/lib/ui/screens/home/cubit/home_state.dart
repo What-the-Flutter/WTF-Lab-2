@@ -9,6 +9,6 @@ class HomeState {
   HomeState({
     required this.searchMode,
     required this.searchResult,
-    this.authKey = false,
+    required this.authKey,
   });
 }

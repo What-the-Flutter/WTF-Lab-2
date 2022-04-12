@@ -17,9 +17,6 @@ class Settings extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.read<ThemeCubit>().state == MyThemes.darkTheme;
-    final authValue = context.read<HomeCubit>().state.authKey == true;
-    final bubleAlign = context.read<SettingsCubit>().state.chatTileAlignment ==
-        Alignment.centerRight;
 
     return Scaffold(
       appBar: AppBar(
@@ -29,9 +26,9 @@ class Settings extends StatelessWidget {
         padding: kListViewPadding,
         child: ListView(
           children: [
-            _authSwitch(context, authValue),
             _nightSide(context, theme),
-            _bubbleAlignment(context, bubleAlign),
+            _authSwitch(context),
+            _bubbleAlignment(context),
             _fontSize(context),
             _chooseBackground(context),
             _shareButton(context),
@@ -47,7 +44,7 @@ class Settings extends StatelessWidget {
       onTap: (() {
         Share.share('check out my App!');
       }),
-      leading: const Icon(Icons.share),
+      leading:   Icon(Icons.adaptive.share),
       title: GradientText(
         'Share with friends!',
         style: Theme.of(context).textTheme.bodyText1,
@@ -147,7 +144,7 @@ class Settings extends StatelessWidget {
     );
   }
 
-  Widget _bubbleAlignment(BuildContext context, bool align) {
+  Widget _bubbleAlignment(BuildContext context) {
     return ListTile(
       onTap: () async {
         await showDialog(
@@ -203,20 +200,41 @@ class Settings extends StatelessWidget {
     );
   }
 
-  Widget _authSwitch(BuildContext context, bool authValue) {
+  Widget _authSwitch(BuildContext context) {
     return ListTile(
+      onTap: () async {
+        await showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+                  title: Text('Enable Bio Auth?',
+                      style: Theme.of(context).textTheme.bodyText1),
+                  actions: [
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          primary: Theme.of(context).primaryColor),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        context.read<HomeCubit>().setAuthKey(false);
+                      },
+                      child: const Text('no'),
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          primary: Theme.of(context).primaryColor),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        context.read<HomeCubit>().setAuthKey(true);
+                      },
+                      child: const Text('Yes'),
+                    )
+                  ],
+                ));
+      },
       leading: const Icon(Icons.fingerprint),
       title: Text(
         'Bio Auth',
         style: Theme.of(context).textTheme.bodyText1,
       ),
-      trailing: Switch.adaptive(
-          activeColor: Theme.of(context).primaryColor,
-          value: authValue,
-          onChanged: (value) async {
-            context.read<HomeCubit>().setAuthKey(value);
-            context.read<HomeCubit>().getAuthKey();
-          }),
     );
   }
 }

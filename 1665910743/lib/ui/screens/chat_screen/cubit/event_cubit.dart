@@ -8,25 +8,27 @@ part 'event_state.dart';
 
 class EventCubit extends Cubit<EventState> {
   DataBaseRepository dataBaseRepository;
+
   EventCubit({required this.dataBaseRepository})
-      : super(
-          EventState(eventList: []),
-        );
+      : super(EventState(eventList: []));
 
   Future<void> getEvents() async {
     final _newList = await dataBaseRepository.getEvents();
     state.eventList.clear();
     state.eventList.addAll(_newList);
 
-    emit(EventState(eventList: state.eventList));
+    emit(
+      EventState(eventList: state.eventList),
+    );
   }
 
-  Future<void> addEvent(
-      {required String categoryTitle, required Event event}) async {
+  Future<void> addEvent({
+    required String categoryTitle,
+    required Event event,
+  }) async {
     dataBaseRepository.addEvent(event);
     final _changes = await dataBaseRepository.updateEvents(state.eventList);
 
-    
     emit(
       EventState(eventList: _changes),
     );
@@ -105,9 +107,9 @@ class EventCubit extends Cubit<EventState> {
       await dataBaseRepository.getEvents(),
     );
 
-    emit(EventState(
-      eventList: state.eventList,
-    ));
+    emit(
+      EventState(eventList: state.eventList),
+    );
   }
 
   void getImage(String name) async {
@@ -118,6 +120,8 @@ class EventCubit extends Cubit<EventState> {
       }
     }
 
-    emit(EventState(eventList: state.eventList));
+    emit(
+      EventState(eventList: state.eventList),
+    );
   }
 }

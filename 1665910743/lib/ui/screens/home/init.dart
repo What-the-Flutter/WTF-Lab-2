@@ -44,12 +44,13 @@ class BlocInit extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fontSize = getFontSize(initFontSize);
+
     return MultiBlocProvider(
       providers: [
         BlocProvider(
           create: (_) => CategoryCubit(
             dataBaseRepository: FireBaseRTDB(user: user),
-          ),
+          )..getCat(),
         ),
         BlocProvider(
           create: (_) => HomeCubit(
@@ -59,12 +60,12 @@ class BlocInit extends StatelessWidget {
         BlocProvider(
           create: (_) => EventCubit(
             dataBaseRepository: FireBaseRTDB(user: user),
-          ),
+          )..getEvents(),
         ),
         BlocProvider(
           create: (_) => SettingsCubit(
             alignRight: isChatBubblesToRight,
-            image: backgroundImagePath
+            image: backgroundImagePath,
           ),
         ),
         BlocProvider(

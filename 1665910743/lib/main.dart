@@ -1,5 +1,4 @@
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,15 +17,11 @@ void main() async {
   final _initFontSize = await prefs.getString('font') ?? 'medium';
   final _backgroundImage = await prefs.getString('image') ?? '';
   final _isChatBubblesToRight = await prefs.getBool('align') ?? false;
-  await FirebaseDatabase.instance
-      .ref()
-      .child(_user!.uid)
-      .child('auth')
-      .set(false);
+
   FlutterNativeSplash.remove();
   runApp(
     BlocInit(
-      user: _user,
+      user: _user!,
       initTheme: _initTheme,
       initFontSize: _initFontSize,
       isChatBubblesToRight: _isChatBubblesToRight,

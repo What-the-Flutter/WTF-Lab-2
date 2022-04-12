@@ -20,6 +20,7 @@ class HomeCubit extends Cubit<HomeState> {
       HomeState(
         searchMode: true,
         searchResult: '',
+        authKey: state.authKey,
       ),
     );
   }
@@ -29,6 +30,7 @@ class HomeCubit extends Cubit<HomeState> {
       HomeState(
         searchMode: state.searchMode,
         searchResult: value,
+        authKey: state.authKey,
       ),
     );
   }
@@ -38,6 +40,7 @@ class HomeCubit extends Cubit<HomeState> {
       HomeState(
         searchResult: '',
         searchMode: false,
+        authKey: state.authKey,
       ),
     );
   }

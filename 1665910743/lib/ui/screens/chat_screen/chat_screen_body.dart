@@ -11,6 +11,7 @@ import 'package:path/path.dart' as path;
 import '../../../constants.dart';
 import '../../../models/event.dart';
 import '../../../models/icons_pack.dart';
+import '../../../models/tags.dart';
 import '../../widgets/event_tile.dart';
 import '../../widgets/event_tile_actions.dart';
 import '../chat_screen/bookmarks.dart';
@@ -31,7 +32,6 @@ class ChatScreenBody extends StatefulWidget {
 
 class _ChatScreenBodyState extends State<ChatScreenBody> {
   final _user = FirebaseAuth.instance.currentUser;
-
   final _controller = TextEditingController();
   final _renameController = TextEditingController();
   final picker = ImagePicker();
@@ -39,6 +39,7 @@ class _ChatScreenBodyState extends State<ChatScreenBody> {
   bool _iconAdd = false;
   File? _image;
   int _selectedIcon = -1;
+  int _selectedTag = -1;
 
   @override
   void initState() {
@@ -76,7 +77,6 @@ class _ChatScreenBodyState extends State<ChatScreenBody> {
 
   Future getImage() async {
     final _pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
     final File? _newImage = await File(_pickedFile!.path);
 
     setState(() {
@@ -96,6 +96,7 @@ class _ChatScreenBodyState extends State<ChatScreenBody> {
   Widget build(BuildContext context) {
     final _backgroundImage =
         context.read<SettingsCubit>().state.backgroundImagePath;
+
     return Container(
       decoration: (_backgroundImage.length > 2)
           ? BoxDecoration(
@@ -108,6 +109,7 @@ class _ChatScreenBodyState extends State<ChatScreenBody> {
       child: Column(
         children: [
           _listBody(widget.categoryTitle),
+          _iconAdd ? _tagsGrid() : const SizedBox(),
           _iconAdd ? _iconsGrid() : const SizedBox(),
           _chatScreenNavBar(),
         ],
@@ -173,6 +175,7 @@ class _ChatScreenBodyState extends State<ChatScreenBody> {
                           title: state.eventList[index].title,
                           date: state.eventList[index].date,
                           favorite: state.eventList[index].favorite,
+                          tag: state.eventList[index].tag,
                           image: (state.eventList[index].imageUrl != null)
                               ? Image.network(
                                   state.eventList[index].imageUrl!,
@@ -307,18 +310,21 @@ class _ChatScreenBodyState extends State<ChatScreenBody> {
                             date: DateTime.now(),
                             favorite: false,
                             categoryTitle: widget.categoryTitle,
+                            tag: _selectedTag,
                           ),
                         );
                   } else {
                     context.read<EventCubit>().addEvent(
                           categoryTitle: widget.categoryTitle,
                           event: Event(
-                              image: '',
-                              title: _controller.text,
-                              date: DateTime.now(),
-                              favorite: false,
-                              iconCode: kMyIcons[_selectedIcon].icon!.codePoint,
-                              categoryTitle: widget.categoryTitle),
+                            image: '',
+                            title: _controller.text,
+                            date: DateTime.now(),
+                            favorite: false,
+                            iconCode: kMyIcons[_selectedIcon].icon!.codePoint,
+                            categoryTitle: widget.categoryTitle,
+                            tag: _selectedTag,
+                          ),
                         );
                   }
                   _selectedIcon = -1;
@@ -333,12 +339,14 @@ class _ChatScreenBodyState extends State<ChatScreenBody> {
                     context.read<EventCubit>().addEvent(
                           categoryTitle: widget.categoryTitle,
                           event: Event(
-                              iconCode: 0,
-                              title: basename,
-                              date: DateTime.now(),
-                              favorite: false,
-                              image: _image!.path,
-                              categoryTitle: widget.categoryTitle),
+                            iconCode: 0,
+                            title: basename,
+                            date: DateTime.now(),
+                            favorite: false,
+                            image: _image!.path,
+                            categoryTitle: widget.categoryTitle,
+                            tag: _selectedTag,
+                          ),
                         );
                   }
                 }
@@ -350,6 +358,40 @@ class _ChatScreenBodyState extends State<ChatScreenBody> {
                 color: Theme.of(context).primaryColor,
               ))
         ],
+      ),
+    );
+  }
+
+  Widget _tagsGrid() {
+    final _size = MediaQuery.of(context).size;
+    return Container(
+      height: _size.height * 0.03,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: kMyTags.length,
+        itemBuilder: ((context, i) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: GestureDetector(
+              onTap: (() => setState(
+                    () {
+                      if (_selectedTag == i) {
+                        _selectedTag = -1;
+                      } else {
+                        _selectedTag = i;
+                      }
+                    },
+                  )),
+              child: Text(
+                kMyTags[i],
+                style: TextStyle(
+                    color: i == _selectedTag
+                        ? Theme.of(context).primaryColor
+                        : Colors.black54),
+              ),
+            ),
+          );
+        }),
       ),
     );
   }

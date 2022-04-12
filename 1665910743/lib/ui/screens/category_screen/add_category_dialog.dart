@@ -6,7 +6,6 @@ import '../../../models/event_category.dart';
 import '../../../models/icons_pack.dart';
 import '../../theme/theme_cubit/theme_cubit.dart';
 import '../../theme/theme_data.dart';
-import '../../widgets/category_icon_button.dart';
 import 'cubit/category_cubit.dart';
 
 Future<dynamic> addTaskDialog(BuildContext context) {
@@ -55,7 +54,7 @@ class _ModalBodyState extends State<ModalBody> {
       constraints: BoxConstraints(maxHeight: screenSize.height * 0.95),
       margin: EdgeInsets.only(top: screenSize.height * 0.05),
       decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
+        color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.8),
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(30),
           topRight: Radius.circular(30),
@@ -81,7 +80,7 @@ class _ModalBodyState extends State<ModalBody> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   _addTextField(screenSize, context),
-                  _addButton(context)
+                  _addButton(context),
                 ],
               ),
             ),
@@ -106,35 +105,47 @@ class _ModalBodyState extends State<ModalBody> {
             mainAxisSpacing: 20),
         itemCount: kMyIcons.length,
         itemBuilder: (context, i) {
-          return GestureDetector(
-            onTap: () {
-              setState(
-                () {
-                  _isSelected = !_isSelected;
-                  _selectedIndexAvatar = i;
-                },
-              );
-            },
-            child: CircleAvatar(
-              backgroundColor: (_selectedIndexAvatar == i)
-                  ? Theme.of(context).primaryColor
-                  : Theme.of(context).scaffoldBackgroundColor,
-              foregroundColor:
-                  (context.read<ThemeCubit>().state == MyThemes.darkTheme)
-                      ? ((_selectedIndexAvatar == i)
-                          ? Colors.white
-                          : Theme.of(context).primaryColor)
-                      : ((_selectedIndexAvatar == i)
-                          ? Colors.white
-                          : Theme.of(context).primaryColor),
-              radius: _screenSize.width * 0.13,
-              child: CategoryIconButton(
-                icon: kMyIcons[i],
-                size: _screenSize.width * 0.13,
-              ),
-            ),
+          return _categoryIconButton(
+            i,
+            context,
+            _screenSize,
           );
         },
+      ),
+    );
+  }
+
+  Widget _categoryIconButton(
+    int i,
+    BuildContext context,
+    Size _screenSize,
+  ) {
+    return GestureDetector(
+      onTap: () {
+        setState(
+          () {
+            _isSelected = !_isSelected;
+            _selectedIndexAvatar = i;
+          },
+        );
+      },
+      child: CircleAvatar(
+        backgroundColor: (_selectedIndexAvatar == i)
+            ? Theme.of(context).primaryColor
+            : Theme.of(context).scaffoldBackgroundColor,
+        foregroundColor:
+            (context.read<ThemeCubit>().state == MyThemes.darkTheme)
+                ? ((_selectedIndexAvatar == i)
+                    ? Colors.white
+                    : Theme.of(context).primaryColor)
+                : ((_selectedIndexAvatar == i)
+                    ? Colors.white
+                    : Theme.of(context).primaryColor),
+        radius: _screenSize.width * 0.13,
+        child: Icon(
+          kMyIcons[i].icon,
+          size: _screenSize.width * 0.13,
+        ),
       ),
     );
   }

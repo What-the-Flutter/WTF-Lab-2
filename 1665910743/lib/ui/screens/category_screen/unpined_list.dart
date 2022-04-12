@@ -7,19 +7,8 @@ import '../chat_screen/chat_screen.dart';
 import 'cubit/category_cubit.dart';
 import 'edit_category_dialog.dart';
 
-class UnpinedCategory extends StatefulWidget {
+class UnpinedCategory extends StatelessWidget {
   const UnpinedCategory({Key? key}) : super(key: key);
-
-  @override
-  State<UnpinedCategory> createState() => _UnpinedCategoryState();
-}
-
-class _UnpinedCategoryState extends State<UnpinedCategory> {
-  @override
-  void didChangeDependencies() {
-    context.read<CategoryCubit>().getCat();
-    super.didChangeDependencies();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,11 +20,12 @@ class _UnpinedCategoryState extends State<UnpinedCategory> {
             itemCount: state.categoryList.length,
             itemBuilder: ((context, index) {
               return GestureDetector(
-                onTap: (() => Navigator.push(
+                onTap: (() => Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                         builder: ((context) => ChatScreen(
-                            categoryTitle: state.categoryList[index].title)),
+                              categoryTitle: state.categoryList[index].title,
+                            )),
                       ),
                     )),
                 onLongPress: () {

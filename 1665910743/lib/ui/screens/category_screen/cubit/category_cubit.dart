@@ -30,6 +30,7 @@ class CategoryCubit extends Cubit<CategoryState> {
     state.categoryList.addAll(
       await dataBaseRepository.getCategorys(),
     );
+
     emit(
       CategoryState(categoryList: state.categoryList),
     );
@@ -41,6 +42,7 @@ class CategoryCubit extends Cubit<CategoryState> {
     state.categoryList.addAll(
       await dataBaseRepository.getCategorys(),
     );
+
     emit(
       CategoryState(categoryList: state.categoryList),
     );
@@ -49,7 +51,6 @@ class CategoryCubit extends Cubit<CategoryState> {
   void unpin(EventCategory category, String key) async {
     dataBaseRepository.unpinCategory(key);
     state.categoryList.clear();
-
     state.categoryList.addAll(
       await dataBaseRepository.getCategorys(),
     );
@@ -75,7 +76,11 @@ class CategoryCubit extends Cubit<CategoryState> {
     required String newTitle,
     required String oldTitle,
   }) async {
-    dataBaseRepository.renameCategory(key, newTitle, oldTitle);
+    dataBaseRepository.renameCategory(
+      key,
+      newTitle,
+      oldTitle,
+    );
     state.categoryList.clear();
     state.categoryList.addAll(
       await dataBaseRepository.getCategorys(),

@@ -1,9 +1,7 @@
 import 'package:intl/intl.dart';
 
-
-
-extension MonthDateYear on DateTime{
+extension MonthDateYear on DateTime {
   String mmddyy() {
-     return  DateFormat.yMMMMd().format(this);
-    }
+    return DateFormat.MMMMd().format(this);
+  }
 }

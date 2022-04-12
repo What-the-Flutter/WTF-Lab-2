@@ -67,7 +67,7 @@ class _HomeState extends State<Home> {
   }
 
   PreferredSizeWidget _appBar(BuildContext context) {
-    return context.watch<HomeCubit>().state.searchMode
+    return context.read<HomeCubit>().state.searchMode
         ? AppBar(
             automaticallyImplyLeading: false,
             title: TextField(
