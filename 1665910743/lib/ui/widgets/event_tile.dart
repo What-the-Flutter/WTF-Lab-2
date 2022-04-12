@@ -163,8 +163,9 @@ class _TileWithImageState extends State<_TileWithImage> {
             Container(
               width: MediaQuery.of(context).size.width * 0.5,
               child: Text(
-                widget.title,
+                '${widget.title.substring(0, 10)}...',
                 style: Theme.of(context).textTheme.bodyText1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             Row(

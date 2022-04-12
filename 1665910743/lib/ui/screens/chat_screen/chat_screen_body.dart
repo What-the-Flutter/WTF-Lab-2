@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -177,10 +178,11 @@ class _ChatScreenBodyState extends State<ChatScreenBody> {
                           favorite: state.eventList[index].favorite,
                           tag: state.eventList[index].tag,
                           image: (state.eventList[index].imageUrl != null)
-                              ? Image.network(
-                                  state.eventList[index].imageUrl!,
-                                  width: 70,
-                                  height: 70,
+                              ? Image(
+                                  image: CachedNetworkImageProvider(
+                                      state.eventList[index].imageUrl!),
+                                  width: 90,
+                                  height: 90,
                                 )
                               : null),
                     ),
