@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'constants.dart';
+
+enum ThemeKeys { light, dark }
 
 class AppTheme {
   static ThemeData lightTheme = ThemeData(
@@ -45,10 +48,9 @@ class AppTheme {
 }
 
 class CustomTheme extends StatefulWidget {
-  final ThemeData themeData;
   final Widget child;
 
-  const CustomTheme({Key? key, required this.themeData, required this.child}) : super(key: key);
+  const CustomTheme({Key? key, required this.child}) : super(key: key);
 
   @override
   CustomThemeState createState() => CustomThemeState();
@@ -57,15 +59,37 @@ class CustomTheme extends StatefulWidget {
 class CustomThemeState extends State<CustomTheme> {
   ThemeData themeData = AppTheme.lightTheme;
 
-  void switchTheme() {
-    setState(() =>
-        themeData = themeData == AppTheme.darkTheme ? AppTheme.lightTheme : AppTheme.darkTheme);
+  void _loadTheme() async {
+    final prefs = await SharedPreferences.getInstance();
+    final theme = prefs.getString('theme') ?? ThemeKeys.light.toString();
+
+    setState(
+      () {
+        if (theme == ThemeKeys.light.toString()) {
+          themeData = AppTheme.lightTheme;
+        } else {
+          themeData = AppTheme.darkTheme;
+        }
+      },
+    );
+  }
+
+  void switchTheme(ThemeKeys themeKey) async {
+    final _prefs = await SharedPreferences.getInstance();
+    if (themeKey == ThemeKeys.light) {
+      _prefs.setString('theme', ThemeKeys.light.toString());
+      setState(() => themeData = AppTheme.lightTheme);
+    } else {
+      _prefs.setString('theme', ThemeKeys.dark.toString());
+      setState(() => themeData = AppTheme.darkTheme);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    _loadTheme();
     return InheritedCustomTheme(
-      themeData: widget.themeData,
+      themeData: themeData,
       child: widget.child,
       state: this,
     );

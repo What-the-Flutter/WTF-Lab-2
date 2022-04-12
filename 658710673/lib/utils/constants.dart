@@ -12,126 +12,36 @@ class Constants {
 
 class CategoryIcons {
   static const List<Icon> icons = [
-    Icon(
-      Icons.flight_takeoff,
-      color: Colors.white,
-    ),
-    Icon(
-      Icons.family_restroom,
-      color: Colors.white,
-    ),
-    Icon(
-      Icons.sports_volleyball,
-      color: Colors.white,
-    ),
-    Icon(
-      Icons.grade,
-      color: Colors.white,
-    ),
-    Icon(
-      Icons.sports_bar,
-      color: Colors.white,
-    ),
-    Icon(
-      Icons.sports_basketball,
-      color: Colors.white,
-    ),
-    Icon(
-      Icons.add,
-      color: Colors.white,
-    ),
-    Icon(
-      Icons.radar,
-      color: Colors.white,
-    ),
-    Icon(
-      Icons.sailing,
-      color: Colors.white,
-    ),
-    Icon(
-      Icons.earbuds,
-      color: Colors.white,
-    ),
-    Icon(
-      Icons.flight_takeoff,
-      color: Colors.white,
-    ),
-    Icon(
-      Icons.family_restroom,
-      color: Colors.white,
-    ),
-    Icon(
-      Icons.sports_volleyball,
-      color: Colors.white,
-    ),
-    Icon(
-      Icons.grade,
-      color: Colors.white,
-    ),
-    Icon(
-      Icons.sports_bar,
-      color: Colors.white,
-    ),
-    Icon(
-      Icons.sports_basketball,
-      color: Colors.white,
-    ),
-    Icon(
-      Icons.add,
-      color: Colors.white,
-    ),
-    Icon(
-      Icons.radar,
-      color: Colors.white,
-    ),
-    Icon(
-      Icons.sailing,
-      color: Colors.white,
-    ),
-    Icon(
-      Icons.earbuds,
-      color: Colors.white,
-    ),
-    Icon(
-      Icons.flight_takeoff,
-      color: Colors.white,
-    ),
-    Icon(
-      Icons.family_restroom,
-      color: Colors.white,
-    ),
-    Icon(
-      Icons.sports_volleyball,
-      color: Colors.white,
-    ),
-    Icon(
-      Icons.grade,
-      color: Colors.white,
-    ),
-    Icon(
-      Icons.sports_bar,
-      color: Colors.white,
-    ),
-    Icon(
-      Icons.sports_basketball,
-      color: Colors.white,
-    ),
-    Icon(
-      Icons.add,
-      color: Colors.white,
-    ),
-    Icon(
-      Icons.radar,
-      color: Colors.white,
-    ),
-    Icon(
-      Icons.sailing,
-      color: Colors.white,
-    ),
-    Icon(
-      Icons.earbuds,
-      color: Colors.white,
-    ),
+    Icon(Icons.flight_takeoff),
+    Icon(Icons.family_restroom),
+    Icon(Icons.sports_volleyball),
+    Icon(Icons.grade),
+    Icon(Icons.sports_bar),
+    Icon(Icons.sports_basketball),
+    Icon(Icons.add),
+    Icon(Icons.radar),
+    Icon(Icons.sailing),
+    Icon(Icons.earbuds),
+    Icon(Icons.videogame_asset),
+    Icon(Icons.enhance_photo_translate),
+    Icon(Icons.access_alarm),
+    Icon(Icons.account_balance_sharp),
+    Icon(Icons.add_ic_call),
+    Icon(Icons.add_shopping_cart_sharp),
+    Icon(Icons.agriculture_sharp),
+    Icon(Icons.anchor_sharp),
+    Icon(Icons.vpn_key_sharp),
+    Icon(Icons.wine_bar),
+    Icon(Icons.work_rounded),
+    Icon(Icons.weekend),
+    Icon(Icons.wifi_protected_setup),
+    Icon(Icons.airline_seat_individual_suite),
+    Icon(Icons.visibility),
+    Icon(Icons.volunteer_activism),
+    Icon(Icons.apartment),
+    Icon(Icons.voice_chat),
+    Icon(Icons.watch),
+    Icon(Icons.wash),
   ];
 }
 

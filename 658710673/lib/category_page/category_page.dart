@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -23,7 +25,6 @@ class CategoryPage extends StatefulWidget {
 class _CategoryPageState extends State<CategoryPage> {
   final TextEditingController _textController = TextEditingController();
   final TextEditingController _searchController = TextEditingController();
-  final _homeCubit = HomeCubit();
 
   @override
   void dispose() {
@@ -43,7 +44,7 @@ class _CategoryPageState extends State<CategoryPage> {
       builder: (context, state) {
         return Scaffold(
           resizeToAvoidBottomInset: true,
-          appBar: state.category!.events.where((element) => element.isSelected == true).isEmpty &&
+          appBar: state.events.where((element) => element.isSelected == true).isEmpty &&
                   !state.isEditingMode
               ? state.isSearchMode
                   ? _searchAppBar()
@@ -54,8 +55,7 @@ class _CategoryPageState extends State<CategoryPage> {
           body: Column(
             children: [
               Expanded(
-                child:
-                    state.category!.events.isEmpty ? _bodyWithoutEvents() : _bodyWithEvents(state),
+                child: state.events.isEmpty ? _bodyWithoutEvents() : _bodyWithEvents(state),
               ),
               Align(
                 alignment: Alignment.bottomLeft,
@@ -133,7 +133,7 @@ class _CategoryPageState extends State<CategoryPage> {
       ),
       title: Center(
         child: Text(
-          state.category!.events.where((element) => element.isSelected == true).length.toString(),
+          state.events.where((element) => element.isSelected == true).length.toString(),
         ),
       ),
       actions: [
@@ -143,11 +143,12 @@ class _CategoryPageState extends State<CategoryPage> {
           },
           icon: const Icon(Icons.reply),
         ),
-        if (state.category!.events.where((element) => element.isSelected == true).length == 1 &&
+        if (state.events.where((element) => element.isSelected == true).length == 1 &&
             !state.isAttachment)
           IconButton(
             icon: const Icon(Icons.edit),
-            onPressed: () => BlocProvider.of<CategoryCubit>(context).editEvent(_textController),
+            onPressed: () =>
+                _textController.text = BlocProvider.of<CategoryCubit>(context).editEvent(),
           ),
         IconButton(
           icon: const Icon(Icons.copy),
@@ -204,19 +205,17 @@ class _CategoryPageState extends State<CategoryPage> {
   ListView _bodyWithEvents(CategoryState state) {
     return ListView.builder(
       shrinkWrap: true,
-      itemCount: state.isSearchMode
-          ? state.category!.searchedEvents.length
-          : state.category!.events.length,
+      itemCount: state.isSearchMode ? state.searchedEvents.length : state.events.length,
       itemBuilder: (context, index) => Dismissible(
-        key: UniqueKey(),
+        key: Key(state.events[index].toString()),
         child: Align(
           alignment: Alignment.centerLeft,
           child: GestureDetector(
             onTap: () => BlocProvider.of<CategoryCubit>(context).tapOnEvent(index, _textController),
             onLongPress: () => BlocProvider.of<CategoryCubit>(context).selectEvent(index),
             child: state.isSearchMode
-                ? _eventMessage(index, state, state.category!.searchedEvents)
-                : _eventMessage(index, state, state.category!.events),
+                ? _eventMessage(index, state, state.searchedEvents)
+                : _eventMessage(index, state, state.events),
           ),
         ),
         background: Container(
@@ -254,7 +253,7 @@ class _CategoryPageState extends State<CategoryPage> {
         onDismissed: (direction) {
           if (direction == DismissDirection.startToEnd) {
             BlocProvider.of<CategoryCubit>(context).selectEvent(index);
-            BlocProvider.of<CategoryCubit>(context).editEvent(_textController);
+            _textController.text = BlocProvider.of<CategoryCubit>(context).editEvent();
           } else {
             BlocProvider.of<CategoryCubit>(context).selectEvent(index);
             BlocProvider.of<CategoryCubit>(context).deleteEvent();
@@ -282,23 +281,14 @@ class _CategoryPageState extends State<CategoryPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          state.category!.events[index].section !=
-                      BlocProvider.of<CategoryCubit>(context).defaultSection &&
+          state.events[index].sectionTitle !=
+                      BlocProvider.of<CategoryCubit>(context).defaultSection.title &&
                   events[index].attachment == null
               ? Wrap(
                   children: [
-                    Icon(BlocProvider.of<CategoryCubit>(context)
-                        .state
-                        .category!
-                        .events[index]
-                        .section!
-                        .iconData),
-                    Text(BlocProvider.of<CategoryCubit>(context)
-                        .state
-                        .category!
-                        .events[index]
-                        .section!
-                        .title),
+                    Icon(IconData(
+                        BlocProvider.of<CategoryCubit>(context).state.events[index].sectionIcon!)),
+                    Text(BlocProvider.of<CategoryCubit>(context).state.events[index].sectionTitle),
                   ],
                 )
               : Wrap(),
@@ -314,7 +304,7 @@ class _CategoryPageState extends State<CategoryPage> {
                 maxHeight: 200.0,
                 maxWidth: 200.0,
               ),
-              child: Image.file(events[index].attachment!),
+              child: Image.file(File(events[index].attachment!)),
             ),
           Wrap(
             children: [
@@ -363,12 +353,16 @@ class _CategoryPageState extends State<CategoryPage> {
           ),
           state.isWritingMode
               ? IconButton(
-                  onPressed: () => BlocProvider.of<CategoryCubit>(context)
-                      .addNewEvent(_textController, widget.category.title),
+                  onPressed: () {
+                    BlocProvider.of<CategoryCubit>(context)
+                        .addNewEvent(_textController.text, widget.category);
+                    _textController.text = '';
+                  },
                   icon: const Icon(Icons.send),
                 )
               : IconButton(
-                  onPressed: () => BlocProvider.of<CategoryCubit>(context).attachImage(),
+                  onPressed: () =>
+                      BlocProvider.of<CategoryCubit>(context).attachImage(widget.category),
                   icon: const Icon(Icons.image),
                 ),
         ],
@@ -501,7 +495,9 @@ class _CategoryPageState extends State<CategoryPage> {
           activeColor: Theme.of(context).primaryColor,
           value: index,
           groupValue: state.replyCategoryIndex,
-          onChanged: (value) => ctx.read<CategoryCubit>().setReplyCategory(ctx, value as int),
+          onChanged: (value) {
+            ctx.read<CategoryCubit>().setReplyCategory(ctx, value as int);
+          },
         );
       },
     );

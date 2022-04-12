@@ -9,9 +9,8 @@ import 'utils/app_theme.dart';
 
 void main() {
   runApp(
-    CustomTheme(
-      themeData: AppTheme.lightTheme,
-      child: const ChatJournalApp(),
+    const CustomTheme(
+      child: ChatJournalApp(),
     ),
   );
 }

@@ -46,9 +46,10 @@ class _HomePageState extends State<HomePage> {
                 actions: [
                   IconButton(
                     icon: const Icon(Icons.invert_colors),
-                    onPressed: () => setState(() {
-                      InheritedCustomTheme.of(context).switchTheme();
-                    }),
+                    onPressed: () =>
+                        InheritedCustomTheme.of(context).themeData == AppTheme.lightTheme
+                            ? InheritedCustomTheme.of(context).switchTheme(ThemeKeys.dark)
+                            : InheritedCustomTheme.of(context).switchTheme(ThemeKeys.light),
                   ),
                 ],
                 flexibleSpace: FlexibleSpaceBar(
@@ -108,6 +109,7 @@ class _HomePageState extends State<HomePage> {
           leading: CircleAvatar(
             child: category.icon,
             backgroundColor: Colors.grey,
+            foregroundColor: Colors.white,
           ),
           title: Align(
             alignment: Alignment.centerLeft,
@@ -116,20 +118,7 @@ class _HomePageState extends State<HomePage> {
               style: Theme.of(context).textTheme.headline6,
             ),
           ),
-          subtitle: category.events.isEmpty
-              ? const Text('No events. Click to create one')
-              : Text(
-                  category.events.last.description,
-                ),
-          trailing: category.events.isEmpty
-              ? const Text('')
-              : Text(
-                  DateFormat().add_jm().format(category.events.last.timeOfCreation).toString(),
-                  style: const TextStyle(
-                    fontSize: 15,
-                    color: Color(0xFF616161),
-                  ),
-                ),
+          subtitle: const Text('No events. Click to create one'),
           onTap: () async {
             await Navigator.push(
               context,
@@ -151,13 +140,13 @@ class _HomePageState extends State<HomePage> {
             );
             setState(() {});
           },
-          onLongPress: () => _modalBottomActions(context, index, state),
+          onLongPress: () => _showModalBottomActions(context, index, state),
         ),
       ),
     );
   }
 
-  Future<dynamic> _modalBottomActions(BuildContext context, int index, HomeState state) {
+  Future<dynamic> _showModalBottomActions(BuildContext ctx, int index, HomeState state) {
     return showModalBottomSheet(
       context: context,
       builder: (context) => Container(
@@ -206,7 +195,7 @@ class _HomePageState extends State<HomePage> {
               title: const Text('Delete Page'),
               onTap: () {
                 Navigator.pop(context);
-                modalBottomDeleteSheet(context, index);
+                _showModalBottomDeleteSheet(ctx, index);
               },
             ),
           ],
@@ -234,7 +223,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<dynamic> modalBottomDeleteSheet(BuildContext context, int index) {
+  Future<dynamic> _showModalBottomDeleteSheet(BuildContext ctx, int index) {
     return showModalBottomSheet(
       context: context,
       builder: (context) => Container(
@@ -273,7 +262,7 @@ class _HomePageState extends State<HomePage> {
                       color: Colors.red,
                       iconSize: 30,
                       onPressed: () {
-                        BlocProvider.of<HomeCubit>(context).deleteCategory(index);
+                        BlocProvider.of<HomeCubit>(ctx).deleteCategory(index);
                         Navigator.pop(context);
                       },
                       icon: const Icon(Icons.delete),
@@ -327,17 +316,6 @@ class _HomePageState extends State<HomePage> {
                         .format(state.categories[index].timeOfCreation)
                         .toString(),
                   ),
-                ),
-                ListTile(
-                  title: const Text('Latest Event'),
-                  subtitle: state.categories[index].events.isNotEmpty
-                      ? Text(
-                          DateFormat()
-                              .add_jms()
-                              .format(state.categories[index].events.last.timeOfCreation)
-                              .toString(),
-                        )
-                      : const Text('No events at the time'),
                 ),
               ],
             ),
