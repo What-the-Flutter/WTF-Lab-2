@@ -13,8 +13,10 @@ List<Icon> kMyIcons = const [
   Icon(Icons.account_circle),
   Icon(Icons.work_outline),
   Icon(Icons.add_circle_rounded),
-  Icon(Icons.add_task_outlined),
-  Icon(Icons.arrow_circle_down_sharp),
+  Icon(Icons.workspace_premium_outlined),
+  Icon(Icons.account_balance_outlined),
   Icon(Icons.chat),
 ];
+
+
 

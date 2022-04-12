@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:path/path.dart';
 
 import '../models/event.dart';
 import '../models/event_category.dart';
@@ -14,6 +15,60 @@ class FireBaseRTDB implements DataBaseRepository {
   final DatabaseReference ref = FirebaseDatabase.instance.ref();
 
   FireBaseRTDB({required this.user});
+
+  @override
+  Future<List<EventCategory>> getCategorys() async {
+    var events = <EventCategory>[];
+    var databaseEvent = await ref
+        .child(user?.uid ?? '')
+        .child('category')
+        .orderByChild('pinned')
+        .once();
+    for (final child in databaseEvent.snapshot.children) {
+      final value = child.value as Map<dynamic, dynamic>;
+      final event = EventCategory.fromMap(value);
+      event.id = child.key;
+      events.add(event);
+    }
+    return events;
+  }
+
+  @override
+  Future<List<Event>> getEvents() async {
+    var events = <Event>[];
+    var databaseEvent = await ref
+        .child(user?.uid ?? '')
+        .child('events')
+        .orderByChild('date')
+        .once();
+    for (final child in databaseEvent.snapshot.children) {
+      final value = child.value as Map<dynamic, dynamic>;
+      final event = Event.fromMap(value);
+      event.id = child.key;
+      events.add(event);
+    }
+    return events;
+  }
+
+  @override
+  Future<List<Event>> updateEvents(List<Event> oldList) async {
+    var events = <Event>[];
+    var databaseEvent = await ref
+        .child(user?.uid ?? '')
+        .child('events')
+        .orderByChild('date')
+        .once();
+    for (final child in databaseEvent.snapshot.children) {
+      final value = child.value as Map<dynamic, dynamic>;
+      final event = Event.fromMap(value);
+      event.id = child.key;
+      events.add(event);
+    }
+
+    events.removeWhere((element) => oldList.contains(element));
+
+    return events;
+  }
 
   @override
   Future<void> addCategory(
@@ -31,12 +86,14 @@ class FireBaseRTDB implements DataBaseRepository {
   @override
   Future<void> addEvent(Event event) async {
     final isImage = await event.image;
-    if (isImage != null) {
+
+    if (isImage.length > 2) {
       try {
+        final basename = basenameWithoutExtension(event.image);
         final storageRef =
-            FirebaseStorage.instance.ref('${user?.uid}/${event.title}');
+            FirebaseStorage.instance.ref('${user?.uid}/$basename');
         await storageRef.putFile(
-          File(event.image!),
+          File(event.image),
         );
       } catch (e) {
         print(e);
@@ -109,7 +166,8 @@ class FireBaseRTDB implements DataBaseRepository {
   }
 
   @override
-  Future<void> renameCategory(String key, String newTitle) async {
+  Future<void> renameCategory(
+      String key, String newTitle, String oldTitle) async {
     try {
       await ref
           .child(user!.uid)
@@ -118,6 +176,25 @@ class FireBaseRTDB implements DataBaseRepository {
           .update({'title': newTitle});
     } catch (e) {
       print(e);
+    }
+    var databaseEvent = await ref
+        .child(user?.uid ?? '')
+        .child('events')
+        .orderByChild('date')
+        .once();
+    for (final child in databaseEvent.snapshot.children) {
+      final value = child.value as Map<dynamic, dynamic>;
+      if (value['categoryTitle'] == oldTitle) {
+        try {
+          await ref
+              .child(user!.uid)
+              .child('events')
+              .child(child.key!)
+              .update({'categoryTitle': newTitle});
+        } catch (e) {
+          print(e);
+        }
+      }
     }
   }
 

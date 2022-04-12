@@ -1,76 +1,40 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
-import '../../cubit/category_cubit/category_list_cubit.dart';
-import '../../cubit/theme_cubit/theme_cubit.dart';
-import '../theme/theme_data.dart';
+import '../screens/settings/settings.dart';
 
-class JourneyDrawer extends StatefulWidget {
+class JourneyDrawer extends StatelessWidget {
   const JourneyDrawer({Key? key}) : super(key: key);
 
   @override
-  State<JourneyDrawer> createState() => _JourneyDrawerState();
-}
-
-class _JourneyDrawerState extends State<JourneyDrawer> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final theme = context.read<ThemeCubit>().state == MyThemes.darkTheme;
     return Drawer(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       child: Column(
-        children: [_header(context), _body(context, theme)],
+        children: [_header(context), _body(context)],
       ),
     );
   }
 
-  Widget _body(BuildContext context, bool theme) {
-    var authValue = context.watch<CategoryListCubit>().state.authKey;
-
+  Widget _body(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(10),
       height: MediaQuery.of(context).size.height * 0.8,
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text('Enable Bio auth'),
-              Switch.adaptive(
-                  activeColor: Theme.of(context).primaryColor,
-                  value: authValue!,
-                  onChanged: (value) async {
-                    context.read<CategoryListCubit>().setAuthKey(value);
-                    context.read<CategoryListCubit>().getAuthKey();
-                  }),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text('Night Side'),
-              Switch.adaptive(
-                  activeColor: Theme.of(context).primaryColor,
-                  value: theme,
-                  onChanged: (value) {
-                    setState(() {
-                      value
-                          ? context
-                              .read<ThemeCubit>()
-                              .themeChanged(MyThemeKeys.dark)
-                          : context
-                              .read<ThemeCubit>()
-                              .themeChanged(MyThemeKeys.light);
-                    });
-                  }),
-            ],
-          ),
+          ListTile(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: ((context) => const Settings()),
+                ),
+              );
+            },
+            leading: const Icon(Icons.settings),
+            title: const Text('Settings'),
+          )
         ],
       ),
     );
@@ -89,9 +53,12 @@ class _JourneyDrawerState extends State<JourneyDrawer> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Settings',
-                  style: TextStyle(fontSize: 20),
+                Text(
+                  'My Journal',
+                  style: GoogleFonts.bebasNeue(
+                    color: Colors.white,
+                    fontSize: 40,
+                  ),
                 ),
                 Text(
                   DateFormat.yMMMMd()
@@ -99,9 +66,7 @@ class _JourneyDrawerState extends State<JourneyDrawer> {
                         DateTime.now(),
                       )
                       .toString(),
-                  style: const TextStyle(
-                    fontSize: 10,
-                  ),
+                  style: Theme.of(context).textTheme.bodyText2,
                 ),
               ],
             ),
@@ -111,3 +76,5 @@ class _JourneyDrawerState extends State<JourneyDrawer> {
     );
   }
 }
+//TODO: stateless
+

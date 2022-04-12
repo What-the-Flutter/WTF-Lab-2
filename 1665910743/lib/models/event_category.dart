@@ -4,6 +4,7 @@ class EventCategory {
   final Icon icon;
   String title;
   bool pinned;
+  String? id;
 
   EventCategory({
     required this.title,

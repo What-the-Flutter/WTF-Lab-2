@@ -1,0 +1,17 @@
+const List<String> kMyTags = [
+  '#track',
+  '#money',
+  '#party',
+  '#sport',
+  '#presents',
+  '#birthdays',
+  '#alarm',
+  '#to-do',
+  '#shopping',
+  '#meet',
+  '#work',
+  '#add',
+  '#place',
+  '#goal',
+  '#messege',
+];

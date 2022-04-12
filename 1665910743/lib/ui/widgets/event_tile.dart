@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../extensions/date_extension.dart';
+import '../../models/tags.dart';
+import '../screens/settings/cubit/settings_cubit.dart';
 
 class EventTile extends StatelessWidget {
   final String title;
@@ -9,6 +12,7 @@ class EventTile extends StatelessWidget {
   final Image? image;
   final bool isSelected;
   final int iconCode;
+  final int tag;
 
   EventTile({
     Key? key,
@@ -17,29 +21,28 @@ class EventTile extends StatelessWidget {
     required this.favorite,
     required this.isSelected,
     required this.iconCode,
+    required this.tag,
     this.image,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final _tileAlignLeft =
+        context.read<SettingsCubit>().state.chatTileAlignment ==
+            Alignment.centerLeft;
     return Container(
       margin: const EdgeInsets.all(5),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.black38
-                  : Colors.grey,
-              blurRadius: 2.0,
-              spreadRadius: 0.0,
-              offset: const Offset(2.0, 2.0), // shadow direction: bottom right
-            )
-          ],
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(15),
-            topRight: Radius.circular(15),
-            bottomRight: Radius.circular(15),
+          borderRadius: BorderRadius.only(
+            topLeft: const Radius.circular(15),
+            topRight: const Radius.circular(15),
+            bottomRight: _tileAlignLeft
+                ? const Radius.circular(15)
+                : const Radius.circular(0),
+            bottomLeft: _tileAlignLeft
+                ? const Radius.circular(0)
+                : const Radius.circular(15),
           ),
           color: isSelected
               ? Theme.of(context).primaryColor.withOpacity(0.7)
@@ -55,7 +58,9 @@ class EventTile extends StatelessWidget {
               title: title,
               formattedDate: date.mmddyy(),
               favorite: favorite,
-              iconCode: iconCode),
+              iconCode: iconCode,
+              tag: tag,
+            ),
     );
   }
 }
@@ -65,12 +70,15 @@ class _TileWithoutImage extends StatelessWidget {
   final String _formattedDate;
   final bool favorite;
   final int iconCode;
+  final int tag;
+
   const _TileWithoutImage({
     Key? key,
     required this.title,
     required String formattedDate,
     required this.favorite,
     required this.iconCode,
+    required this.tag,
   })  : _formattedDate = formattedDate,
         super(key: key);
 
@@ -94,18 +102,28 @@ class _TileWithoutImage extends StatelessWidget {
           children: [
             Text(
               title,
-              style: const TextStyle(fontSize: 20),
+              style: Theme.of(context).textTheme.bodyText1,
             ),
+            (tag != -1)
+                ? Text(
+                    kMyTags[tag],
+                    style: Theme.of(context).textTheme.bodyText2,
+                  )
+                : const SizedBox(),
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   _formattedDate,
-                  style: const TextStyle(fontSize: 10),
+                  style: Theme.of(context).textTheme.bodyText2,
                 ),
-                Icon(
-                  favorite ? Icons.star : Icons.star_border,
-                  size: 10,
+                Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: Icon(
+                    favorite ? Icons.star : Icons.star_border,
+                    size: 15,
+                    color: Theme.of(context).scaffoldBackgroundColor,
+                  ),
                 )
               ],
             ),
@@ -155,9 +173,9 @@ class _TileWithImageState extends State<_TileWithImage> {
             Container(
               width: MediaQuery.of(context).size.width * 0.5,
               child: Text(
-                widget.title,
-                style:
-                    const TextStyle(fontSize: 20, overflow: TextOverflow.fade),
+                '${widget.title.substring(0, 10)}...',
+                style: Theme.of(context).textTheme.bodyText1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             Row(
@@ -165,11 +183,12 @@ class _TileWithImageState extends State<_TileWithImage> {
               children: [
                 Text(
                   widget.formattedDate,
-                  style: const TextStyle(fontSize: 10),
+                  style: Theme.of(context).textTheme.bodyText2,
                 ),
                 Icon(
                   widget.favorite ? Icons.star : Icons.star_border,
-                  size: 10,
+                  size: 15,
+                  color: Theme.of(context).scaffoldBackgroundColor,
                 )
               ],
             ),
