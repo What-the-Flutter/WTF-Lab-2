@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../extensions/date_extension.dart';
 import '../../models/tags.dart';
+import '../screens/settings/cubit/settings_cubit.dart';
 
 class EventTile extends StatelessWidget {
   final String title;
@@ -25,14 +27,22 @@ class EventTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final _tileAlignLeft =
+        context.read<SettingsCubit>().state.chatTileAlignment ==
+            Alignment.centerLeft;
     return Container(
       margin: const EdgeInsets.all(5),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(15),
-            topRight: Radius.circular(15),
-            bottomRight: Radius.circular(15),
+          borderRadius: BorderRadius.only(
+            topLeft: const Radius.circular(15),
+            topRight: const Radius.circular(15),
+            bottomRight: _tileAlignLeft
+                ? const Radius.circular(15)
+                : const Radius.circular(0),
+            bottomLeft: _tileAlignLeft
+                ? const Radius.circular(0)
+                : const Radius.circular(15),
           ),
           color: isSelected
               ? Theme.of(context).primaryColor.withOpacity(0.7)
