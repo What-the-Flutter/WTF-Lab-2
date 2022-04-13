@@ -1,10 +1,9 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../data/db_provider.dart';
 import '../home_page/home_cubit.dart';
 import '../models/category.dart';
 import '../models/event.dart';
@@ -12,12 +11,14 @@ import '../models/section.dart';
 import 'category_state.dart';
 
 class CategoryCubit extends Cubit<CategoryState> {
-  CategoryCubit() : super(CategoryState());
+  CategoryCubit() : super(CategoryState(events: [], searchedEvents: []));
 
   final defaultSection = Section(title: '', iconData: Icons.bubble_chart);
 
-  void init(Category category) {
+  void init(Category category) async {
     emit(state.copyWith(category: category, selectedSection: defaultSection));
+    final events = await DBProvider.db.getAllCategoryEvents(category);
+    emit(state.copyWith(events: events));
   }
 
   void changeFavoriteMode() {
@@ -37,7 +38,7 @@ class CategoryCubit extends Cubit<CategoryState> {
   }
 
   void changeSearchMode() {
-    state.category!.searchedEvents.clear();
+    state.searchedEvents.clear();
     emit(state.copyWith(isSearchMode: !state.isSearchMode, category: state.category));
   }
 
@@ -45,42 +46,48 @@ class CategoryCubit extends Cubit<CategoryState> {
     emit(state.copyWith(selectedSection: section));
   }
 
-  Future attachImage() async {
+  Future attachImage(Category category) async {
     final image = await ImagePicker().pickImage(source: ImageSource.gallery);
 
     if (image == null) return;
     emit(state.copyWith(isAttachment: true));
-    state.category!.events.add(Event('', attachment: File(image.path)));
-    emit(state.copyWith(category: state.category));
+    final event = Event('', category.id, attachment: image.path);
+    final newEvent = await DBProvider.db.addEvent(event);
+    state.events.add(newEvent);
+    emit(state.copyWith(events: state.events));
   }
 
-  void addNewEvent(TextEditingController controller, String category) {
-    if (controller.text.replaceAll('\n', '').isEmpty) {
+  void addNewEvent(String text, Category category) async {
+    if (text.replaceAll('\n', '').isEmpty) {
       return;
     }
     if (state.isEditingMode) {
-      state.isEditingMode = false;
-      state.isMessageEdit = false;
-      var selectedEventIndex =
-          state.category!.events.indexWhere((element) => element.isSelected == true);
-      state.category!.events[selectedEventIndex].description = controller.text;
+      changeEditingMode();
+      changeMessageEditMode();
+      final selectedEventIndex = state.events.indexWhere((element) => element.isSelected == true);
+      state.events[selectedEventIndex].description = text;
+      await DBProvider.db.updateEvent(state.events[selectedEventIndex]);
       cancelSelectedEvents();
     } else {
-      state.category!.events.add(Event(
-        controller.text,
-        section: state.selectedSection,
-      ));
+      final event = Event(
+        text,
+        category.id,
+        sectionTitle: defaultSection.title,
+        sectionIcon: defaultSection.iconData.codePoint,
+      );
+      final newEvent = await DBProvider.db.addEvent(event);
+      state.events.add(newEvent);
     }
-    controller.text = '';
-    state.isWritingMode = false;
+    changeWritingMode(text);
 
     emit(state.copyWith(category: state.category, isMessageEdit: state.isMessageEdit));
   }
 
-  void deleteEvent() {
-    for (var i = 0; i < state.category!.events.length; i++) {
-      if (state.category!.events[i].isSelected) {
-        state.category!.events.removeAt(i);
+  void deleteEvent() async {
+    for (var i = 0; i < state.events.length; i++) {
+      if (state.events[i].isSelected) {
+        await DBProvider.db.deleteEvent(state.events[i]);
+        state.events.removeAt(i);
         i--;
       }
     }
@@ -88,36 +95,34 @@ class CategoryCubit extends Cubit<CategoryState> {
   }
 
   void cancelSelectedEvents() {
-    for (var event in state.category!.events) {
+    for (var event in state.events) {
       if (event.isSelected) {
         event.isSelected = false;
       }
     }
-    emit(state.copyWith(category: state.category));
+    emit(state.copyWith(events: state.events));
   }
 
   void selectEvent(int index) {
-    state.category!.events[index].isSelected = true;
-    emit(state.copyWith(category: state.category));
+    state.events[index].isSelected = true;
+    emit(state.copyWith(events: state.events));
   }
 
-  void editEvent(TextEditingController controller) {
-    var selectedEventIndex =
-        state.category!.events.indexWhere((element) => element.isSelected == true);
-    controller.text = (state.category!.events[selectedEventIndex].description);
-    state.isMessageEdit = true;
-    state.isEditingMode = true;
+  String editEvent() {
+    final selectedEventIndex = state.events.indexWhere((element) => element.isSelected == true);
+    changeMessageEditMode();
+    changeEditingMode();
     emit(state.copyWith(isMessageEdit: state.isMessageEdit, isEditingMode: state.isEditingMode));
+    return state.events[selectedEventIndex].description;
   }
 
   void copyToClipboard() {
     var selectedText = '';
-    var selectedEventIndex =
-        state.category!.events.indexWhere((element) => element.isSelected == true);
-    if (state.category!.events[selectedEventIndex].attachment != null) {
-      selectedText = state.category!.events[selectedEventIndex].attachment!.path;
+    final selectedEventIndex = state.events.indexWhere((element) => element.isSelected == true);
+    if (state.events[selectedEventIndex].attachment != null) {
+      selectedText = state.events[selectedEventIndex].attachment!;
     } else {
-      for (var event in state.category!.events) {
+      for (var event in state.events) {
         if (event.isSelected) {
           selectedText += '${event.description}\n';
         }
@@ -127,18 +132,19 @@ class CategoryCubit extends Cubit<CategoryState> {
     cancelSelectedEvents();
   }
 
-  void changeEventBookmark() {
-    for (var event in state.category!.events) {
+  void changeEventBookmark() async {
+    for (var event in state.events) {
       if (event.isSelected) {
         event.isSelected = false;
         event.isBookmarked = !event.isBookmarked;
+        await DBProvider.db.updateEvent(event);
       }
     }
-    emit(state.copyWith(category: state.category));
+    emit(state.copyWith(events: state.events));
   }
 
-  void tapOnEvent(int index, TextEditingController controller) {
-    var events = state.category!.events;
+  void tapOnEvent(int index, TextEditingController controller) async {
+    var events = state.events;
 
     if (events.where((element) => element.isSelected == true).isNotEmpty) {
       if (events[index].isSelected) {
@@ -153,22 +159,19 @@ class CategoryCubit extends Cubit<CategoryState> {
         events[index].isBookmarked = true;
       }
     }
-    emit(state.copyWith(category: state.category));
+    emit(state.copyWith(events: events));
+    await DBProvider.db.updateEvent(events[index]);
   }
 
   void search(String query) {
-    state.category!.searchedEvents.clear();
+    state.searchedEvents.clear();
     emit(state.copyWith(category: state.category));
-    for (var i = 0; i < state.category!.events.length; i++) {
-      if (state.category!.events
-          .elementAt(i)
-          .description
-          .toLowerCase()
-          .contains(query.toLowerCase())) {
-        state.category!.searchedEvents.add(state.category!.events.elementAt(i));
+    for (var i = 0; i < state.events.length; i++) {
+      if (state.events.elementAt(i).description.toLowerCase().contains(query.toLowerCase())) {
+        state.searchedEvents.add(state.events.elementAt(i));
       }
     }
-    emit(state.copyWith(category: state.category));
+    emit(state.copyWith(searchedEvents: state.searchedEvents));
   }
 
   void setReplyCategory(BuildContext context, int index) {
@@ -179,15 +182,16 @@ class CategoryCubit extends Cubit<CategoryState> {
     ));
   }
 
-  void replyEvents(BuildContext context) {
+  void replyEvents(BuildContext context) async {
     final category = state.replyCategory;
     var eventsToReply = <Event>[];
-    for (var event in state.category!.events) {
+    for (var event in state.events) {
       if (event.isSelected) {
         eventsToReply.add(event);
+        event.categoryId = category!.id;
+        await DBProvider.db.updateEvent(event);
       }
     }
     deleteEvent();
-    context.read<HomeCubit>().addEvents(eventsToReply, category!);
   }
 }

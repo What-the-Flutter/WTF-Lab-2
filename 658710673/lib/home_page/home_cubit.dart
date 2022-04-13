@@ -1,42 +1,31 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../data/db_provider.dart';
 import '../models/category.dart';
-import '../models/event.dart';
 import 'home_state.dart';
 
 class HomeCubit extends Cubit<HomeState> {
   HomeCubit() : super(HomeState());
 
-  final List<Category> _categories = [
-    Category('Journal', const Icon(Icons.book, color: Colors.white)),
-    Category('Gratitude', const Icon(Icons.grade, color: Colors.white)),
-    Category('Notes', const Icon(Icons.menu_book, color: Colors.white)),
-  ];
+  void init() async {
+    emit(state.copyWith(categories: await DBProvider.db.getAllCategories()));
+  }
 
-  void init() => emit(state.copyWith(categories: _categories));
-
-  void addCategory(Category category) {
-    state.categories.add(category);
+  void addCategory(Category category) async {
+    final newCat = await DBProvider.db.addCategory(category);
+    state.categories.add(newCat);
     emit(state.copyWith(categories: state.categories));
   }
 
   void deleteCategory(int index) {
+    DBProvider.db.deleteCategory(state.categories[index]);
     state.categories.removeAt(index);
     emit(state.copyWith(categories: state.categories));
   }
 
   void editCategory(int index, Category category) {
+    DBProvider.db.updateCategory(category);
     state.categories[index] = category;
     emit(state.copyWith(categories: state.categories));
-  }
-
-  void addEvents(List<Event> events, Category category) {
-    final categories = List<Category>.from(state.categories);
-    final index = categories.indexOf(category);
-    for (var event in events) {
-      categories[index].events.add(event);
-    }
-    emit(state.copyWith(categories: categories));
   }
 }

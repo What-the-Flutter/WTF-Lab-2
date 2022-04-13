@@ -1,15 +1,62 @@
 import 'package:flutter/material.dart';
 
-import 'event.dart';
+class CategoryFields {
+  static final String id = 'id';
+  static final String timeOfCreation = 'timeOfCreation';
+  static final String icon = 'icon';
+  static final String title = 'title';
+}
 
-class Category{
-  DateTime timeOfCreation = DateTime.now();
-  List<Event> events = [];
-  List<Event> searchedEvents = [];
+class Category {
+  int? id;
+  DateTime timeOfCreation;
+  final Icon icon;
   String title;
-  Icon icon;
 
-  Category(this.title, this.icon);
+  Category({
+    this.id,
+    required this.title,
+    required this.icon,
+  }) : timeOfCreation = DateTime.now();
+
+  Category.fromDB({
+    this.id,
+    required this.title,
+    required this.icon,
+    required this.timeOfCreation,
+  });
+
+  Category copyWith({
+    int? id,
+    String? title,
+    Icon? icon,
+  }) {
+    return Category(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      icon: icon ?? this.icon,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'timeOfCreation': timeOfCreation.toIso8601String(),
+      'icon': icon.icon!.codePoint,
+      'title': title,
+    };
+  }
+
+  Category.fromMap(Map<dynamic, dynamic> data)
+      : id = data['id'],
+        timeOfCreation = data['timeOfCreation'],
+        title = data['title'],
+        icon = Icon(
+          IconData(
+            data['icon'],
+            fontFamily: 'MaterialIcons',
+          ),
+        );
 
   @override
   String toString() {

@@ -94,10 +94,16 @@ class _CreateCategoryPageState extends State<CreateCategoryPage> {
                   ),
             onPressed: () {
               if (_textController.text.isNotEmpty) {
-                var category = Category(
-                  _textController.text,
-                  CategoryIcons.icons[state.selectedIcon],
-                );
+                late Category category;
+                if (widget.editCategory == null) {
+                  category = Category(
+                    title: _textController.text,
+                    icon: CategoryIcons.icons[state.selectedIcon],
+                  );
+                } else {
+                  category = widget.editCategory!.copyWith(
+                      title: _textController.text, icon: CategoryIcons.icons[state.selectedIcon]);
+                }
                 Navigator.of(context).pop(category);
               } else {
                 Navigator.pop(context);
@@ -122,6 +128,7 @@ class _CreateCategoryPageState extends State<CreateCategoryPage> {
               backgroundColor: state.selectedIcon != index
                   ? Colors.black12
                   : InheritedCustomTheme.of(context).themeData.colorScheme.primary,
+              foregroundColor: Colors.white,
               child: IconButton(
                 onPressed: () =>
                     BlocProvider.of<CreateCategoryPageCubit>(context).selectIcon(index),
