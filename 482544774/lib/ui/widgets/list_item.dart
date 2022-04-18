@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../data/category_list.dart';
+import '../screens/event.dart';
 
 class ListItem extends StatelessWidget {
   const ListItem(this.index, {Key? key}) : super(key: key);
@@ -12,6 +13,8 @@ class ListItem extends StatelessWidget {
     final currentElement = categoryList[index];
 
     return ListTile(
+      onTap: () => Navigator.of(context)
+          .push(MaterialPageRoute(builder: (_) => EventScreen())),
       leading: CircleAvatar(
         backgroundColor: Colors.grey,
         radius: 20,
