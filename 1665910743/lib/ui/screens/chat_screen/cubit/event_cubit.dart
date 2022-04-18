@@ -1,5 +1,4 @@
 import 'package:bloc/bloc.dart';
-import 'package:meta/meta.dart';
 
 import '../../../../models/event.dart';
 import '../../../../repository/database_repository.dart';
@@ -10,20 +9,19 @@ class EventCubit extends Cubit<EventState> {
   DataBaseRepository dataBaseRepository;
 
   EventCubit({required this.dataBaseRepository})
-      : super(EventState(eventList: []));
+      : super(
+          const EventState(eventList: []),
+        );
 
   Future<void> getEvents() async {
     final _newList = await dataBaseRepository.getEvents();
-    state.eventList.clear();
-    state.eventList.addAll(_newList);
 
     emit(
-      EventState(eventList: state.eventList),
+      EventState(eventList: _newList).copyWith(animate: false),
     );
   }
 
   Future<void> addEvent({
-    required String categoryTitle,
     required Event event,
   }) async {
     dataBaseRepository.addEvent(event);
@@ -36,12 +34,11 @@ class EventCubit extends Cubit<EventState> {
 
   Future<void> removeEventInCategory({required String key}) async {
     dataBaseRepository.removeEvent(key);
-    state.eventList.clear();
-    state.eventList.addAll(
-      await dataBaseRepository.getEvents(),
-    );
+
+    final _changes = await dataBaseRepository.getEvents();
+
     emit(
-      EventState(eventList: state.eventList),
+      EventState(eventList: _changes).copyWith(hasSelected: []),
     );
   }
 
@@ -50,13 +47,11 @@ class EventCubit extends Cubit<EventState> {
     required String newTitle,
   }) async {
     dataBaseRepository.renameEvent(key, newTitle);
-    state.eventList.clear();
-    state.eventList.addAll(
-      await dataBaseRepository.getEvents(),
-    );
+
+    final _changes = await dataBaseRepository.getEvents();
 
     emit(
-      EventState(eventList: state.eventList),
+      state.copyWith(eventList: _changes),
     );
   }
 
@@ -65,36 +60,39 @@ class EventCubit extends Cubit<EventState> {
     required bool isBook,
   }) async {
     dataBaseRepository.bookmarkEvent(key, isBook);
-    state.eventList.clear();
-    state.eventList.addAll(
-      await dataBaseRepository.getEvents(),
-    );
+    final _changes = await dataBaseRepository.updateEvents(state.eventList);
 
     emit(
-      EventState(eventList: state.eventList),
+      EventState(eventList: _changes).copyWith(animate: !isBook),
     );
   }
 
   Future<void> eventSelect(String key) async {
     dataBaseRepository.eventSelected(key);
-    state.eventList.clear();
-    state.eventList.addAll(
-      await dataBaseRepository.getEvents(),
-    );
+
+    final _changes = await dataBaseRepository.getEvents();
+    final _selected = <String>[];
+    _selected.addAll(state.hasSelected);
+    _selected.add(key);
     emit(
-      EventState(eventList: state.eventList),
+      EventState(eventList: _changes).copyWith(hasSelected: _selected),
     );
   }
 
   Future<void> eventNotSelect(String key) async {
     dataBaseRepository.eventNotSelected(key);
-    state.eventList.clear();
-    state.eventList.addAll(
-      await dataBaseRepository.getEvents(),
-    );
+    final _changes = await dataBaseRepository.getEvents();
+    final _selected = <String>[];
+    _selected.addAll(state.hasSelected);
+
+    _selected.remove(key);
     emit(
-      EventState(eventList: state.eventList),
+      EventState(eventList: _changes).copyWith(hasSelected: _selected),
     );
+  }
+
+  void clearHasSelected() {
+    emit(state.copyWith(hasSelected: []));
   }
 
   Future<void> moveEvent(String key, String newCategory) async {
@@ -102,13 +100,29 @@ class EventCubit extends Cubit<EventState> {
       key,
       newCategory,
     );
-    state.eventList.clear();
-    state.eventList.addAll(
-      await dataBaseRepository.getEvents(),
-    );
+
+    final _changes = await dataBaseRepository.getEvents();
 
     emit(
-      EventState(eventList: state.eventList),
+      state.copyWith(eventList: _changes),
+    );
+  }
+
+  void iconSelect(int i) {
+    emit(
+      state.copyWith(selectedIcon: i),
+    );
+  }
+
+  void tagSelect(int i) {
+    emit(
+      state.copyWith(selectedTag: i),
+    );
+  }
+
+  void iconAdd(bool value) {
+    emit(
+      state.copyWith(iconAdd: value),
     );
   }
 
@@ -121,7 +135,7 @@ class EventCubit extends Cubit<EventState> {
     }
 
     emit(
-      EventState(eventList: state.eventList),
+      state,
     );
   }
 }

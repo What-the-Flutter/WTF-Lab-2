@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:lottie/lottie.dart';
 
 import '../home/home_widget.dart';
 
@@ -20,7 +21,7 @@ class BioAuth extends StatefulWidget {
   State<BioAuth> createState() => _BioAuthState();
 }
 
-class _BioAuthState extends State<BioAuth> {
+class _BioAuthState extends State<BioAuth> with TickerProviderStateMixin {
   final LocalAuthentication auth = LocalAuthentication();
   _SupportState _supportState = _SupportState.unknown;
   bool? _canCheckBiometrics;
@@ -122,7 +123,7 @@ class _BioAuthState extends State<BioAuth> {
             Container(
               decoration: BoxDecoration(
                   image: const DecorationImage(
-                    opacity: 0.5,
+                    opacity: 0.1,
                     image: AssetImage('assets/auth_back.jpg'),
                     fit: BoxFit.fitWidth,
                   ),
@@ -201,10 +202,11 @@ class _BioAuthState extends State<BioAuth> {
           );
         }
       },
-      child: Icon(
-        Icons.fingerprint,
-        size: MediaQuery.of(context).size.width * 0.2,
-        color: Theme.of(context).primaryColor,
+      child: Container(
+        child: Lottie.asset(
+          'assets/biometric.json',
+          repeat: false,
+        ),
       ),
     );
   }

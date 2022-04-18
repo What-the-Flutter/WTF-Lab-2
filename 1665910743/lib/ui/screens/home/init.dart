@@ -12,6 +12,7 @@ import '../settings/cubit/settings_cubit.dart';
 import 'cubit/home_cubit.dart';
 import 'journal.dart';
 
+//BlocsInjector rename
 class BlocInit extends StatelessWidget {
   final User user;
   final String initTheme;
@@ -55,7 +56,7 @@ class BlocInit extends StatelessWidget {
         BlocProvider(
           create: (_) => HomeCubit(
             dataBaseRepository: FireBaseRTDB(user: user),
-          ),
+          )..getAuthKey(),
         ),
         BlocProvider(
           create: (_) => EventCubit(

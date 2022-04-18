@@ -28,7 +28,7 @@ class JourneyDrawer extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: ((context) => const Settings()),
+                  builder: ((_) => const Settings()),
                 ),
               );
             },

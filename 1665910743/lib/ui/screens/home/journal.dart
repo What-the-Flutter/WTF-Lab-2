@@ -23,11 +23,6 @@ class _JournalState extends State<Journal> {
     super.initState();
   }
 
-  @override
-  void didChangeDependencies() {
-    context.read<HomeCubit>().getAuthKey();
-    super.didChangeDependencies();
-  }
 
   @override
   Widget build(BuildContext context) {

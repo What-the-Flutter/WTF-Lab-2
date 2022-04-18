@@ -10,8 +10,9 @@ import '../models/event_category.dart';
 import '../repository/database_repository.dart';
 
 class FireBaseRTDB implements DataBaseRepository {
-  final FirebaseDatabase database = FirebaseDatabase.instance;
   final User? user;
+
+  final FirebaseDatabase database = FirebaseDatabase.instance;
   final DatabaseReference ref = FirebaseDatabase.instance.ref();
 
   FireBaseRTDB({required this.user});
@@ -86,7 +87,7 @@ class FireBaseRTDB implements DataBaseRepository {
   @override
   Future<void> addEvent(Event event) async {
     final isImage = await event.image;
-
+    print(isImage);
     if (isImage.length > 2) {
       try {
         final basename = basenameWithoutExtension(event.image);
@@ -95,16 +96,22 @@ class FireBaseRTDB implements DataBaseRepository {
         await storageRef.putFile(
           File(event.image),
         );
+        event.imageUrl = await getImageUrl(basename);
+
+        await ref.child(user?.uid ?? 'user').child('events').push().set(
+              event.toMap(),
+            );
       } catch (e) {
         print(e);
       }
-    }
-    try {
-      await ref.child(user?.uid ?? 'user').child('events').push().set(
-            event.toMap(),
-          );
-    } catch (e) {
-      print(e);
+    } else {
+      try {
+        await ref.child(user?.uid ?? 'user').child('events').push().set(
+              event.toMap(),
+            );
+      } catch (e) {
+        print(e);
+      }
     }
   }
 
@@ -159,7 +166,16 @@ class FireBaseRTDB implements DataBaseRepository {
   @override
   Future<void> removeEvent(String key) async {
     try {
+      final databaseEvent =
+          await ref.child(user!.uid).child('events').child(key).once();
+      final value = databaseEvent.snapshot.value as Map<dynamic, dynamic>;
+      final eventFromMap = Event.fromMap(value);
       await ref.child(user!.uid).child('events').child(key).remove();
+      if (eventFromMap.imageUrl != null) {
+        final photoRef =
+            await FirebaseStorage.instance.refFromURL(eventFromMap.imageUrl!);
+        await photoRef.delete();
+      }
     } catch (e) {
       print(e);
     }

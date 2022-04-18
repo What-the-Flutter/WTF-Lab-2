@@ -9,6 +9,7 @@ import '../Category_Screen/add_category_dialog.dart';
 import '../Category_Screen/home.dart';
 import '../daily_screen/daily.dart';
 import '../explore_screen/explore.dart';
+import '../timeline_screen/filter.dart';
 import '../timeline_screen/timeline.dart';
 import 'bottom_nav_bar.dart';
 import 'cubit/home_cubit.dart';
@@ -26,8 +27,8 @@ class _HomeState extends State<Home> {
 
   final _selectedItems = {
     const HomeScreen(): 'Home',
-    Daily(): 'Daily',
-    Timeline(): 'Timeline',
+    const Daily(): 'Daily',
+    const Timeline(): 'Timeline',
     const Explore(): 'Explore',
   };
 
@@ -43,18 +44,32 @@ class _HomeState extends State<Home> {
       drawer: const JourneyDrawer(),
       appBar: _appBar(context),
       body: _selectedItems.keys.elementAt(_selectedIndex),
-      floatingActionButton: FloatingActionButton(
-          backgroundColor: Theme.of(context).primaryColor,
-          child: const Icon(Icons.add),
-          onPressed: () {
-            HapticFeedback.mediumImpact();
-            addTaskDialog(context);
-          }),
+      floatingActionButton: _floatingButton(context),
       bottomNavigationBar: BottomNavBar(
         onTap: _onItemTapped,
         selectedIndex: _selectedIndex,
       ),
     );
+  }
+
+  FloatingActionButton _floatingButton(BuildContext context) {
+    return _selectedIndex == 2
+        ? FloatingActionButton(
+            onPressed: () {
+              HapticFeedback.mediumImpact();
+
+              filterDialog(context);
+            },
+            backgroundColor: Theme.of(context).primaryColor,
+            child: const Icon(Icons.filter_list_sharp),
+          )
+        : FloatingActionButton(
+            backgroundColor: Theme.of(context).primaryColor,
+            child: const Icon(Icons.add),
+            onPressed: () {
+              HapticFeedback.mediumImpact();
+              addTaskDialog(context);
+            });
   }
 
   void _onItemTapped(int index) {
@@ -67,7 +82,7 @@ class _HomeState extends State<Home> {
   }
 
   PreferredSizeWidget _appBar(BuildContext context) {
-    return context.read<HomeCubit>().state.searchMode
+    return context.watch<HomeCubit>().state.searchMode
         ? AppBar(
             automaticallyImplyLeading: false,
             title: TextField(
@@ -94,17 +109,26 @@ class _HomeState extends State<Home> {
         : AppBar(
             title: Text(_selectedItems.values.elementAt(_selectedIndex)),
             centerTitle: true,
-            actions: [
-              _selectedIndex == 1
-                  ? Hero(
+            actions: _selectedIndex == 2
+                ? [
+                    Hero(
                       tag: 'search',
                       child: IconButton(
                         onPressed: (() =>
                             context.read<HomeCubit>().enterSearchMode()),
                         icon: const Icon(Icons.search),
                       ),
-                    )
-                  : IconButton(
+                    ),
+                    IconButton(
+                      onPressed: () =>
+                          context.read<HomeCubit>().showBookmaked(),
+                      icon: Icon(context.read<HomeCubit>().state.showBookmarked
+                          ? Icons.bookmark
+                          : Icons.bookmark_border),
+                    ),
+                  ]
+                : [
+                    IconButton(
                       onPressed: () {
                         context.read<ThemeCubit>().state == MyThemes.lightTheme
                             ? context
@@ -120,7 +144,6 @@ class _HomeState extends State<Home> {
                             : Icons.light_mode,
                       ),
                     ),
-            ],
-          );
+                  ]);
   }
 }

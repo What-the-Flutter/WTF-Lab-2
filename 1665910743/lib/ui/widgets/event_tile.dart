@@ -3,18 +3,22 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../extensions/date_extension.dart';
 import '../../models/tags.dart';
+import '../screens/chat_screen/cubit/event_cubit.dart';
 import '../screens/settings/cubit/settings_cubit.dart';
+import '../theme/theme_data.dart';
+
+const _br = 15.0;
 
 class EventTile extends StatelessWidget {
   final String title;
   final DateTime date;
   final bool favorite;
-  final Image? image;
   final bool isSelected;
   final int iconCode;
   final int tag;
+  final Image? image;
 
-  EventTile({
+  const EventTile({
     Key? key,
     required this.title,
     required this.date,
@@ -27,40 +31,49 @@ class EventTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _tileAlignLeft =
-        context.read<SettingsCubit>().state.chatTileAlignment ==
-            Alignment.centerLeft;
-    return Container(
-      margin: const EdgeInsets.all(5),
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(15),
-            topRight: const Radius.circular(15),
-            bottomRight: _tileAlignLeft
-                ? const Radius.circular(15)
-                : const Radius.circular(0),
-            bottomLeft: _tileAlignLeft
-                ? const Radius.circular(0)
-                : const Radius.circular(15),
+    return BlocBuilder<SettingsCubit, SettingsState>(
+      bloc: context.read<SettingsCubit>(),
+      builder: ((context, state) {
+        final _tileAlignLeft = state.chatTileAlignment == Alignment.centerLeft;
+
+        return AnimatedScale(
+          scale: isSelected ? 1.1 : 1,
+          duration: const Duration(milliseconds: 200),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 500),
+            margin: const EdgeInsets.all(5),
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.only(
+                  topLeft: const Radius.circular(_br),
+                  topRight: const Radius.circular(_br),
+                  bottomRight: _tileAlignLeft
+                      ? const Radius.circular(_br)
+                      : const Radius.circular(0),
+                  bottomLeft: _tileAlignLeft
+                      ? const Radius.circular(0)
+                      : const Radius.circular(_br),
+                ),
+                color: isSelected
+                    ? MyThemes.selectedColor
+                    : Theme.of(context).primaryColor),
+            child: (image != null)
+                ? _TileWithImage(
+                    image: image,
+                    title: title,
+                    formattedDate: date.mmddyy(),
+                    favorite: favorite,
+                  )
+                : _TileWithoutImage(
+                    title: title,
+                    formattedDate: date.mmddyy(),
+                    favorite: favorite,
+                    iconCode: iconCode,
+                    tag: tag,
+                  ),
           ),
-          color: isSelected
-              ? Theme.of(context).primaryColor.withOpacity(0.7)
-              : Theme.of(context).primaryColor),
-      child: (image != null)
-          ? _TileWithImage(
-              image: image,
-              title: title,
-              formattedDate: date.mmddyy(),
-              favorite: favorite,
-            )
-          : _TileWithoutImage(
-              title: title,
-              formattedDate: date.mmddyy(),
-              favorite: favorite,
-              iconCode: iconCode,
-              tag: tag,
-            ),
+        );
+      }),
     );
   }
 }
@@ -100,9 +113,14 @@ class _TileWithoutImage extends StatelessWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              title,
-              style: Theme.of(context).textTheme.bodyText1,
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                  maxWidth: MediaQuery.of(context).size.width * 0.5),
+              child: Text(
+                title,
+                style: Theme.of(context).textTheme.bodyText1,
+                overflow: TextOverflow.clip,
+              ),
             ),
             (tag != -1)
                 ? Text(
@@ -119,10 +137,14 @@ class _TileWithoutImage extends StatelessWidget {
                 ),
                 Padding(
                   padding: const EdgeInsets.only(left: 8.0),
-                  child: Icon(
-                    favorite ? Icons.star : Icons.star_border,
-                    size: 15,
-                    color: Theme.of(context).scaffoldBackgroundColor,
+                  child: AnimatedScale(
+                    duration: const Duration(seconds: 1),
+                    scale: context.watch<EventCubit>().state.iconScale,
+                    child: Icon(
+                      favorite ? Icons.bookmark : Icons.bookmark_border,
+                      size: 20,
+                      color: Theme.of(context).scaffoldBackgroundColor,
+                    ),
                   ),
                 )
               ],
@@ -155,7 +177,7 @@ class _TileWithImage extends StatefulWidget {
 class _TileWithImageState extends State<_TileWithImage> {
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
@@ -172,10 +194,14 @@ class _TileWithImageState extends State<_TileWithImage> {
           children: [
             Container(
               width: MediaQuery.of(context).size.width * 0.5,
-              child: Text(
-                '${widget.title.substring(0, 10)}...',
-                style: Theme.of(context).textTheme.bodyText1,
-                overflow: TextOverflow.ellipsis,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                    maxWidth: MediaQuery.of(context).size.width * 0.5),
+                child: Text(
+                  widget.title,
+                  style: Theme.of(context).textTheme.bodyText1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ),
             Row(
@@ -186,8 +212,8 @@ class _TileWithImageState extends State<_TileWithImage> {
                   style: Theme.of(context).textTheme.bodyText2,
                 ),
                 Icon(
-                  widget.favorite ? Icons.star : Icons.star_border,
-                  size: 15,
+                  widget.favorite ? Icons.bookmark : Icons.bookmark_border,
+                  size: 20,
                   color: Theme.of(context).scaffoldBackgroundColor,
                 )
               ],

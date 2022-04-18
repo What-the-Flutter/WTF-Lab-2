@@ -17,7 +17,7 @@ void main() async {
   final _initFontSize = await prefs.getString('font') ?? 'medium';
   final _backgroundImage = await prefs.getString('image') ?? '';
   final _isChatBubblesToRight = await prefs.getBool('align') ?? false;
-
+//method init settings
   FlutterNativeSplash.remove();
   runApp(
     BlocInit(

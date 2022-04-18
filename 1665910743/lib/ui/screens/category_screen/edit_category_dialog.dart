@@ -81,7 +81,10 @@ class _EditDialogState extends State<EditDialog> {
   }
 
   Widget _renameButton(
-      BuildContext context, CategoryCubit cubit, String oldTitle) {
+    BuildContext context,
+    CategoryCubit cubit,
+    String oldTitle,
+  ) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         primary: Theme.of(context).primaryColor,
@@ -129,7 +132,7 @@ class _EditDialogState extends State<EditDialog> {
       child: IconButton(
         onPressed: () {
           Navigator.pop(context);
-
+//setstate delete
           if (widget.category.pinned == false) {
             setState(
               () {
@@ -153,6 +156,7 @@ class _EditDialogState extends State<EditDialog> {
         icon: widget.pinned
             ? const Icon(Icons.push_pin)
             : const Icon(Icons.push_pin_outlined),
+            // ? to icon
       ),
     );
   }

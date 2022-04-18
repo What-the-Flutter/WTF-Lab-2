@@ -27,10 +27,13 @@ class Event {
         iconCode = map['icon'],
         categoryTitle = map['categoryTitle'],
         image = map['imagePath'],
-        tag = map['tag'] ?? -1;
+        isSelected = map['isSelected'] == 0 ? false : true,
+        tag = map['tag'] ?? -1,
+        imageUrl = map['imageUrl'];
 
   Map<String, dynamic> toMap() {
     return {
+      'imageUrl': imageUrl,
       'imagePath': image,
       'icon': iconCode,
       'title': title,

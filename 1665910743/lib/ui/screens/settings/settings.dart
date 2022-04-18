@@ -44,7 +44,7 @@ class Settings extends StatelessWidget {
       onTap: (() {
         Share.share('check out my App!');
       }),
-      leading:   Icon(Icons.adaptive.share),
+      leading: Icon(Icons.adaptive.share),
       title: GradientText(
         'Share with friends!',
         style: Theme.of(context).textTheme.bodyText1,
@@ -101,8 +101,10 @@ class Settings extends StatelessWidget {
     return ListTile(
       onTap: () => context.read<SettingsCubit>().getBackgroundImage(),
       leading: const Icon(Icons.image),
-      title:
-          Text('Chat Background', style: Theme.of(context).textTheme.bodyText1),
+      title: Text(
+        'Chat Background',
+        style: Theme.of(context).textTheme.bodyText1,
+      ),
     );
   }
 
@@ -202,8 +204,8 @@ class Settings extends StatelessWidget {
 
   Widget _authSwitch(BuildContext context) {
     return ListTile(
-      onTap: () async {
-        await showDialog(
+      onTap: ()  {
+         showDialog(
             context: context,
             builder: (context) => AlertDialog(
                   title: Text('Enable Bio Auth?',

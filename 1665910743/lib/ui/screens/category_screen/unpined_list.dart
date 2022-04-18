@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../models/event_category.dart';
 import '../chat_screen/chat_screen.dart';
+import '../chat_screen/cubit/event_cubit.dart';
 import 'cubit/category_cubit.dart';
 import 'edit_category_dialog.dart';
 
@@ -19,6 +20,11 @@ class UnpinedCategory extends StatelessWidget {
           return ListView.builder(
             itemCount: state.categoryList.length,
             itemBuilder: ((context, index) {
+              final _events = context.read<EventCubit>().state.eventList.where(
+                  (element) =>
+                      element.categoryTitle == state.categoryList[index].title);
+              final _subtitle =
+                  _events.isNotEmpty ? _events.last.title : 'No events';
               return GestureDetector(
                 onTap: (() => Navigator.pushReplacement(
                       context,
@@ -48,6 +54,10 @@ class UnpinedCategory extends StatelessWidget {
                   title: Text(
                     state.categoryList[index].title,
                     style: Theme.of(context).textTheme.bodyText1,
+                  ),
+                  subtitle: Text(
+                    _subtitle,
+                    style: Theme.of(context).textTheme.bodyText2,
                   ),
                   trailing: (state.categoryList[index].pinned)
                       ? Icon(

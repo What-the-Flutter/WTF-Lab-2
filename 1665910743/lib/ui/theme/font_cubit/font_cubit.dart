@@ -6,6 +6,7 @@ import '../theme_data.dart';
 
 class FontCubit extends Cubit<TextTheme> {
   final TextTheme initSize;
+
   FontCubit({required this.initSize}) : super(initSize);
 
   Future<void> fontChange(MyFontSize size) async {

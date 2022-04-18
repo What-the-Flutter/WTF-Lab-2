@@ -124,7 +124,7 @@ class _EditChatTileState extends State<EditChatTile> {
       foregroundColor: Colors.white,
       backgroundColor: Theme.of(context).primaryColor,
       child: IconButton(
-        onPressed: () {
+        onPressed: () async {
           Navigator.pop(context);
           context.read<EventCubit>().bookMarkEvent(key: key, isBook: isBook);
         },

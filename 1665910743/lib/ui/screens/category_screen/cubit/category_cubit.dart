@@ -1,5 +1,4 @@
 import 'package:bloc/bloc.dart';
-import 'package:meta/meta.dart';
 
 import '../../../../models/event_category.dart';
 import '../../../../repository/database_repository.dart';
@@ -10,7 +9,7 @@ class CategoryCubit extends Cubit<CategoryState> {
   DataBaseRepository dataBaseRepository;
 
   CategoryCubit({required this.dataBaseRepository})
-      : super(CategoryState(categoryList: []));
+      : super( CategoryState(categoryList: []));
 
   void add(EventCategory category) async {
     dataBaseRepository.addCategory(category);
@@ -31,9 +30,9 @@ class CategoryCubit extends Cubit<CategoryState> {
       await dataBaseRepository.getCategorys(),
     );
 
-    emit(
-      CategoryState(categoryList: state.categoryList),
-    );
+    emit(CategoryState(
+      categoryList: await dataBaseRepository.getCategorys(),
+    ));
   }
 
   void pin(EventCategory category, String key) async {
@@ -61,7 +60,6 @@ class CategoryCubit extends Cubit<CategoryState> {
   }
 
   void getCat() async {
-    state.categoryList.clear();
     state.categoryList.addAll(
       await dataBaseRepository.getCategorys(),
     );
