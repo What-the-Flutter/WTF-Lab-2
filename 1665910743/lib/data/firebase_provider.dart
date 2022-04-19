@@ -87,7 +87,7 @@ class FireBaseRTDB implements DataBaseRepository {
   @override
   Future<void> addEvent(Event event) async {
     final isImage = await event.image;
-    print(isImage);
+    
     if (isImage.length > 2) {
       try {
         final basename = basenameWithoutExtension(event.image);
@@ -96,6 +96,7 @@ class FireBaseRTDB implements DataBaseRepository {
         await storageRef.putFile(
           File(event.image),
         );
+
         event.imageUrl = await getImageUrl(basename);
 
         await ref.child(user?.uid ?? 'user').child('events').push().set(

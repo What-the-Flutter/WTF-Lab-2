@@ -114,7 +114,6 @@ class _EditDialogState extends State<EditDialog> {
       child: IconButton(
         onPressed: () {
           cubit.remove(widget.category, widget.dbKey);
-
           Navigator.pop(context);
         },
         icon: const Icon(Icons.delete_forever),
@@ -132,31 +131,22 @@ class _EditDialogState extends State<EditDialog> {
       child: IconButton(
         onPressed: () {
           Navigator.pop(context);
-//setstate delete
           if (widget.category.pinned == false) {
-            setState(
-              () {
-                cubit.pin(
-                  widget.category,
-                  widget.dbKey,
-                );
-              },
+            cubit.pin(
+              widget.category,
+              widget.dbKey,
             );
           } else {
-            setState(
-              () {
-                cubit.unpin(
-                  widget.category,
-                  widget.dbKey,
-                );
-              },
+            cubit.unpin(
+              widget.category,
+              widget.dbKey,
             );
           }
         },
         icon: widget.pinned
             ? const Icon(Icons.push_pin)
             : const Icon(Icons.push_pin_outlined),
-            // ? to icon
+        // ? to icon
       ),
     );
   }

@@ -86,8 +86,10 @@ class _ChatListBodyState extends State<ChatListBody> {
                                 ? Image(
                                     image: CachedNetworkImageProvider(
                                         state.eventList[index].imageUrl!),
-                                    width: 90,
-                                    height: 90,
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.5,
+                                    height: MediaQuery.of(context).size.height *
+                                        0.3,
                                   )
                                 : null),
                       ),

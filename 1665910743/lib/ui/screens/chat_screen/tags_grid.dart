@@ -15,7 +15,7 @@ class TagsGrid extends StatelessWidget {
       height: _size.height * 0.03,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: kMyTags.length,
+        itemCount: kTags.length,
         itemBuilder: ((context, i) {
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -28,7 +28,7 @@ class TagsGrid extends StatelessWidget {
                 }
               }),
               child: Text(
-                kMyTags[i],
+                kTags[i],
                 style: TextStyle(
                   color: i == _eventCubit.state.selectedTag
                       ? Theme.of(context).primaryColor

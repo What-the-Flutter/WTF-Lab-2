@@ -59,7 +59,6 @@ class _ChatScreenNavBarState extends State<ChatScreenNavBar>
 
       setState(() {
         image = _newImage!.path;
-        print(image);
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -73,7 +72,7 @@ class _ChatScreenNavBarState extends State<ChatScreenNavBar>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final animate = context.read<EventCubit>().state.animate;
+    final animate = context.watch<EventCubit>().state.animate;
     if (animate) {
       _controller.forward().then((_) => _controller.reverse());
     } else {
@@ -86,106 +85,128 @@ class _ChatScreenNavBarState extends State<ChatScreenNavBar>
     final _eventCubit = context.watch<EventCubit>();
 
     return SafeArea(
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          IconButton(
-            onPressed: () {
-              if (_eventCubit.state.hasSelected.isEmpty) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => BookmarkEvents(),
+          image != null ? _imagePreview(context) : const SizedBox(),
+          Row(
+            children: [
+              IconButton(
+                onPressed: () {
+                  if (_eventCubit.state.hasSelected.isEmpty) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => BookmarkEvents(),
+                      ),
+                    );
+                  } else {
+                    for (final el in _eventCubit.state.hasSelected) {
+                      context.read<EventCubit>().removeEventInCategory(key: el);
+                      context.read<EventCubit>().clearHasSelected();
+                    }
+                  }
+                },
+                icon: SlideTransition(
+                  position: _offsetAnimation,
+                  child: ScaleTransition(
+                    scale: _scaleAnimation,
+                    child: Icon(
+                      _eventCubit.state.hasSelected.isNotEmpty
+                          ? Icons.delete
+                          : Icons.bookmark,
+                      color: Theme.of(context).primaryColor,
+                    ),
                   ),
-                );
-              } else {
-                for (final el in _eventCubit.state.hasSelected) {
-                  context.read<EventCubit>().removeEventInCategory(key: el);
-                  context.read<EventCubit>().clearHasSelected();
-                }
-              }
-            },
-            icon: SlideTransition(
-              position: _offsetAnimation,
-              child: ScaleTransition(
-                scale: _scaleAnimation,
-                child: Icon(
-                  _eventCubit.state.hasSelected.isNotEmpty
-                      ? Icons.delete
-                      : Icons.bookmark,
+                ),
+              ),
+              IconButton(
+                onPressed: () {
+                  _eventCubit.iconAdd(true);
+                },
+                icon: Icon(
+                  (_eventCubit.state.selectedIcon == -1)
+                      ? Icons.bubble_chart
+                      : kIcons[_eventCubit.state.selectedIcon].icon,
                   color: Theme.of(context).primaryColor,
                 ),
               ),
-            ),
-          ),
-          IconButton(
-            onPressed: () {
-              setState(() {
-                _eventCubit.iconAdd(true);
-              });
-            },
-            icon: Icon(
-              (_eventCubit.state.selectedIcon == -1)
-                  ? Icons.bubble_chart
-                  : kMyIcons[_eventCubit.state.selectedIcon].icon,
-              color: Theme.of(context).primaryColor,
-            ),
-          ),
-          Expanded(
-            child: TextField(
-              style: TextStyle(color: Theme.of(context).primaryColor),
-              decoration: InputDecoration(
-                hintText: ' Enter event',
-                hintStyle: TextStyle(color: Theme.of(context).primaryColor),
-                border: InputBorder.none,
+              Expanded(
+                child: TextField(
+                  style: TextStyle(color: Theme.of(context).primaryColor),
+                  decoration: InputDecoration(
+                    hintText: ' Enter event',
+                    hintStyle: TextStyle(color: Theme.of(context).primaryColor),
+                    border: InputBorder.none,
+                  ),
+                  controller: widget.controller,
+                ),
               ),
-              controller: widget.controller,
-            ),
+              IconButton(
+                  onPressed: () async {
+                    if (widget.controller.value.text.isNotEmpty) {
+                      if (_eventCubit.state.selectedIcon == -1) {
+                        context.read<EventCubit>().addEvent(
+                              event: Event(
+                                image: image != null ? image! : '',
+                                iconCode: 0,
+                                title: widget.controller.text,
+                                date: DateTime.now(),
+                                favorite: false,
+                                categoryTitle: widget.categoryTitle,
+                                tag: _eventCubit.state.selectedTag,
+                              ),
+                            );
+                      } else {
+                        context.read<EventCubit>().addEvent(
+                              event: Event(
+                                image: image != null ? image! : '',
+                                title: widget.controller.text,
+                                date: DateTime.now(),
+                                favorite: false,
+                                iconCode: kIcons[_eventCubit.state.selectedIcon]
+                                    .icon!
+                                    .codePoint,
+                                categoryTitle: widget.categoryTitle,
+                                tag: _eventCubit.state.selectedTag,
+                              ),
+                            );
+                      }
+                      context.read<EventCubit>().iconSelect(-1);
+                      widget.controller.clear();
+                      image = null;
+                    } else if (widget.controller.value.text.isEmpty) {
+                      await getImage();
+                    }
+                  },
+                  icon: Icon(
+                    widget.controller.value.text.isEmpty
+                        ? Icons.photo_camera
+                        : Icons.send,
+                    color: Theme.of(context).primaryColor,
+                  ))
+            ],
           ),
-          IconButton(
-              onPressed: () async {
-                if (widget.controller.value.text.isNotEmpty) {
-                  if (_eventCubit.state.selectedIcon == -1) {
-                    context.read<EventCubit>().addEvent(
-                          event: Event(
-                            image: image != null ? image! : '',
-                            iconCode: 0,
-                            title: widget.controller.text,
-                            date: DateTime.now(),
-                            favorite: false,
-                            categoryTitle: widget.categoryTitle,
-                            tag: _eventCubit.state.selectedTag,
-                          ),
-                        );
-                  } else {
-                    context.read<EventCubit>().addEvent(
-                          event: Event(
-                            image: '',
-                            title: widget.controller.text,
-                            date: DateTime.now(),
-                            favorite: false,
-                            iconCode: kMyIcons[_eventCubit.state.selectedIcon]
-                                .icon!
-                                .codePoint,
-                            categoryTitle: widget.categoryTitle,
-                            tag: _eventCubit.state.selectedTag,
-                          ),
-                        );
-                  }
-                  context.read<EventCubit>().iconSelect(-1);
-                  widget.controller.clear();
-                } else if (widget.controller.value.text.isEmpty) {
-                  await getImage();
-                }
-              },
-              icon: Icon(
-                widget.controller.value.text.isEmpty
-                    ? Icons.photo_camera
-                    : Icons.send,
-                color: Theme.of(context).primaryColor,
-              ))
         ],
       ),
     );
+  }
+
+  Widget _imagePreview(BuildContext context) {
+    return Padding(
+        padding: const EdgeInsets.only(right: 8.0),
+        child: CircleAvatar(
+          backgroundColor: Theme.of(context).primaryColor,
+          radius: 27,
+          child: ClipOval(
+            child: Image.file(
+              File(image!),
+              fit: BoxFit.cover,
+              width: 50,
+              height: 50,
+            ),
+          ),
+        ));
   }
 
   @override

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../category_screen/cubit/category_cubit.dart';
 
 Future<dynamic> filterDialog(BuildContext context) {
   return showModalBottomSheet(
@@ -21,17 +24,15 @@ Future<dynamic> filterDialog(BuildContext context) {
 }
 
 class FilterBody extends StatelessWidget {
-  const FilterBody({
-    Key? key,
-  }) : super(key: key);
+  const FilterBody({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.of(context).size;
+    final _screenSize = MediaQuery.of(context).size;
 
     return Container(
-      constraints: BoxConstraints(maxHeight: screenSize.height * 0.95),
-      margin: EdgeInsets.only(top: screenSize.height * 0.05),
+      constraints: BoxConstraints(maxHeight: _screenSize.height * 0.95),
+      margin: EdgeInsets.only(top: _screenSize.height * 0.05),
       decoration: BoxDecoration(
         color: Theme.of(context).scaffoldBackgroundColor,
         borderRadius: const BorderRadius.only(
@@ -39,23 +40,41 @@ class FilterBody extends StatelessWidget {
           topRight: Radius.circular(30),
         ),
       ),
-      height: screenSize.height * 0.75,
+      height: _screenSize.height * 0.75,
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(10),
-                  topRight: Radius.circular(40),
-                  bottomRight: Radius.circular(40),
-                  bottomLeft: Radius.circular(10),
-                ),
+                  color: Theme.of(context).primaryColor,
+                  borderRadius: BorderRadius.circular(25)),
+              child: Text(
+                'Show Events From caterory:',
+                style: Theme.of(context).textTheme.bodyText1,
               ),
             ),
+            Divider(
+              color: Theme.of(context).primaryColor,
+              height: 40,
+              thickness: 3,
+              indent: 100,
+              endIndent: 100,
+            ),
+            Expanded(
+              child: BlocBuilder<CategoryCubit, CategoryState>(
+                bloc: context.read<CategoryCubit>(),
+                builder: ((context, state) {
+                  return ListView.builder(
+                    itemBuilder: ((context, index) {
+                      return const ListTile();
+                    }),
+                  );
+                }),
+              ),
+            )
           ],
         ),
       ),

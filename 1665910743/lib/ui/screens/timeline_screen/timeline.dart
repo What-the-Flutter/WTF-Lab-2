@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -25,9 +26,7 @@ class Timeline extends StatelessWidget {
 }
 
 class BodyList extends StatelessWidget {
-  const BodyList({
-    Key? key,
-  }) : super(key: key);
+  const BodyList({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -41,12 +40,6 @@ class BodyList extends StatelessWidget {
           itemBuilder: ((context, index) {
             if (_showBookmarked) {
               if (state.eventList[index].favorite) {
-                if (state.eventList[index].image.length > 2) {
-                  context
-                      .read<EventCubit>()
-                      .getImage(state.eventList[index].title);
-                }
-
                 return Slidable(
                   startActionPane: ActionPane(
                     motion: const ScrollMotion(),
@@ -71,10 +64,12 @@ class BodyList extends StatelessWidget {
                         favorite: state.eventList[index].favorite,
                         tag: state.eventList[index].tag,
                         image: (state.eventList[index].imageUrl != null)
-                            ? Image.network(
-                                state.eventList[index].imageUrl!,
-                                width: 70,
-                                height: 70,
+                            ? Image(
+                                image: CachedNetworkImageProvider(
+                                    state.eventList[index].imageUrl!),
+                                width: MediaQuery.of(context).size.width * 0.5,
+                                height:
+                                    MediaQuery.of(context).size.height * 0.3,
                               )
                             : null),
                   ),
@@ -83,12 +78,6 @@ class BodyList extends StatelessWidget {
                 return const SizedBox();
               }
             } else {
-              if (state.eventList[index].image.length > 2) {
-                context
-                    .read<EventCubit>()
-                    .getImage(state.eventList[index].title);
-              }
-
               return Slidable(
                 startActionPane: ActionPane(
                   motion: const ScrollMotion(),
@@ -113,10 +102,11 @@ class BodyList extends StatelessWidget {
                       favorite: state.eventList[index].favorite,
                       tag: state.eventList[index].tag,
                       image: (state.eventList[index].imageUrl != null)
-                          ? Image.network(
-                              state.eventList[index].imageUrl!,
-                              width: 70,
-                              height: 70,
+                          ? Image(
+                              image: CachedNetworkImageProvider(
+                                  state.eventList[index].imageUrl!),
+                              width: MediaQuery.of(context).size.width * 0.5,
+                              height: MediaQuery.of(context).size.height * 0.3,
                             )
                           : null),
                 ),
@@ -141,7 +131,9 @@ class SearchResultList extends StatelessWidget {
       bloc: _eventCubit,
       builder: (context, state) {
         return _searchResult.isEmpty
-            ? Center(child: Lottie.asset('assets/search.json'))
+            ? Center(
+                child: Lottie.asset('assets/search.json', repeat: false),
+              )
             : ListView.builder(
                 itemCount: state.eventList.length,
                 itemBuilder: ((context, index) {
@@ -149,12 +141,6 @@ class SearchResultList extends StatelessWidget {
                       state.eventList[index].title.contains(
                         _searchResult,
                       )) {
-                    if (state.eventList[index].image.length > 2) {
-                      context
-                          .read<EventCubit>()
-                          .getImage(state.eventList[index].title);
-                    }
-
                     return Slidable(
                       startActionPane: ActionPane(
                         motion: const ScrollMotion(),
@@ -179,10 +165,13 @@ class SearchResultList extends StatelessWidget {
                             favorite: state.eventList[index].favorite,
                             tag: state.eventList[index].tag,
                             image: (state.eventList[index].imageUrl != null)
-                                ? Image.network(
-                                    state.eventList[index].imageUrl!,
-                                    width: 70,
-                                    height: 70,
+                                ? Image(
+                                    image: CachedNetworkImageProvider(
+                                        state.eventList[index].imageUrl!),
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.5,
+                                    height: MediaQuery.of(context).size.height *
+                                        0.3,
                                   )
                                 : null),
                       ),

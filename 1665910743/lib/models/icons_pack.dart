@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-List<Icon> kMyIcons = const [
+List<Icon> kIcons = const [
   Icon(Icons.track_changes),
   Icon(Icons.monetization_on),
   Icon(Icons.sports_bar),
@@ -17,6 +17,3 @@ List<Icon> kMyIcons = const [
   Icon(Icons.account_balance_outlined),
   Icon(Icons.chat),
 ];
-
-
-

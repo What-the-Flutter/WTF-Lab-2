@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../Chat_Screen/chat_screen_body.dart';
 import '../home/home_widget.dart';
+import 'cubit/event_cubit.dart';
 
 class ChatScreen extends StatelessWidget {
   final String categoryTitle;
@@ -20,12 +22,15 @@ class ChatScreen extends StatelessWidget {
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pushReplacement(
+          onPressed: () {
+            context.read<EventCubit>().stopAnimate();
+            Navigator.pushReplacement(
             context,
             MaterialPageRoute(
               builder: (context) => const Home(),
             ),
-          ),
+          );
+          },
         ),
       ),
       body: ChatScreenBody(

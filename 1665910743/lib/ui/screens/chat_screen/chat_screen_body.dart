@@ -26,7 +26,7 @@ class ChatScreenBody extends StatefulWidget {
 }
 
 class _ChatScreenBodyState extends State<ChatScreenBody> {
-  final _controller = TextEditingController();
+  final TextEditingController _controller = TextEditingController();
   final TextEditingController _renameController = TextEditingController();
 
   @override
@@ -39,10 +39,6 @@ class _ChatScreenBodyState extends State<ChatScreenBody> {
     });
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-  }
 
   @override
   void dispose() {
@@ -56,6 +52,7 @@ class _ChatScreenBodyState extends State<ChatScreenBody> {
     final _backgroundImage =
         context.read<SettingsCubit>().state.backgroundImagePath;
     final _iconAdd = context.watch<EventCubit>().state.iconAdd;
+    
     return GestureDetector(
       onTap: (() => context.read<EventCubit>().iconAdd(false)),
       child: Container(

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -9,7 +10,6 @@ import '../settings/cubit/settings_cubit.dart';
 import 'cubit/event_cubit.dart';
 
 class BookmarkEvents extends StatelessWidget {
-
   BookmarkEvents({Key? key}) : super(key: key);
 
   @override
@@ -29,12 +29,6 @@ class BookmarkEvents extends StatelessWidget {
               itemCount: state.eventList.length,
               itemBuilder: ((context, index) {
                 if (state.eventList[index].favorite) {
-                  if (state.eventList[index].image.length > 2) {
-                    context
-                        .read<EventCubit>()
-                        .getImage(state.eventList[index].title);
-                  }
-
                   return Slidable(
                     startActionPane: ActionPane(
                       motion: const ScrollMotion(),
@@ -59,10 +53,13 @@ class BookmarkEvents extends StatelessWidget {
                           favorite: state.eventList[index].favorite,
                           tag: state.eventList[index].tag,
                           image: (state.eventList[index].imageUrl != null)
-                              ? Image.network(
-                                  state.eventList[index].imageUrl!,
-                                  width: 70,
-                                  height: 70,
+                              ? Image(
+                                  image: CachedNetworkImageProvider(
+                                      state.eventList[index].imageUrl!),
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.5,
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.3,
                                 )
                               : null),
                     ),

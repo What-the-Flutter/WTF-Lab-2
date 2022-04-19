@@ -9,9 +9,7 @@ class EventCubit extends Cubit<EventState> {
   DataBaseRepository dataBaseRepository;
 
   EventCubit({required this.dataBaseRepository})
-      : super(
-          const EventState(eventList: []),
-        );
+      : super(const EventState(eventList: []));
 
   Future<void> getEvents() async {
     final _newList = await dataBaseRepository.getEvents();
@@ -47,7 +45,6 @@ class EventCubit extends Cubit<EventState> {
     required String newTitle,
   }) async {
     dataBaseRepository.renameEvent(key, newTitle);
-
     final _changes = await dataBaseRepository.getEvents();
 
     emit(
@@ -69,11 +66,11 @@ class EventCubit extends Cubit<EventState> {
 
   Future<void> eventSelect(String key) async {
     dataBaseRepository.eventSelected(key);
-
     final _changes = await dataBaseRepository.getEvents();
     final _selected = <String>[];
     _selected.addAll(state.hasSelected);
     _selected.add(key);
+
     emit(
       EventState(eventList: _changes).copyWith(hasSelected: _selected),
     );
@@ -126,16 +123,7 @@ class EventCubit extends Cubit<EventState> {
     );
   }
 
-  void getImage(String name) async {
-    final url = await dataBaseRepository.getImageUrl(name);
-    for (var element in state.eventList) {
-      if (element.title == name) {
-        element.imageUrl = url;
-      }
-    }
-
-    emit(
-      state,
-    );
+  void stopAnimate() {
+    emit(state.copyWith(animate: false));
   }
 }

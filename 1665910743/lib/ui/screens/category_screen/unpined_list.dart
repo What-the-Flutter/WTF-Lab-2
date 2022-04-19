@@ -25,6 +25,7 @@ class UnpinedCategory extends StatelessWidget {
                       element.categoryTitle == state.categoryList[index].title);
               final _subtitle =
                   _events.isNotEmpty ? _events.last.title : 'No events';
+                  
               return GestureDetector(
                 onTap: (() => Navigator.pushReplacement(
                       context,

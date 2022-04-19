@@ -19,7 +19,7 @@ class IconsGrid extends StatelessWidget {
             child: ListView.builder(
               shrinkWrap: true,
               scrollDirection: Axis.horizontal,
-              itemCount: kMyIcons.length,
+              itemCount: kIcons.length,
               itemBuilder: ((context, index) => GestureDetector(
                     onTap: (() {
                       context.read<EventCubit>().iconSelect(index);
@@ -34,7 +34,7 @@ class IconsGrid extends StatelessWidget {
                         foregroundColor:
                             Theme.of(context).scaffoldBackgroundColor,
                         radius: 20,
-                        child: kMyIcons[index],
+                        child: kIcons[index],
                       ),
                     ),
                   )),

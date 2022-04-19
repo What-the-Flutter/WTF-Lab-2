@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../extensions/date_extension.dart';
 import '../../models/tags.dart';
-import '../screens/chat_screen/cubit/event_cubit.dart';
 import '../screens/settings/cubit/settings_cubit.dart';
 import '../theme/theme_data.dart';
 
@@ -63,6 +62,8 @@ class EventTile extends StatelessWidget {
                     title: title,
                     formattedDate: date.mmddyy(),
                     favorite: favorite,
+                    iconCode: iconCode,
+                    tag: tag,
                   )
                 : _TileWithoutImage(
                     title: title,
@@ -124,7 +125,7 @@ class _TileWithoutImage extends StatelessWidget {
             ),
             (tag != -1)
                 ? Text(
-                    kMyTags[tag],
+                    kTags[tag],
                     style: Theme.of(context).textTheme.bodyText2,
                   )
                 : const SizedBox(),
@@ -137,14 +138,10 @@ class _TileWithoutImage extends StatelessWidget {
                 ),
                 Padding(
                   padding: const EdgeInsets.only(left: 8.0),
-                  child: AnimatedScale(
-                    duration: const Duration(seconds: 1),
-                    scale: context.watch<EventCubit>().state.iconScale,
-                    child: Icon(
-                      favorite ? Icons.bookmark : Icons.bookmark_border,
-                      size: 20,
-                      color: Theme.of(context).scaffoldBackgroundColor,
-                    ),
+                  child: Icon(
+                    favorite ? Icons.bookmark : Icons.bookmark_border,
+                    size: 20,
+                    color: Theme.of(context).scaffoldBackgroundColor,
                   ),
                 )
               ],
@@ -161,6 +158,8 @@ class _TileWithImage extends StatefulWidget {
   final String title;
   final String formattedDate;
   final bool favorite;
+  final int iconCode;
+  final int tag;
 
   _TileWithImage({
     Key? key,
@@ -168,6 +167,8 @@ class _TileWithImage extends StatefulWidget {
     required this.title,
     required this.favorite,
     required this.formattedDate,
+    required this.iconCode,
+    required this.tag,
   }) : super(key: key);
 
   @override
@@ -189,35 +190,53 @@ class _TileWithImageState extends State<_TileWithImage> {
         SizedBox(
           width: MediaQuery.of(context).size.width * 0.1,
         ),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: MediaQuery.of(context).size.width * 0.5,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                    maxWidth: MediaQuery.of(context).size.width * 0.5),
-                child: Text(
-                  widget.title,
-                  style: Theme.of(context).textTheme.bodyText1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ),
-            Row(
-              mainAxisSize: MainAxisSize.min,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  widget.formattedDate,
-                  style: Theme.of(context).textTheme.bodyText2,
+                Container(
+                  width: MediaQuery.of(context).size.width * 0.5,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                        maxWidth: MediaQuery.of(context).size.width * 0.5),
+                    child: Text(
+                      widget.title,
+                      style: Theme.of(context).textTheme.bodyText1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ),
-                Icon(
-                  widget.favorite ? Icons.bookmark : Icons.bookmark_border,
-                  size: 20,
-                  color: Theme.of(context).scaffoldBackgroundColor,
-                )
+                (widget.tag != -1)
+                    ? Text(
+                        kTags[widget.tag],
+                        style: Theme.of(context).textTheme.bodyText2,
+                      )
+                    : const SizedBox(),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      widget.formattedDate,
+                      style: Theme.of(context).textTheme.bodyText2,
+                    ),
+                    Icon(
+                      widget.favorite ? Icons.bookmark : Icons.bookmark_border,
+                      size: 20,
+                      color: Theme.of(context).scaffoldBackgroundColor,
+                    )
+                  ],
+                ),
               ],
             ),
+            (widget.iconCode != 0)
+                ? Icon(
+                    IconData(widget.iconCode, fontFamily: 'MaterialIcons'),
+                    color: Theme.of(context).scaffoldBackgroundColor,
+                    size: 50,
+                  )
+                : const SizedBox(),
           ],
         )
       ],
