@@ -22,9 +22,8 @@ class EventCubit extends Cubit<EventState> {
   Future<void> addEvent({
     required Event event,
   }) async {
-    dataBaseRepository.addEvent(event);
+    await dataBaseRepository.addEvent(event);
     final _changes = await dataBaseRepository.updateEvents(state.eventList);
-
     emit(
       EventState(eventList: _changes),
     );
