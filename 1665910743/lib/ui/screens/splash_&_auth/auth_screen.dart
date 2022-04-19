@@ -29,6 +29,11 @@ class _BioAuthState extends State<BioAuth> with TickerProviderStateMixin {
   String _authorized = 'Not Authorized';
   bool _isAuthenticating = false;
 
+  late final AnimationController _controller = AnimationController(
+    duration: const Duration(milliseconds: 2000),
+    vsync: this,
+  );
+
   @override
   void initState() {
     super.initState();
@@ -41,6 +46,8 @@ class _BioAuthState extends State<BioAuth> with TickerProviderStateMixin {
     if (_canCheckBiometrics != null && _canCheckBiometrics == true) {
       _authenticateWithBiometrics();
     }
+    Future.delayed(const Duration(seconds: 1))
+        .then((_) => _controller.forward());
   }
 
   Future<void> _checkBiometrics() async {
@@ -205,6 +212,7 @@ class _BioAuthState extends State<BioAuth> with TickerProviderStateMixin {
       child: Container(
         child: Lottie.asset(
           'assets/biometric.json',
+          controller: _controller,
           repeat: false,
         ),
       ),
