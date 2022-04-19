@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../category_screen/cubit/category_cubit.dart';
+import '../chat_screen/cubit/event_cubit.dart';
 
 Future<dynamic> filterDialog(BuildContext context) {
   return showModalBottomSheet(
@@ -64,8 +65,8 @@ class FilterBody extends StatelessWidget {
               endIndent: 100,
             ),
             Expanded(
-              child: BlocBuilder<CategoryCubit, CategoryState>(
-                bloc: context.read<CategoryCubit>(),
+              child: BlocBuilder<EventCubit, EventState>(
+                bloc: context.read<EventCubit>(),
                 builder: ((context, state) {
                   return ListView.builder(
                     itemBuilder: ((context, index) {

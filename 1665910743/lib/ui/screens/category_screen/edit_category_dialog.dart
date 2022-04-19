@@ -129,25 +129,21 @@ class _EditDialogState extends State<EditDialog> {
       backgroundColor: Theme.of(context).primaryColor,
       foregroundColor: Colors.white,
       child: IconButton(
-        onPressed: () {
-          Navigator.pop(context);
-          if (widget.category.pinned == false) {
-            cubit.pin(
-              widget.category,
-              widget.dbKey,
-            );
-          } else {
-            cubit.unpin(
-              widget.category,
-              widget.dbKey,
-            );
-          }
-        },
-        icon: widget.pinned
-            ? const Icon(Icons.push_pin)
-            : const Icon(Icons.push_pin_outlined),
-        // ? to icon
-      ),
+          onPressed: () {
+            Navigator.pop(context);
+            if (widget.category.pinned == false) {
+              cubit.pin(
+                widget.category,
+                widget.dbKey,
+              );
+            } else {
+              cubit.unpin(
+                widget.category,
+                widget.dbKey,
+              );
+            }
+          },
+          icon: Icon(widget.pinned ? Icons.push_pin : Icons.push_pin_outlined)),
     );
   }
 }

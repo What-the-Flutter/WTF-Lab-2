@@ -22,7 +22,7 @@ class MyThemes {
   static const lightColor = Color.fromARGB(255, 74, 138, 90);
   static const darkColor = Color.fromARGB(255, 65, 104, 75);
   static const selectedColor = Color.fromARGB(255, 49, 87, 58);
-// add text color
+
   static final ThemeData lightTheme = ThemeData(
     appBarTheme: const AppBarTheme(
       backgroundColor: lightColor,

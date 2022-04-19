@@ -107,6 +107,7 @@ class _BioAuthState extends State<BioAuth> with TickerProviderStateMixin {
                 builder: ((context) => const Home()),
               ),
             )
+        
           // ignore: unnecessary_statements
           : null;
     });
