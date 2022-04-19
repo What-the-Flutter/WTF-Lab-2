@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../theme/font_cubit/font_cubit.dart';
 import '../../theme/theme_cubit/theme_cubit.dart';
 import '../splash_&_auth/auth_screen.dart';
+import '../splash_&_auth/cubit/auth_cubit.dart';
 import 'cubit/home_cubit.dart';
 import 'home_widget.dart';
 
@@ -23,7 +24,6 @@ class _JournalState extends State<Journal> {
     super.initState();
   }
 
-
   @override
   Widget build(BuildContext context) {
     final _textTheme = context.watch<FontCubit>().state;
@@ -34,7 +34,11 @@ class _JournalState extends State<Journal> {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
           theme: state.copyWith(textTheme: _textTheme),
-          home: (authKey) ? const BioAuth() : const Home(),
+          home: (authKey)
+              ? BioAuth(
+                  authCubit: context.watch<AuthCubit>(),
+                )
+              : const Home(),
         );
       }),
     );

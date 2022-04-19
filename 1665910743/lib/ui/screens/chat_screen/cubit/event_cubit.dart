@@ -125,4 +125,8 @@ class EventCubit extends Cubit<EventState> {
   void stopAnimate() {
     emit(state.copyWith(animate: false));
   }
+
+  void imageSelect(String? image) {
+    emit(state.copyWith(selectedImage: image));
+  }
 }

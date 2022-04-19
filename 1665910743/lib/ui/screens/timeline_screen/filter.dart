@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../category_screen/cubit/category_cubit.dart';
-import '../chat_screen/cubit/event_cubit.dart';
 
 Future<void> filterDialog(BuildContext context) {
   return showModalBottomSheet(
@@ -18,8 +17,7 @@ Future<void> filterDialog(BuildContext context) {
           padding:
               EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
           child: BlocProvider.value(
-            value: context.read<CategoryCubit>(),
-            child: const FilterBody()),
+              value: context.read<CategoryCubit>(), child: const FilterBody()),
         ),
       );
     },

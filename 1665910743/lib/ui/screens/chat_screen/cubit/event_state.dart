@@ -8,6 +8,7 @@ class EventState {
   final bool iconAdd;
   final double iconScale;
   final bool animate;
+  final String? selectedImage;
 
   const EventState({
     required this.eventList,
@@ -17,6 +18,7 @@ class EventState {
     this.iconAdd = false,
     this.iconScale = 1.0,
     this.animate = false,
+    this.selectedImage,
   });
 
   EventState copyWith({
@@ -27,6 +29,7 @@ class EventState {
     bool? iconAdd,
     double? iconScale,
     bool? animate,
+    String? selectedImage,
   }) {
     return EventState(
       eventList: eventList ?? this.eventList,
@@ -36,6 +39,7 @@ class EventState {
       iconAdd: iconAdd ?? this.iconAdd,
       iconScale: iconScale ?? this.iconScale,
       animate: animate ?? false,
+      selectedImage: selectedImage,
     );
   }
 }

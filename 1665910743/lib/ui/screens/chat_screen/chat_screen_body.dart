@@ -72,6 +72,7 @@ class _ChatScreenBodyState extends State<ChatScreenBody> {
             ChatScreenNavBar(
               categoryTitle: widget.categoryTitle,
               controller: _controller,
+              eventCubit: context.read<EventCubit>(),
             ),
           ],
         ),

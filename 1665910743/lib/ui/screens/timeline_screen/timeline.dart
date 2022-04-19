@@ -12,107 +12,110 @@ import '../settings/cubit/settings_cubit.dart';
 
 class Timeline extends StatelessWidget {
   static const title = 'Timeline';
-  //TODO: cubit сверху
+
   const Timeline({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final state = context.watch<HomeCubit>().state;
-
-    return Container(
-      child: state.searchMode ? const SearchResultList() : const BodyList(),
-    );
+    return BlocBuilder<HomeCubit, HomeState>(
+        bloc: context.watch<HomeCubit>(),
+        builder: ((context, state) =>
+            state.searchMode ? const SearchResultList() : const BodyList()));
   }
 }
 
 class BodyList extends StatelessWidget {
   const BodyList({Key? key}) : super(key: key);
-//TODO: blocBuilder
   @override
   Widget build(BuildContext context) {
-    final _eventCubit = context.read<EventCubit>();
-    final _showBookmarked = context.watch<HomeCubit>().state.showBookmarked;
     return BlocBuilder<EventCubit, EventState>(
-      bloc: _eventCubit,
+      bloc: context.read<EventCubit>(),
       builder: (context, state) {
-        return ListView.builder(
-          itemCount: state.eventList.length,
-          itemBuilder: ((context, index) {
-            if (_showBookmarked) {
-              if (state.eventList[index].favorite) {
-                return Slidable(
-                  startActionPane: ActionPane(
-                    motion: const ScrollMotion(),
-                    children: [
-                      EditAction(
-                        event: state.eventList[index],
-                        eventKey: state.eventList[index].id!,
+        return BlocBuilder<HomeCubit, HomeState>(
+          bloc: context.watch<HomeCubit>(),
+          builder: ((context, homeState) => ListView.builder(
+                itemCount: state.eventList.length,
+                itemBuilder: ((context, index) {
+                  if (homeState.showBookmarked) {
+                    if (state.eventList[index].favorite) {
+                      return Slidable(
+                        startActionPane: ActionPane(
+                          motion: const ScrollMotion(),
+                          children: [
+                            EditAction(
+                              event: state.eventList[index],
+                              eventKey: state.eventList[index].id!,
+                            ),
+                            RemoveAction(eventKey: state.eventList[index].id!),
+                            MoveAction(eventKey: state.eventList[index].id!),
+                          ],
+                        ),
+                        child: Align(
+                          alignment: BlocProvider.of<SettingsCubit>(context)
+                              .state
+                              .chatTileAlignment,
+                          child: EventTile(
+                              iconCode: state.eventList[index].iconCode,
+                              isSelected: state.eventList[index].isSelected,
+                              title: state.eventList[index].title,
+                              date: state.eventList[index].date,
+                              favorite: state.eventList[index].favorite,
+                              tag: state.eventList[index].tag,
+                              image: (state.eventList[index].imageUrl != null)
+                                  ? Image(
+                                      image: CachedNetworkImageProvider(
+                                          state.eventList[index].imageUrl!),
+                                      width: MediaQuery.of(context).size.width *
+                                          0.5,
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              0.3,
+                                    )
+                                  : null),
+                        ),
+                      );
+                    } else {
+                      return const SizedBox();
+                    }
+                  } else {
+                    return Slidable(
+                      startActionPane: ActionPane(
+                        motion: const ScrollMotion(),
+                        children: [
+                          EditAction(
+                            event: state.eventList[index],
+                            eventKey: state.eventList[index].id!,
+                          ),
+                          RemoveAction(eventKey: state.eventList[index].id!),
+                          MoveAction(eventKey: state.eventList[index].id!),
+                        ],
                       ),
-                      RemoveAction(eventKey: state.eventList[index].id!),
-                      MoveAction(eventKey: state.eventList[index].id!),
-                    ],
-                  ),
-                  child: Align(
-                    alignment: BlocProvider.of<SettingsCubit>(context)
-                        .state
-                        .chatTileAlignment,
-                    child: EventTile(
-                        iconCode: state.eventList[index].iconCode,
-                        isSelected: state.eventList[index].isSelected,
-                        title: state.eventList[index].title,
-                        date: state.eventList[index].date,
-                        favorite: state.eventList[index].favorite,
-                        tag: state.eventList[index].tag,
-                        image: (state.eventList[index].imageUrl != null)
-                            ? Image(
-                                image: CachedNetworkImageProvider(
-                                    state.eventList[index].imageUrl!),
-                                width: MediaQuery.of(context).size.width * 0.5,
-                                height:
-                                    MediaQuery.of(context).size.height * 0.3,
-                              )
-                            : null),
-                  ),
-                );
-              } else {
-                return const SizedBox();
-              }
-            } else {
-              return Slidable(
-                startActionPane: ActionPane(
-                  motion: const ScrollMotion(),
-                  children: [
-                    EditAction(
-                      event: state.eventList[index],
-                      eventKey: state.eventList[index].id!,
-                    ),
-                    RemoveAction(eventKey: state.eventList[index].id!),
-                    MoveAction(eventKey: state.eventList[index].id!),
-                  ],
-                ),
-                child: Align(
-                  alignment: BlocProvider.of<SettingsCubit>(context)
-                      .state
-                      .chatTileAlignment,
-                  child: EventTile(
-                      iconCode: state.eventList[index].iconCode,
-                      isSelected: state.eventList[index].isSelected,
-                      title: state.eventList[index].title,
-                      date: state.eventList[index].date,
-                      favorite: state.eventList[index].favorite,
-                      tag: state.eventList[index].tag,
-                      image: (state.eventList[index].imageUrl != null)
-                          ? Image(
-                              image: CachedNetworkImageProvider(
-                                  state.eventList[index].imageUrl!),
-                              width: MediaQuery.of(context).size.width * 0.5,
-                              height: MediaQuery.of(context).size.height * 0.3,
-                            )
-                          : null),
-                ),
-              );
-            }
-          }),
+                      child: Align(
+                        alignment: BlocProvider.of<SettingsCubit>(context)
+                            .state
+                            .chatTileAlignment,
+                        child: EventTile(
+                            iconCode: state.eventList[index].iconCode,
+                            isSelected: state.eventList[index].isSelected,
+                            title: state.eventList[index].title,
+                            date: state.eventList[index].date,
+                            favorite: state.eventList[index].favorite,
+                            tag: state.eventList[index].tag,
+                            image: (state.eventList[index].imageUrl != null)
+                                ? Image(
+                                    image: CachedNetworkImageProvider(
+                                        state.eventList[index].imageUrl!),
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.5,
+                                    height: MediaQuery.of(context).size.height *
+                                        0.3,
+                                  )
+                                : null),
+                      ),
+                    );
+                  }
+                }),
+              )),
         );
       },
     );
