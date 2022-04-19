@@ -22,7 +22,7 @@ class Event {
 
   Event.fromMap(Map<dynamic, dynamic> map)
       : title = map['title'] ?? 'title',
-        date = DateTime.parse(map['date'] ?? ''),
+        date = DateTime.parse(map['date']),
         favorite = map['favorite'] == 0 ? false : true,
         iconCode = map['icon'],
         categoryTitle = map['categoryTitle'],

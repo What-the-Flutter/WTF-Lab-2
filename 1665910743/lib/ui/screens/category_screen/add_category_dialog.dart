@@ -8,7 +8,7 @@ import '../../theme/theme_cubit/theme_cubit.dart';
 import '../../theme/theme_data.dart';
 import 'cubit/category_cubit.dart';
 
-Future<dynamic> addTaskDialog(BuildContext context) {
+Future<void> addTaskDialog(BuildContext context) {
   return showModalBottomSheet(
     isScrollControlled: true,
     backgroundColor: Colors.white.withOpacity(0.0),

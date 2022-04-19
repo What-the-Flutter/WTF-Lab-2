@@ -12,7 +12,7 @@ import '../settings/cubit/settings_cubit.dart';
 
 class Timeline extends StatelessWidget {
   static const title = 'Timeline';
-
+  //TODO: cubit сверху
   const Timeline({Key? key}) : super(key: key);
 
   @override
@@ -27,7 +27,7 @@ class Timeline extends StatelessWidget {
 
 class BodyList extends StatelessWidget {
   const BodyList({Key? key}) : super(key: key);
-
+//TODO: blocBuilder
   @override
   Widget build(BuildContext context) {
     final _eventCubit = context.read<EventCubit>();

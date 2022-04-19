@@ -28,7 +28,8 @@ class _BioAuthState extends State<BioAuth> with TickerProviderStateMixin {
   List<BiometricType>? _availableBiometrics;
   String _authorized = 'Not Authorized';
   bool _isAuthenticating = false;
-
+//TODO: bloc
+//TODO: инициализация в initState
   late final AnimationController _controller = AnimationController(
     duration: const Duration(milliseconds: 2000),
     vsync: this,
@@ -209,11 +210,15 @@ class _BioAuthState extends State<BioAuth> with TickerProviderStateMixin {
           );
         }
       },
-      child: Container(
-        child: Lottie.asset(
-          'assets/biometric.json',
-          controller: _controller,
-          repeat: false,
+      child: Center(
+        child: Container(
+          child: Lottie.asset(
+            'assets/biometric.json',
+            controller: _controller,
+            repeat: false,
+            width: 250,
+            height: 250,
+          ),
         ),
       ),
     );

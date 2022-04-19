@@ -6,7 +6,7 @@ import '../../models/tags.dart';
 import '../screens/settings/cubit/settings_cubit.dart';
 import '../theme/theme_data.dart';
 
-const _br = 15.0;
+const double _borderRadius = 15.0;
 
 class EventTile extends StatelessWidget {
   final String title;
@@ -44,14 +44,14 @@ class EventTile extends StatelessWidget {
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.only(
-                  topLeft: const Radius.circular(_br),
-                  topRight: const Radius.circular(_br),
+                  topLeft: const Radius.circular(_borderRadius),
+                  topRight: const Radius.circular(_borderRadius),
                   bottomRight: _tileAlignLeft
-                      ? const Radius.circular(_br)
+                      ? const Radius.circular(_borderRadius)
                       : const Radius.circular(0),
                   bottomLeft: _tileAlignLeft
                       ? const Radius.circular(0)
-                      : const Radius.circular(_br),
+                      : const Radius.circular(_borderRadius),
                 ),
                 color: isSelected
                     ? MyThemes.selectedColor

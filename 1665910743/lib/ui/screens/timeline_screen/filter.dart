@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../category_screen/cubit/category_cubit.dart';
 import '../chat_screen/cubit/event_cubit.dart';
 
-Future<dynamic> filterDialog(BuildContext context) {
+Future<void> filterDialog(BuildContext context) {
   return showModalBottomSheet(
     isScrollControlled: true,
     backgroundColor: Colors.white.withOpacity(0.0),
@@ -12,12 +12,14 @@ Future<dynamic> filterDialog(BuildContext context) {
       maxWidth: MediaQuery.of(context).size.width * 0.95,
     ),
     context: context,
-    builder: (context) {
+    builder: (buildContext) {
       return SingleChildScrollView(
         child: Padding(
           padding:
               EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-          child: const FilterBody(),
+          child: BlocProvider.value(
+            value: context.read<CategoryCubit>(),
+            child: const FilterBody()),
         ),
       );
     },
@@ -65,8 +67,8 @@ class FilterBody extends StatelessWidget {
               endIndent: 100,
             ),
             Expanded(
-              child: BlocBuilder<EventCubit, EventState>(
-                bloc: context.read<EventCubit>(),
+              child: BlocBuilder<CategoryCubit, CategoryState>(
+                bloc: context.read<CategoryCubit>(),
                 builder: ((context, state) {
                   return ListView.builder(
                     itemBuilder: ((context, index) {

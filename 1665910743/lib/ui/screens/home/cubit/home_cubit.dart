@@ -8,11 +8,13 @@ class HomeCubit extends Cubit<HomeState> {
   DataBaseRepository dataBaseRepository;
 
   HomeCubit({required this.dataBaseRepository})
-      : super(const HomeState(
-            searchMode: false,
-            searchResult: '',
-            authKey: false,
-            showBookmarked: false));
+      : super(
+          const HomeState(
+              searchMode: false,
+              searchResult: '',
+              authKey: false,
+              showBookmarked: false),
+        );
 
   void enterSearchMode() {
     emit(
@@ -48,7 +50,7 @@ class HomeCubit extends Cubit<HomeState> {
   }
 
   void showBookmaked() {
-    print(state.showBookmarked);
+    
     emit(
       HomeState(
         searchMode: state.searchMode,
