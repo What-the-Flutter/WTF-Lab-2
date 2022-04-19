@@ -12,15 +12,14 @@ import '../settings/cubit/settings_cubit.dart';
 import 'cubit/home_cubit.dart';
 import 'journal.dart';
 
-//BlocsInjector rename
-class BlocInit extends StatelessWidget {
+class BlocsProvider extends StatelessWidget {
   final User user;
   final String initTheme;
   final String initFontSize;
   final String backgroundImagePath;
   final bool isChatBubblesToRight;
 
-  const BlocInit({
+  const BlocsProvider({
     Key? key,
     required this.backgroundImagePath,
     required this.isChatBubblesToRight,

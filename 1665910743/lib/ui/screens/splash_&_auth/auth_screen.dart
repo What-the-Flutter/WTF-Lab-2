@@ -100,16 +100,15 @@ class _BioAuthState extends State<BioAuth> with TickerProviderStateMixin {
     final message = authenticated ? 'Authorized' : 'Not Authorized';
     setState(() {
       _authorized = message;
-      (_authorized == 'Authorized')
-          ? Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: ((context) => const Home()),
-              ),
-            )
-        
-          // ignore: unnecessary_statements
-          : null;
+
+      if (_authorized == 'Authorized') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: ((context) => const Home()),
+          ),
+        );
+      }
     });
   }
 
