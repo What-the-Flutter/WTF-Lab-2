@@ -6,11 +6,13 @@ import '../home/home_widget.dart';
 import 'cubit/event_cubit.dart';
 
 class ChatScreen extends StatelessWidget {
+  final EventCubit eventCubit;
   final String categoryTitle;
 
   const ChatScreen({
     Key? key,
     required this.categoryTitle,
+    required this.eventCubit,
   }) : super(key: key);
 
   @override
@@ -25,16 +27,17 @@ class ChatScreen extends StatelessWidget {
           onPressed: () {
             context.read<EventCubit>().stopAnimate();
             Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const Home(),
-            ),
-          );
+              context,
+              MaterialPageRoute(
+                builder: (context) => const Home(),
+              ),
+            );
           },
         ),
       ),
       body: ChatScreenBody(
         categoryTitle: categoryTitle,
+        eventCubit: eventCubit,
       ),
     );
   }

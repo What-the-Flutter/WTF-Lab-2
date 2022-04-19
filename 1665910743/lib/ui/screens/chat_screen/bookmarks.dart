@@ -10,12 +10,11 @@ import '../settings/cubit/settings_cubit.dart';
 import 'cubit/event_cubit.dart';
 
 class BookmarkEvents extends StatelessWidget {
-  BookmarkEvents({Key? key}) : super(key: key);
+  final EventCubit eventCubit;
+  BookmarkEvents({Key? key, required this.eventCubit}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    var _eventCubit = context.read<EventCubit>();
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Bookmarks'),
@@ -23,7 +22,7 @@ class BookmarkEvents extends StatelessWidget {
       body: Container(
         padding: kListViewPadding,
         child: BlocBuilder<EventCubit, EventState>(
-          bloc: _eventCubit,
+          bloc: eventCubit,
           builder: (context, state) {
             return ListView.builder(
               itemCount: state.eventList.length,
@@ -38,7 +37,10 @@ class BookmarkEvents extends StatelessWidget {
                           eventKey: state.eventList[index].id!,
                         ),
                         RemoveAction(eventKey: state.eventList[index].id!),
-                        MoveAction(eventKey: state.eventList[index].id!),
+                        MoveAction(
+                          eventKey: state.eventList[index].id!,
+                          categoryName: state.eventList[index].categoryTitle,
+                        ),
                       ],
                     ),
                     child: Align(

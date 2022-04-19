@@ -32,6 +32,7 @@ class UnpinedCategory extends StatelessWidget {
                       MaterialPageRoute(
                         builder: ((context) => ChatScreen(
                               categoryTitle: state.categoryList[index].title,
+                              eventCubit: context.read<EventCubit>(),
                             )),
                       ),
                     )),

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../category_screen/cubit/category_cubit.dart';
+// ignore: prefer_relative_imports
+import 'package:my_journal/ui/screens/Category_Screen/cubit/category_cubit.dart';
 
 Future<void> filterDialog(BuildContext context) {
   return showModalBottomSheet(
@@ -16,8 +17,7 @@ Future<void> filterDialog(BuildContext context) {
         child: Padding(
           padding:
               EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-          child: BlocProvider.value(
-              value: context.read<CategoryCubit>(), child: const FilterBody()),
+          child: const FilterBody(),
         ),
       );
     },
@@ -69,8 +69,19 @@ class FilterBody extends StatelessWidget {
                 bloc: context.read<CategoryCubit>(),
                 builder: ((context, state) {
                   return ListView.builder(
+                    itemCount: state.categoryList.length,
                     itemBuilder: ((context, index) {
-                      return const ListTile();
+                      return ListTile(
+                        onTap: (() {}),
+                        leading: Icon(
+                          Icons.circle,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                        title: Text(
+                          state.categoryList[index].title,
+                          style: Theme.of(context).textTheme.bodyText1,
+                        ),
+                      );
                     }),
                   );
                 }),

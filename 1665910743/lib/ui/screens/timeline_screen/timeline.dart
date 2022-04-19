@@ -47,7 +47,11 @@ class BodyList extends StatelessWidget {
                               eventKey: state.eventList[index].id!,
                             ),
                             RemoveAction(eventKey: state.eventList[index].id!),
-                            MoveAction(eventKey: state.eventList[index].id!),
+                            MoveAction(
+                              eventKey: state.eventList[index].id!,
+                              categoryName:
+                                  state.eventList[index].categoryTitle,
+                            ),
                           ],
                         ),
                         child: Align(
@@ -87,7 +91,10 @@ class BodyList extends StatelessWidget {
                             eventKey: state.eventList[index].id!,
                           ),
                           RemoveAction(eventKey: state.eventList[index].id!),
-                          MoveAction(eventKey: state.eventList[index].id!),
+                          MoveAction(
+                            eventKey: state.eventList[index].id!,
+                            categoryName: state.eventList[index].categoryTitle,
+                          ),
                         ],
                       ),
                       child: Align(
@@ -153,7 +160,10 @@ class SearchResultList extends StatelessWidget {
                             eventKey: state.eventList[index].id!,
                           ),
                           RemoveAction(eventKey: state.eventList[index].id!),
-                          MoveAction(eventKey: state.eventList[index].id!),
+                          MoveAction(
+                            eventKey: state.eventList[index].id!,
+                            categoryName: state.eventList[index].categoryTitle,
+                          ),
                         ],
                       ),
                       child: Align(

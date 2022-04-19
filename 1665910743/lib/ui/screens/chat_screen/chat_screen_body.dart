@@ -14,11 +14,13 @@ import '../settings/cubit/settings_cubit.dart';
 import 'chat_screen_nav_bar.dart';
 
 class ChatScreenBody extends StatefulWidget {
+  final EventCubit eventCubit;
   final String categoryTitle;
 
   const ChatScreenBody({
     Key? key,
     required this.categoryTitle,
+    required this.eventCubit,
   }) : super(key: key);
 
   @override
@@ -39,7 +41,6 @@ class _ChatScreenBodyState extends State<ChatScreenBody> {
     });
   }
 
-
   @override
   void dispose() {
     _controller.dispose();
@@ -52,7 +53,7 @@ class _ChatScreenBodyState extends State<ChatScreenBody> {
     final _backgroundImage =
         context.read<SettingsCubit>().state.backgroundImagePath;
     final _iconAdd = context.watch<EventCubit>().state.iconAdd;
-    
+
     return GestureDetector(
       onTap: (() => context.read<EventCubit>().iconAdd(false)),
       child: Container(
@@ -66,13 +67,16 @@ class _ChatScreenBodyState extends State<ChatScreenBody> {
         padding: kListViewPadding,
         child: Column(
           children: [
-            ChatListBody(categoryTitle: widget.categoryTitle),
+            ChatListBody(
+              categoryTitle: widget.categoryTitle,
+              eventCubit: widget.eventCubit,
+            ),
             _iconAdd ? const TagsGrid() : const SizedBox(),
             _iconAdd ? const IconsGrid() : const SizedBox(),
             ChatScreenNavBar(
               categoryTitle: widget.categoryTitle,
               controller: _controller,
-              eventCubit: context.read<EventCubit>(),
+              eventCubit: widget.eventCubit,
             ),
           ],
         ),

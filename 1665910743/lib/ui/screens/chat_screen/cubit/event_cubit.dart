@@ -30,9 +30,22 @@ class EventCubit extends Cubit<EventState> {
   }
 
   Future<void> removeEventInCategory({required String key}) async {
-    dataBaseRepository.removeEvent(key);
+   await dataBaseRepository.removeEvent(key);
 
     final _changes = await dataBaseRepository.getEvents();
+
+    emit(
+      EventState(eventList: _changes).copyWith(hasSelected: []),
+    );
+  }
+
+  Future<void> removeMultipleEvents() async {
+    print(state.hasSelected);
+    for (final el in state.hasSelected) {
+      await dataBaseRepository.removeEvent(el);
+    }
+
+    final _changes = await dataBaseRepository.updateEvents(state.eventList);
 
     emit(
       EventState(eventList: _changes).copyWith(hasSelected: []),

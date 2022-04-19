@@ -98,14 +98,13 @@ class _ChatScreenNavBarState extends State<ChatScreenNavBar>
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => BookmarkEvents(),
+                              builder: (context) => BookmarkEvents(
+                                eventCubit: widget.eventCubit,
+                              ),
                             ),
                           );
                         } else {
-                          for (final el in state.hasSelected) {
-                            widget.eventCubit.removeEventInCategory(key: el);
-                            widget.eventCubit.clearHasSelected();
-                          }
+                          widget.eventCubit.removeMultipleEvents();
                         }
                       },
                       icon: SlideTransition(

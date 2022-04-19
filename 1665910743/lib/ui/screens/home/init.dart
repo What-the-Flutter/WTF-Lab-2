@@ -49,6 +49,7 @@ class BlocsProvider extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
+          lazy: false,
           create: (_) => CategoryCubit(
             dataBaseRepository: FireBaseRTDB(user: user),
           )..getCat(),

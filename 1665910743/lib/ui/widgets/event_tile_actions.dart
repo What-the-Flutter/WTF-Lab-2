@@ -34,10 +34,13 @@ class EditAction extends StatelessWidget {
 }
 
 class MoveAction extends StatelessWidget {
+  final String categoryName;
   final String eventKey;
+
   MoveAction({
     Key? key,
     required this.eventKey,
+    required this.categoryName,
   }) : super(key: key);
 
   @override
@@ -45,7 +48,11 @@ class MoveAction extends StatelessWidget {
     return SlidableAction(
       autoClose: true,
       onPressed: (context) {
-        moveTile(context: context, eventKey: eventKey);
+        moveTile(
+          context: context,
+          eventKey: eventKey,
+          categoryName: categoryName,
+        );
       },
       backgroundColor: Colors.transparent,
       foregroundColor: Theme.of(context).primaryColor,

@@ -39,7 +39,7 @@ class EditChatTile extends StatefulWidget {
 }
 
 class _EditChatTileState extends State<EditChatTile> {
-  final _renameController = TextEditingController();
+  final TextEditingController _renameController = TextEditingController();
 
   @override
   void dispose() {
