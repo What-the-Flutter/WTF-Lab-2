@@ -12,7 +12,6 @@ import 'pages/home/home_cubit.dart';
 import 'pages/new_category_page/new_category_page_cubit.dart';
 import 'pages/settings_page/settings_cubit.dart';
 import 'pages/settings_page/settings_state.dart';
-import 'themes/inherited_theme.dart';
 
 class ChatJournalApp extends StatefulWidget {
   const ChatJournalApp({Key? key}) : super(key: key);
@@ -30,60 +29,58 @@ class _ChatJournalAppState extends State<ChatJournalApp> {
   @override
   Widget build(BuildContext context) {
     final db = FirebaseProvider();
-    return AppThemeProvider(
-      child: Builder(
-        builder: (context) => MultiRepositoryProvider(
+    return Builder(
+      builder: (context) => MultiRepositoryProvider(
+        providers: [
+          RepositoryProvider<EventsRepository>(
+            create: (_) => EventsRepository(db),
+          ),
+          RepositoryProvider<ChatsRepository>(
+            create: (_) => ChatsRepository(db),
+          ),
+          RepositoryProvider<IconsRepository>(
+            create: (_) => IconsRepository(db),
+          ),
+        ],
+        child: MultiBlocProvider(
           providers: [
-            RepositoryProvider<EventsRepository>(
-              create: (_) => EventsRepository(db),
+            BlocProvider(
+              create: (context) => HomeCubit(
+                context.read<ChatsRepository>(),
+                context.read<EventsRepository>(),
+                context.read<IconsRepository>(),
+              ),
             ),
-            RepositoryProvider<ChatsRepository>(
-              create: (_) => ChatsRepository(db),
+            BlocProvider(
+              create: (context) => NewCategoryPageCubit(
+                context.read<IconsRepository>(),
+              ),
             ),
-            RepositoryProvider<IconsRepository>(
-              create: (_) => IconsRepository(db),
+            BlocProvider(
+              create: (context) => EventPageCubit(
+                context.read<EventsRepository>(),
+                context.read<ChatsRepository>(),
+              ),
+            ),
+            BlocProvider(
+              create: (_) => SettingsCubit(),
+            ),
+            BlocProvider(
+              create: (_) => AuthCubit(),
             ),
           ],
-          child: MultiBlocProvider(
-            providers: [
-              BlocProvider(
-                create: (context) => HomeCubit(
-                  context.read<ChatsRepository>(),
-                  context.read<EventsRepository>(),
-                  context.read<IconsRepository>(),
-                ),
-              ),
-              BlocProvider(
-                create: (context) => NewCategoryPageCubit(
-                  context.read<IconsRepository>(),
-                ),
-              ),
-              BlocProvider(
-                create: (context) => EventPageCubit(
-                  context.read<EventsRepository>(),
-                  context.read<ChatsRepository>(),
-                ),
-              ),
-              BlocProvider(
-                create: (_) => SettingsCubit(),
-              ),
-              BlocProvider(
-                create: (_) => AuthCubit(),
-              ),
-            ],
-            child: BlocBuilder<SettingsCubit, SettingsState>(
-              builder: ((context, state) {
-                context.read<AuthCubit>().authorize();
+          child: BlocBuilder<SettingsCubit, SettingsState>(
+            builder: ((context, state) {
+              context.read<AuthCubit>().authorize();
 
-                return MaterialApp(
-                  title: 'WTF Project',
-                  theme: state.currentTheme,
-                  home: const HomePage(
-                    title: 'Home',
-                  ),
-                );
-              }),
-            ),
+              return MaterialApp(
+                title: 'WTF Project',
+                theme: state.currentTheme,
+                home: const HomePage(
+                  title: 'Home',
+                ),
+              );
+            }),
           ),
         ),
       ),

@@ -34,6 +34,7 @@ class _HomePageState extends State<HomePage> {
     _settingsCubit = BlocProvider.of<SettingsCubit>(context);
 
     _homeCubit.init();
+    _settingsCubit.loadTheme();
   }
 
   @override

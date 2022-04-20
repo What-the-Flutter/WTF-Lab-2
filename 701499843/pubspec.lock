@@ -14,7 +14,7 @@ packages:
       name: bloc
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "8.0.3"
+    version: "7.2.1"
   boolean_selector:
     dependency: transitive
     description:
@@ -180,7 +180,7 @@ packages:
       name: flutter_bloc
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "8.0.1"
+    version: "7.1.0"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -205,6 +205,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  hashtagable:
+    dependency: "direct main"
+    description:
+      name: hashtagable
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.2+1"
   http:
     dependency: transitive
     description:
@@ -289,6 +296,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.7.0"
+  mime:
+    dependency: transitive
+    description:
+      name: mime
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.1"
   nested:
     dependency: transitive
     description:
@@ -351,7 +365,14 @@ packages:
       name: provider
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "6.0.2"
+    version: "5.0.0"
+  share:
+    dependency: "direct main"
+    description:
+      name: share
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.4"
   shared_preferences:
     dependency: "direct main"
     description:
