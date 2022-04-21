@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-List<Icon> mySetOfIcons = const [
+List<Icon> setOfEventIcons = const [
   Icon(Icons.cancel, color: Colors.red,),
   Icon(Icons.monetization_on),
   Icon(Icons.sports_bar),
