@@ -57,7 +57,12 @@ class _EditDialogState extends State<EditDialog> {
           Radius.circular(25.0),
         ),
       ),
-      title: const Center(child: Text('Rename your event')),
+      title: Center(
+        child: Text(
+          'Rename your event',
+          style: Theme.of(context).textTheme.bodyText1,
+        ),
+      ),
       actionsAlignment: MainAxisAlignment.spaceEvenly,
       actions: [
         _pinButton(
@@ -75,6 +80,13 @@ class _EditDialogState extends State<EditDialog> {
         )
       ],
       content: TextField(
+        style: TextStyle(color: Theme.of(context).primaryColor),
+        decoration: InputDecoration(
+          focusedBorder: OutlineInputBorder(
+            borderSide:
+                BorderSide(color: Theme.of(context).primaryColor, width: 1),
+          ),
+        ),
         controller: _controller,
       ),
     );

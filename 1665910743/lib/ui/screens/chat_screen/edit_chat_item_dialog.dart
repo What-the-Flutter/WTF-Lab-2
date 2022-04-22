@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../chat_screen/cubit/event_cubit.dart';
 
 Future<void> chatTileEditDialog({
+  required EventCubit eventCubit,
   required BuildContext context,
   required String title,
   required String key,
@@ -12,6 +12,7 @@ Future<void> chatTileEditDialog({
   return showDialog(
     context: context,
     builder: (context) => EditChatTile(
+      eventCubit: eventCubit,
       title: title,
       context: context,
       eventKey: key,
@@ -21,6 +22,7 @@ Future<void> chatTileEditDialog({
 }
 
 class EditChatTile extends StatefulWidget {
+  final EventCubit eventCubit;
   final BuildContext context;
   final bool isBookmarked;
   final String title;
@@ -32,6 +34,7 @@ class EditChatTile extends StatefulWidget {
     required this.title,
     required this.eventKey,
     required this.isBookmarked,
+    required this.eventCubit,
   }) : super(key: key);
 
   @override
@@ -73,6 +76,13 @@ class _EditChatTileState extends State<EditChatTile> {
         _deleteButton(context)
       ],
       content: TextField(
+        style: TextStyle(color: Theme.of(context).primaryColor),
+        decoration: InputDecoration(
+          focusedBorder: OutlineInputBorder(
+            borderSide:
+                BorderSide(color: Theme.of(context).primaryColor, width: 1),
+          ),
+        ),
         controller: _renameController,
       ),
     );
@@ -85,9 +95,9 @@ class _EditChatTileState extends State<EditChatTile> {
       child: IconButton(
         onPressed: () {
           Navigator.pop(context);
-          context.read<EventCubit>().removeEventInCategory(
-                key: widget.eventKey,
-              );
+          widget.eventCubit.removeEventInCategory(
+            key: widget.eventKey,
+          );
         },
         icon: const Icon(Icons.delete_forever),
       ),
@@ -103,10 +113,10 @@ class _EditChatTileState extends State<EditChatTile> {
       ),
       onPressed: () {
         Navigator.pop(context);
-        context.read<EventCubit>().eventRename(
-              key: widget.eventKey,
-              newTitle: _renameController.text,
-            );
+        widget.eventCubit.eventRename(
+          key: widget.eventKey,
+          newTitle: _renameController.text,
+        );
       },
       child: const Text(
         'Rename',
@@ -126,7 +136,7 @@ class _EditChatTileState extends State<EditChatTile> {
       child: IconButton(
         onPressed: () async {
           Navigator.pop(context);
-          context.read<EventCubit>().bookMarkEvent(key: key, isBook: isBook);
+          widget.eventCubit.bookMarkEvent(key: key, isBook: isBook);
         },
         icon: Icon(
           widget.isBookmarked ? Icons.bookmark : Icons.bookmark_border,

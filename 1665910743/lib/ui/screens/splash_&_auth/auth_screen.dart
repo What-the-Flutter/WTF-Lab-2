@@ -5,6 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:lottie/lottie.dart';
 
+import '../../theme/theme_cubit/theme_cubit.dart';
+import '../home/cubit/home_cubit.dart';
 import '../home/home_widget.dart';
 import 'cubit/auth_cubit.dart';
 
@@ -96,7 +98,10 @@ class _BioAuthState extends State<BioAuth> with TickerProviderStateMixin {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: ((context) => const Home()),
+          builder: ((context) => Home(
+                homeCubit: context.read<HomeCubit>(),
+                themeCubit: context.read<ThemeCubit>(),
+              )),
         ),
       );
     }
@@ -197,7 +202,11 @@ class _BioAuthState extends State<BioAuth> with TickerProviderStateMixin {
                   state.authorized == 'Authorized') {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => const Home()),
+                  MaterialPageRoute(
+                      builder: (context) => Home(
+                            homeCubit: context.read<HomeCubit>(),
+                            themeCubit: context.read<ThemeCubit>(),
+                          )),
                 );
               }
             },

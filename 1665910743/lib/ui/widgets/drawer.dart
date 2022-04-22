@@ -1,8 +1,14 @@
+// ignore_for_file: prefer_relative_imports
+
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:my_journal/ui/screens/Category_Screen/cubit/category_cubit.dart';
 
+import '../screens/chat_screen/cubit/event_cubit.dart';
 import '../screens/settings/settings.dart';
+import '../screens/stats.dart/stats_screen.dart';
 
 class JourneyDrawer extends StatelessWidget {
   const JourneyDrawer({Key? key}) : super(key: key);
@@ -11,6 +17,7 @@ class JourneyDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Drawer(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      elevation: 5,
       child: Column(
         children: [_header(context), _body(context)],
       ),
@@ -32,8 +39,33 @@ class JourneyDrawer extends StatelessWidget {
                 ),
               );
             },
-            leading: const Icon(Icons.settings),
-            title: const Text('Settings'),
+            leading: Icon(
+              Icons.settings,
+              color: Theme.of(context).primaryColor,
+            ),
+            title: const Text(
+              'Settings',
+            ),
+          ),
+          ListTile(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: ((_) => StatsScreen(
+                        categoryCubit: context.read<CategoryCubit>(),
+                        eventCubit: context.read<EventCubit>(),
+                      )),
+                ),
+              );
+            },
+            leading: Icon(
+              Icons.pie_chart,
+              color: Theme.of(context).primaryColor,
+            ),
+            title: const Text(
+              'Statistics',
+            ),
           )
         ],
       ),
@@ -76,5 +108,3 @@ class JourneyDrawer extends StatelessWidget {
     );
   }
 }
-
-

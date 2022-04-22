@@ -2,8 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../constants.dart';
 import '../../../models/event_category.dart';
-import '../../../models/icons_pack.dart';
 import '../../theme/theme_cubit/theme_cubit.dart';
 import '../../theme/theme_data.dart';
 import 'cubit/category_cubit.dart';
@@ -103,7 +103,7 @@ class _ModalBodyState extends State<ModalBody> {
             childAspectRatio: 3 / 2,
             crossAxisSpacing: 20,
             mainAxisSpacing: 20),
-        itemCount: kIcons.length,
+        itemCount: iconPack.length,
         itemBuilder: (context, i) {
           return _categoryIconButton(
             i,
@@ -143,7 +143,7 @@ class _ModalBodyState extends State<ModalBody> {
                     : Theme.of(context).primaryColor),
         radius: _screenSize.width * 0.13,
         child: Icon(
-          kIcons[i].icon,
+          iconPack[i].icon,
           size: _screenSize.width * 0.13,
         ),
       ),
@@ -171,7 +171,7 @@ class _ModalBodyState extends State<ModalBody> {
           context.read<CategoryCubit>().add(EventCategory(
                 title: _controller.text,
                 pinned: false,
-                icon: kIcons[7],
+                icon: iconPack[7],
               ));
           Navigator.pop(
             context,
@@ -180,7 +180,7 @@ class _ModalBodyState extends State<ModalBody> {
           context.read<CategoryCubit>().add(EventCategory(
                 title: _controller.text,
                 pinned: false,
-                icon: kIcons[_selectedIndexAvatar],
+                icon: iconPack[_selectedIndexAvatar],
               ));
           Navigator.pop(
             context,

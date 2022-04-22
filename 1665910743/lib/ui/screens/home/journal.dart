@@ -9,20 +9,10 @@ import '../splash_&_auth/cubit/auth_cubit.dart';
 import 'cubit/home_cubit.dart';
 import 'home_widget.dart';
 
-class Journal extends StatefulWidget {
+class Journal extends StatelessWidget {
   final user = FirebaseAuth.instance.currentUser;
 
   Journal({Key? key}) : super(key: key);
-
-  @override
-  State<Journal> createState() => _JournalState();
-}
-
-class _JournalState extends State<Journal> {
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +28,10 @@ class _JournalState extends State<Journal> {
               ? BioAuth(
                   authCubit: context.watch<AuthCubit>(),
                 )
-              : const Home(),
+              : Home(
+                  homeCubit: context.read<HomeCubit>(),
+                  themeCubit: context.read<ThemeCubit>(),
+                ),
         );
       }),
     );

@@ -102,7 +102,6 @@ class FireBaseRTDB implements DataBaseRepository {
         await ref.child(user?.uid ?? 'user').child('events').push().set(
               event.toMap(),
             );
-        
       } catch (e) {
         print(e);
       }
@@ -280,10 +279,15 @@ class FireBaseRTDB implements DataBaseRepository {
   @override
   Future<bool> getAuthKey() async {
     DataSnapshot authKey;
-
+    final bool key;
     authKey = await ref.child(user!.uid).child('auth').get();
+    if (authKey.value == null) {
+      key = false;
+    } else {
+      key = authKey.value as bool;
+    }
 
-    return authKey.value as bool;
+    return key;
   }
 
   @override

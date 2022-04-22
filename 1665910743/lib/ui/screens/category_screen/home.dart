@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../chat_screen/cubit/event_cubit.dart';
+import 'cubit/category_cubit.dart';
 import 'unpined_list.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -11,7 +13,9 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const UnpinedCategory();
+    return UnpinedCategory(
+      categoryCubit: context.read<CategoryCubit>(),
+      eventCubit: context.read<EventCubit>(),
+    );
   }
 }
-

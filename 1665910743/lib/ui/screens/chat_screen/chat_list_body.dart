@@ -56,12 +56,17 @@ class _ChatListBodyState extends State<ChatListBody> {
                       motion: const ScrollMotion(),
                       children: [
                         EditAction(
+                          eventCubit: widget.eventCubit,
                           event: state.eventList[index],
                           eventKey: state.eventList[index].id!,
                         ),
-                        RemoveAction(eventKey: state.eventList[index].id!),
-                        MoveAction(eventKey: state.eventList[index].id!,
-                        categoryName: state.eventList[index].categoryTitle,),
+                        RemoveAction(
+                            eventCubit: widget.eventCubit,
+                            eventKey: state.eventList[index].id!),
+                        MoveAction(
+                          eventKey: state.eventList[index].id!,
+                          categoryName: state.eventList[index].categoryTitle,
+                        ),
                       ],
                     ),
                     child: Align(
@@ -73,7 +78,8 @@ class _ChatListBodyState extends State<ChatListBody> {
                             _copyToClipboard(state.eventList[index].title),
                         onLongPress: () {
                           if (state.eventList[index].isSelected == false) {
-                            widget.eventCubit.eventSelect(state.eventList[index].id!);
+                            widget.eventCubit
+                                .eventSelect(state.eventList[index].id!);
                           } else {
                             widget.eventCubit
                                 .eventNotSelect(state.eventList[index].id!);

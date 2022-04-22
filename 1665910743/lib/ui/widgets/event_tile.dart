@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../constants.dart';
 import '../../extensions/date_extension.dart';
-import '../../models/tags.dart';
 import '../screens/settings/cubit/settings_cubit.dart';
 import '../theme/theme_data.dart';
 
@@ -125,7 +125,7 @@ class _TileWithoutImage extends StatelessWidget {
             ),
             (tag != -1)
                 ? Text(
-                    kTags[tag],
+                    tagsList[tag],
                     style: Theme.of(context).textTheme.bodyText2,
                   )
                 : const SizedBox(),
@@ -210,7 +210,7 @@ class _TileWithImageState extends State<_TileWithImage> {
                 ),
                 (widget.tag != -1)
                     ? Text(
-                        kTags[widget.tag],
+                        tagsList[widget.tag],
                         style: Theme.of(context).textTheme.bodyText2,
                       )
                     : const SizedBox(),

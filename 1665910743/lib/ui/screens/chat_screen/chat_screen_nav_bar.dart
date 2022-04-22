@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../constants.dart';
 import '../../../models/event.dart';
-import '../../../models/icons_pack.dart';
 import '../chat_screen/bookmarks.dart';
 import '../chat_screen/cubit/event_cubit.dart';
 
@@ -82,7 +82,7 @@ class _ChatScreenNavBarState extends State<ChatScreenNavBar>
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<EventCubit, EventState>(
-      bloc: context.watch<EventCubit>(),
+      bloc: widget.eventCubit,
       builder: ((context, state) => SafeArea(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -127,7 +127,7 @@ class _ChatScreenNavBarState extends State<ChatScreenNavBar>
                       icon: Icon(
                         (state.selectedIcon == -1)
                             ? Icons.bubble_chart
-                            : kIcons[state.selectedIcon].icon,
+                            : iconPack[state.selectedIcon].icon,
                         color: Theme.of(context).primaryColor,
                       ),
                     ),
@@ -169,7 +169,7 @@ class _ChatScreenNavBarState extends State<ChatScreenNavBar>
                                   title: widget.controller.text,
                                   date: DateTime.now(),
                                   favorite: false,
-                                  iconCode: kIcons[state.selectedIcon]
+                                  iconCode: iconPack[state.selectedIcon]
                                       .icon!
                                       .codePoint,
                                   categoryTitle: widget.categoryTitle,

@@ -18,21 +18,33 @@ class Timeline extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<HomeCubit, HomeState>(
-        bloc: context.watch<HomeCubit>(),
-        builder: ((context, state) =>
-            state.searchMode ? const SearchResultList() : const BodyList()));
+      bloc: context.read<HomeCubit>(),
+      builder: ((context, state) => state.searchMode
+          ? SearchResultList(
+              eventCubit: context.read<EventCubit>(),
+              homeCubit: context.read<HomeCubit>(),
+            )
+          : BodyList(
+              eventCubit: context.read<EventCubit>(),
+              homeCubit: context.read<HomeCubit>(),
+            )),
+    );
   }
 }
 
 class BodyList extends StatelessWidget {
-  const BodyList({Key? key}) : super(key: key);
+  final EventCubit eventCubit;
+  final HomeCubit homeCubit;
+
+  const BodyList({Key? key, required this.eventCubit, required this.homeCubit})
+      : super(key: key);
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<EventCubit, EventState>(
-      bloc: context.read<EventCubit>(),
+      bloc: eventCubit,
       builder: (context, state) {
         return BlocBuilder<HomeCubit, HomeState>(
-          bloc: context.watch<HomeCubit>(),
+          bloc: homeCubit,
           builder: ((context, homeState) => ListView.builder(
                 itemCount: state.eventList.length,
                 itemBuilder: ((context, index) {
@@ -43,10 +55,13 @@ class BodyList extends StatelessWidget {
                           motion: const ScrollMotion(),
                           children: [
                             EditAction(
+                              eventCubit: eventCubit,
                               event: state.eventList[index],
                               eventKey: state.eventList[index].id!,
                             ),
-                            RemoveAction(eventKey: state.eventList[index].id!),
+                            RemoveAction(
+                                eventCubit: eventCubit,
+                                eventKey: state.eventList[index].id!),
                             MoveAction(
                               eventKey: state.eventList[index].id!,
                               categoryName:
@@ -87,10 +102,13 @@ class BodyList extends StatelessWidget {
                         motion: const ScrollMotion(),
                         children: [
                           EditAction(
+                            eventCubit: eventCubit,
                             event: state.eventList[index],
                             eventKey: state.eventList[index].id!,
                           ),
-                          RemoveAction(eventKey: state.eventList[index].id!),
+                          RemoveAction(
+                              eventCubit: eventCubit,
+                              eventKey: state.eventList[index].id!),
                           MoveAction(
                             eventKey: state.eventList[index].id!,
                             categoryName: state.eventList[index].categoryTitle,
@@ -130,15 +148,21 @@ class BodyList extends StatelessWidget {
 }
 
 class SearchResultList extends StatelessWidget {
-  const SearchResultList({Key? key}) : super(key: key);
+  final EventCubit eventCubit;
+  final HomeCubit homeCubit;
+
+  const SearchResultList({
+    Key? key,
+    required this.eventCubit,
+    required this.homeCubit,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final _eventCubit = context.read<EventCubit>();
     final _searchResult = context.watch<HomeCubit>().state.searchResult;
 
     return BlocBuilder<EventCubit, EventState>(
-      bloc: _eventCubit,
+      bloc: eventCubit,
       builder: (context, state) {
         return _searchResult.isEmpty
             ? Center(
@@ -156,10 +180,13 @@ class SearchResultList extends StatelessWidget {
                         motion: const ScrollMotion(),
                         children: [
                           EditAction(
+                            eventCubit: eventCubit,
                             event: state.eventList[index],
                             eventKey: state.eventList[index].id!,
                           ),
-                          RemoveAction(eventKey: state.eventList[index].id!),
+                          RemoveAction(
+                              eventCubit: eventCubit,
+                              eventKey: state.eventList[index].id!),
                           MoveAction(
                             eventKey: state.eventList[index].id!,
                             categoryName: state.eventList[index].categoryTitle,

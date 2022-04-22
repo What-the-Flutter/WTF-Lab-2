@@ -15,15 +15,23 @@ import 'bottom_nav_bar.dart';
 import 'cubit/home_cubit.dart';
 
 class Home extends StatefulWidget {
-  const Home({Key? key}) : super(key: key);
+  final HomeCubit homeCubit;
+  final ThemeCubit themeCubit;
+
+  const Home({
+    Key? key,
+    required this.homeCubit,
+    required this.themeCubit,
+  }) : super(key: key);
 
   @override
   State<Home> createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
+  final TextEditingController _searchController = TextEditingController();
+
   int _selectedIndex = 0;
-  final _searchController = TextEditingController();
 
   final _selectedItems = {
     const HomeScreen(): 'Home',
@@ -41,6 +49,7 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: const ValueKey('HomeScaffold'),
       drawer: const JourneyDrawer(),
       appBar: _appBar(context),
       body: _selectedItems.keys.elementAt(_selectedIndex),
@@ -52,18 +61,19 @@ class _HomeState extends State<Home> {
     );
   }
 
-  FloatingActionButton _floatingButton(BuildContext context) {
+  Widget _floatingButton(BuildContext context) {
     return _selectedIndex == 2
         ? FloatingActionButton(
-            onPressed: () {
-              HapticFeedback.mediumImpact();
-
-              filterDialog(context);
-            },
+            key: const ValueKey('FAB2'),
             backgroundColor: Theme.of(context).primaryColor,
             child: const Icon(Icons.filter_list_sharp),
+            onPressed: () {
+              HapticFeedback.mediumImpact();
+              filterDialog(context);
+            },
           )
         : FloatingActionButton(
+            key: const ValueKey('FAB1'),
             backgroundColor: Theme.of(context).primaryColor,
             child: const Icon(Icons.add),
             onPressed: () {
@@ -73,12 +83,8 @@ class _HomeState extends State<Home> {
   }
 
   void _onItemTapped(int index) {
-    context.read<HomeCubit>().exitSearch();
-    setState(
-      () {
-        _selectedIndex = index;
-      },
-    );
+    widget.homeCubit.exitSearch();
+    setState(() => _selectedIndex = index);
   }
 
   PreferredSizeWidget _appBar(BuildContext context) {
@@ -96,12 +102,12 @@ class _HomeState extends State<Home> {
               ),
               controller: _searchController,
               onChanged: (value) {
-                context.read<HomeCubit>().searchControll(value);
+                widget.homeCubit.searchControll(value);
               },
             ),
             actions: [
               IconButton(
-                onPressed: () => context.read<HomeCubit>().exitSearch(),
+                onPressed: () => widget.homeCubit.exitSearch(),
                 icon: const Icon(Icons.close_rounded),
               ),
             ],
@@ -114,15 +120,13 @@ class _HomeState extends State<Home> {
                     Hero(
                       tag: 'search',
                       child: IconButton(
-                        onPressed: (() =>
-                            context.read<HomeCubit>().enterSearchMode()),
+                        onPressed: (() => widget.homeCubit.enterSearchMode()),
                         icon: const Icon(Icons.search),
                       ),
                     ),
                     IconButton(
-                      onPressed: () =>
-                          context.read<HomeCubit>().showBookmaked(),
-                      icon: Icon(context.read<HomeCubit>().state.showBookmarked
+                      onPressed: () => widget.homeCubit.showBookmaked(),
+                      icon: Icon(widget.homeCubit.state.showBookmarked
                           ? Icons.bookmark
                           : Icons.bookmark_border),
                     ),
@@ -130,16 +134,12 @@ class _HomeState extends State<Home> {
                 : [
                     IconButton(
                       onPressed: () {
-                        context.read<ThemeCubit>().state == MyThemes.lightTheme
-                            ? context
-                                .read<ThemeCubit>()
-                                .themeChanged(MyThemeKeys.dark)
-                            : context
-                                .read<ThemeCubit>()
-                                .themeChanged(MyThemeKeys.light);
+                        widget.themeCubit.state == MyThemes.lightTheme
+                            ? widget.themeCubit.themeChanged(MyThemeKeys.dark)
+                            : widget.themeCubit.themeChanged(MyThemeKeys.light);
                       },
                       icon: Icon(
-                        context.read<ThemeCubit>().state == MyThemes.lightTheme
+                        widget.themeCubit.state == MyThemes.lightTheme
                             ? Icons.nightlight_outlined
                             : Icons.light_mode,
                       ),

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
-import '../../../constants.dart';
+import '../../../constants.dart' as constats;
 import '../../widgets/event_tile.dart';
 import '../../widgets/event_tile_actions.dart';
 import '../settings/cubit/settings_cubit.dart';
@@ -11,7 +11,11 @@ import 'cubit/event_cubit.dart';
 
 class BookmarkEvents extends StatelessWidget {
   final EventCubit eventCubit;
-  BookmarkEvents({Key? key, required this.eventCubit}) : super(key: key);
+
+  BookmarkEvents({
+    Key? key,
+    required this.eventCubit,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +24,7 @@ class BookmarkEvents extends StatelessWidget {
         title: const Text('Bookmarks'),
       ),
       body: Container(
-        padding: kListViewPadding,
+        padding: constats.listViewPadding,
         child: BlocBuilder<EventCubit, EventState>(
           bloc: eventCubit,
           builder: (context, state) {
@@ -33,10 +37,13 @@ class BookmarkEvents extends StatelessWidget {
                       motion: const ScrollMotion(),
                       children: [
                         EditAction(
+                          eventCubit: eventCubit,
                           event: state.eventList[index],
                           eventKey: state.eventList[index].id!,
                         ),
-                        RemoveAction(eventKey: state.eventList[index].id!),
+                        RemoveAction(
+                            eventCubit: eventCubit,
+                            eventKey: state.eventList[index].id!),
                         MoveAction(
                           eventKey: state.eventList[index].id!,
                           categoryName: state.eventList[index].categoryTitle,
@@ -44,9 +51,8 @@ class BookmarkEvents extends StatelessWidget {
                       ],
                     ),
                     child: Align(
-                      alignment: BlocProvider.of<SettingsCubit>(context)
-                          .state
-                          .chatTileAlignment,
+                      alignment:
+                          context.read<SettingsCubit>().state.chatTileAlignment,
                       child: EventTile(
                           iconCode: state.eventList[index].iconCode,
                           isSelected: state.eventList[index].isSelected,

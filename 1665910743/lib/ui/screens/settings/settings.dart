@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:simple_gradient_text/simple_gradient_text.dart';
 
-import '../../../constants.dart';
+import '../../../constants.dart' as constants;
 import '../../theme/font_cubit/font_cubit.dart';
 import '../../theme/theme_cubit/theme_cubit.dart';
 import '../../theme/theme_data.dart';
@@ -23,7 +23,7 @@ class Settings extends StatelessWidget {
         title: const Text('Settings'),
       ),
       body: Padding(
-        padding: kListViewPadding,
+        padding: constants.listViewPadding,
         child: ListView(
           children: [
             _nightSide(context, theme),
@@ -41,6 +41,7 @@ class Settings extends StatelessWidget {
 
   Widget _shareButton(BuildContext context) {
     return ListTile(
+      key: const ValueKey('ShareButton'),
       onTap: (() {
         Share.share('check out my App!');
       }),
@@ -61,6 +62,7 @@ class Settings extends StatelessWidget {
 
   Widget _resetButton(BuildContext context) {
     return ListTile(
+      key: const ValueKey('ResetButton'),
       onTap: () async {
         await showDialog(
             context: context,
@@ -99,6 +101,7 @@ class Settings extends StatelessWidget {
 
   Widget _chooseBackground(BuildContext context) {
     return ListTile(
+      key: const ValueKey('ChooseBackgroundButton'),
       onTap: () => context.read<SettingsCubit>().getBackgroundImage(),
       leading: const Icon(Icons.image),
       title: Text(
@@ -110,6 +113,7 @@ class Settings extends StatelessWidget {
 
   Widget _fontSize(context) {
     return ListTile(
+      key: const ValueKey('FontChangeButton'),
       onTap: (() => showCupertinoModalPopup<void>(
             context: context,
             builder: (context) => CupertinoActionSheet(
@@ -148,6 +152,7 @@ class Settings extends StatelessWidget {
 
   Widget _bubbleAlignment(BuildContext context) {
     return ListTile(
+      key: const ValueKey('ChangeAlignmentButton'),
       onTap: () async {
         await showDialog(
             context: context,
@@ -186,6 +191,7 @@ class Settings extends StatelessWidget {
 
   Widget _nightSide(BuildContext context, bool theme) {
     return ListTile(
+      key: const ValueKey('NightSideButton'),
       leading: const Icon(Icons.sunny),
       title: Text(
         'Night Side',
@@ -204,8 +210,9 @@ class Settings extends StatelessWidget {
 
   Widget _authSwitch(BuildContext context) {
     return ListTile(
-      onTap: ()  {
-         showDialog(
+      key: const ValueKey('AuthButton'),
+      onTap: () {
+        showDialog(
             context: context,
             builder: (context) => AlertDialog(
                   title: Text('Enable Bio Auth?',

@@ -1,17 +1,1 @@
-const List<String> kTags = [
-  '#track',
-  '#money',
-  '#party',
-  '#sport',
-  '#presents',
-  '#birthdays',
-  '#alarm',
-  '#to-do',
-  '#shopping',
-  '#meet',
-  '#work',
-  '#add',
-  '#place',
-  '#goal',
-  '#messege',
-];
+

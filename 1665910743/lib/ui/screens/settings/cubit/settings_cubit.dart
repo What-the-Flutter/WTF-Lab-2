@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -19,18 +20,17 @@ class SettingsCubit extends Cubit<SettingsState> {
   Future<void> alignmentLeft() async {
     final _prefs = await SharedPreferences.getInstance();
     _prefs.setBool('align', false);
-    state.chatTileAlignment = Alignment.centerLeft;
 
-    emit(state);
+    emit(state.copyWith(chatTileAlignment: Alignment.centerLeft));
   }
 
   Future<void> alignmentRight() async {
     final _prefs = await SharedPreferences.getInstance();
     _prefs.setBool('align', true);
 
-    state.chatTileAlignment = Alignment.centerRight;
+    
 
-    emit(state);
+    emit(state.copyWith(chatTileAlignment: Alignment.centerRight));
   }
 
   Future<void> removeBackrgoundImage() async {

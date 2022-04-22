@@ -10,18 +10,18 @@ PODS:
   - Firebase/Storage (8.14.0):
     - Firebase/CoreOnly
     - FirebaseStorage (~> 8.14.0)
-  - firebase_auth (3.3.13):
+  - firebase_auth (3.3.14):
     - Firebase/Auth (= 8.14.0)
     - firebase_core
     - Flutter
-  - firebase_core (1.14.0):
+  - firebase_core (1.14.1):
     - Firebase/CoreOnly (= 8.14.0)
     - Flutter
-  - firebase_database (9.0.10):
+  - firebase_database (9.0.11):
     - Firebase/Database (= 8.14.0)
     - firebase_core
     - Flutter
-  - firebase_storage (10.2.11):
+  - firebase_storage (10.2.12):
     - Firebase/Storage (= 8.14.0)
     - firebase_core
     - Flutter
@@ -73,6 +73,8 @@ PODS:
   - GTMSessionFetcher/Core (1.7.1)
   - image_picker_ios (0.0.1):
     - Flutter
+  - integration_test (0.0.1):
+    - Flutter
   - leveldb-library (1.22.1)
   - local_auth (0.0.1):
     - Flutter
@@ -102,6 +104,7 @@ DEPENDENCIES:
   - Flutter (from `Flutter`)
   - flutter_native_splash (from `.symlinks/plugins/flutter_native_splash/ios`)
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
+  - integration_test (from `.symlinks/plugins/integration_test/ios`)
   - local_auth (from `.symlinks/plugins/local_auth/ios`)
   - path_provider_ios (from `.symlinks/plugins/path_provider_ios/ios`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
@@ -140,6 +143,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_native_splash/ios"
   image_picker_ios:
     :path: ".symlinks/plugins/image_picker_ios/ios"
+  integration_test:
+    :path: ".symlinks/plugins/integration_test/ios"
   local_auth:
     :path: ".symlinks/plugins/local_auth/ios"
   path_provider_ios:
@@ -155,10 +160,10 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Firebase: 7e8fe528c161b9271d365217a74c16aaf834578e
-  firebase_auth: e720e83a58c9efe4f3b8a96b4afe2fbf84fdb28e
-  firebase_core: b0b382f1497ab407aceb25e41e3036c8798c1609
-  firebase_database: 2e035b5d77563fe70a1d5abeff46b1933e3aa8b8
-  firebase_storage: f8843a3d37aafd048659f2cb523107bb54e36f69
+  firebase_auth: db3557d178b86a0d2ccdb7a878a1d1c2fe70de4e
+  firebase_core: cdef02fcf55872191eb0568d4c31a7a700e38582
+  firebase_database: 48b46c2d73ad0b85a1d8a35a66a9af62c8cb4d46
+  firebase_storage: 4a9711df9392778a9f8641d5ce4cb7a228c0472c
   FirebaseAuth: c5fde343630090253d3af7e2d35697b414b40202
   FirebaseCore: b84a44ee7ba999e0f9f76d198a9c7f60a797b848
   FirebaseCoreDiagnostics: fd0c8490f34287229c1d6c103d3a55f81ec85712
@@ -171,6 +176,7 @@ SPEC CHECKSUMS:
   GoogleUtilities: e0913149f6b0625b553d70dae12b49fc62914fd1
   GTMSessionFetcher: 4577a4cc914a5a07c40a8a0ad0acc22080418c2d
   image_picker_ios: b786a5dcf033a8336a657191401bfdf12017dabb
+  integration_test: a1e7d09bd98eca2fc37aefd79d4f41ad37bdbbe5
   leveldb-library: 50c7b45cbd7bf543c81a468fe557a16ae3db8729
   local_auth: 1740f55d7af0a2e2a8684ce225fe79d8931e808c
   nanopb: a0ba3315591a9ae0a16a309ee504766e90db0c96

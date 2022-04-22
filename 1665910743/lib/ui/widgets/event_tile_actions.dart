@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
 import '../../models/event.dart';
@@ -8,6 +7,7 @@ import '../screens/Chat_Screen/move_event_tile.dart';
 import '../screens/chat_screen/cubit/event_cubit.dart';
 
 class EditAction extends StatelessWidget {
+  final EventCubit eventCubit;
   final Event event;
   final String eventKey;
 
@@ -15,12 +15,14 @@ class EditAction extends StatelessWidget {
     Key? key,
     required this.event,
     required this.eventKey,
+    required this.eventCubit,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return SlidableAction(
       onPressed: (context) => chatTileEditDialog(
+        eventCubit: eventCubit,
         isBookmarked: event.favorite,
         key: eventKey,
         title: event.title,
@@ -62,18 +64,19 @@ class MoveAction extends StatelessWidget {
 }
 
 class RemoveAction extends StatelessWidget {
+  final EventCubit eventCubit;
   final String eventKey;
 
   const RemoveAction({
     Key? key,
     required this.eventKey,
+    required this.eventCubit,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return SlidableAction(
-      onPressed: (context) =>
-          context.read<EventCubit>().removeEventInCategory(key: eventKey),
+      onPressed: (context) => eventCubit.removeEventInCategory(key: eventKey),
       backgroundColor: Colors.transparent,
       foregroundColor: Theme.of(context).primaryColor,
       icon: Icons.delete,
