@@ -15,6 +15,7 @@ class FilterCubit extends Cubit<List<String>> {
   }
 
   void reset() {
-    emit([]);
+    state.clear();
+    emit(state);
   }
 }
