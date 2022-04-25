@@ -5,29 +5,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../theme/font_cubit/font_cubit.dart';
 import '../../theme/theme_cubit/theme_cubit.dart';
 import '../splash_&_auth/auth_screen.dart';
+import '../splash_&_auth/cubit/auth_cubit.dart';
 import 'cubit/home_cubit.dart';
 import 'home_widget.dart';
 
-class Journal extends StatefulWidget {
+class Journal extends StatelessWidget {
   final user = FirebaseAuth.instance.currentUser;
 
   Journal({Key? key}) : super(key: key);
-
-  @override
-  State<Journal> createState() => _JournalState();
-}
-
-class _JournalState extends State<Journal> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void didChangeDependencies() {
-    context.read<HomeCubit>().getAuthKey();
-    super.didChangeDependencies();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,8 +23,15 @@ class _JournalState extends State<Journal> {
       builder: ((context, state) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
-          theme: state.copyWith(textTheme: _textTheme),
-          home: (authKey) ? const BioAuth() : const Home(),
+          theme: state.copyWith(textTheme: _textTheme, useMaterial3: true),
+          home: (authKey)
+              ? BioAuth(
+                  authCubit: context.watch<AuthCubit>(),
+                )
+              : Home(
+                  homeCubit: context.read<HomeCubit>(),
+                  themeCubit: context.read<ThemeCubit>(),
+                ),
         );
       }),
     );

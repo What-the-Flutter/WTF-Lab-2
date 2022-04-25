@@ -1,10 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:simple_gradient_text/simple_gradient_text.dart';
 
-import '../../../constants.dart';
+import '../../../constants.dart' as constants;
 import '../../theme/font_cubit/font_cubit.dart';
 import '../../theme/theme_cubit/theme_cubit.dart';
 import '../../theme/theme_data.dart';
@@ -12,21 +11,30 @@ import '../home/cubit/home_cubit.dart';
 import 'cubit/settings_cubit.dart';
 
 class Settings extends StatelessWidget {
-  const Settings({Key? key}) : super(key: key);
+  final ThemeCubit themeCubit;
+  final HomeCubit homeCubit;
+  final SettingsCubit settingsCubit;
+  final FontCubit fontCubit;
+
+  const Settings(
+      {Key? key,
+      required this.themeCubit,
+      required this.homeCubit,
+      required this.settingsCubit,
+      required this.fontCubit})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.read<ThemeCubit>().state == MyThemes.darkTheme;
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
       ),
       body: Padding(
-        padding: kListViewPadding,
+        padding: constants.listViewPadding,
         child: ListView(
           children: [
-            _nightSide(context, theme),
+            _nightSide(context),
             _authSwitch(context),
             _bubbleAlignment(context),
             _fontSize(context),
@@ -41,10 +49,11 @@ class Settings extends StatelessWidget {
 
   Widget _shareButton(BuildContext context) {
     return ListTile(
+      key: const ValueKey('ShareButton'),
       onTap: (() {
         Share.share('check out my App!');
       }),
-      leading:   Icon(Icons.adaptive.share),
+      leading: Icon(Icons.adaptive.share),
       title: GradientText(
         'Share with friends!',
         style: Theme.of(context).textTheme.bodyText1,
@@ -61,6 +70,7 @@ class Settings extends StatelessWidget {
 
   Widget _resetButton(BuildContext context) {
     return ListTile(
+      key: const ValueKey('ResetButton'),
       onTap: () async {
         await showDialog(
             context: context,
@@ -72,13 +82,11 @@ class Settings extends StatelessWidget {
                       style: ElevatedButton.styleFrom(
                           primary: Theme.of(context).primaryColor),
                       onPressed: () {
-                        context.read<FontCubit>().fontChange(MyFontSize.medium);
-                        context.read<SettingsCubit>().alignmentLeft();
-                        context
-                            .read<ThemeCubit>()
-                            .themeChanged(MyThemeKeys.light);
-                        context.read<HomeCubit>().setAuthKey(false);
-                        context.read<SettingsCubit>().removeBackrgoundImage();
+                        fontCubit.fontChange(MyFontSize.medium);
+                        settingsCubit.alignmentLeft();
+                        themeCubit.themeChanged(MyThemeKeys.light);
+                        homeCubit.setAuthKey(false);
+                        settingsCubit.removeBackrgoundImage();
                         Navigator.pop(context);
                       },
                       child: const Text('Yes'),
@@ -99,36 +107,40 @@ class Settings extends StatelessWidget {
 
   Widget _chooseBackground(BuildContext context) {
     return ListTile(
-      onTap: () => context.read<SettingsCubit>().getBackgroundImage(),
+      key: const ValueKey('ChooseBackgroundButton'),
+      onTap: settingsCubit.getBackgroundImage,
       leading: const Icon(Icons.image),
-      title:
-          Text('Chat Background', style: Theme.of(context).textTheme.bodyText1),
+      title: Text(
+        'Chat Background',
+        style: Theme.of(context).textTheme.bodyText1,
+      ),
     );
   }
 
   Widget _fontSize(context) {
     return ListTile(
+      key: const ValueKey('FontChangeButton'),
       onTap: (() => showCupertinoModalPopup<void>(
             context: context,
             builder: (context) => CupertinoActionSheet(
               actions: [
                 CupertinoActionSheetAction(
                   onPressed: () {
-                    context.read<FontCubit>().fontChange(MyFontSize.small);
+                    fontCubit.fontChange(MyFontSize.small);
                     Navigator.pop(context);
                   },
                   child: Text('Small', style: FontSize.small.bodyText1),
                 ),
                 CupertinoActionSheetAction(
                   onPressed: () {
-                    context.read<FontCubit>().fontChange(MyFontSize.medium);
+                    fontCubit.fontChange(MyFontSize.medium);
                     Navigator.pop(context);
                   },
                   child: Text('Medium', style: FontSize.medium.bodyText1),
                 ),
                 CupertinoActionSheetAction(
                   onPressed: () {
-                    context.read<FontCubit>().fontChange(MyFontSize.large);
+                    fontCubit.fontChange(MyFontSize.large);
                     Navigator.pop(context);
                   },
                   child: Text('Lagre', style: FontSize.large.bodyText1),
@@ -146,6 +158,7 @@ class Settings extends StatelessWidget {
 
   Widget _bubbleAlignment(BuildContext context) {
     return ListTile(
+      key: const ValueKey('ChangeAlignmentButton'),
       onTap: () async {
         await showDialog(
             context: context,
@@ -158,7 +171,7 @@ class Settings extends StatelessWidget {
                           primary: Theme.of(context).primaryColor),
                       onPressed: () {
                         Navigator.pop(context);
-                        context.read<SettingsCubit>().alignmentLeft();
+                        settingsCubit.alignmentLeft();
                       },
                       child: const Text('Left'),
                     ),
@@ -167,7 +180,7 @@ class Settings extends StatelessWidget {
                           primary: Theme.of(context).primaryColor),
                       onPressed: () {
                         Navigator.pop(context);
-                        context.read<SettingsCubit>().alignmentRight();
+                        settingsCubit.alignmentRight();
                       },
                       child: const Text('Right'),
                     )
@@ -182,8 +195,11 @@ class Settings extends StatelessWidget {
     );
   }
 
-  Widget _nightSide(BuildContext context, bool theme) {
+  Widget _nightSide(BuildContext context) {
+    final theme = themeCubit.state == MyThemes.darkTheme;
+
     return ListTile(
+      key: const ValueKey('NightSideButton'),
       leading: const Icon(Icons.sunny),
       title: Text(
         'Night Side',
@@ -194,16 +210,17 @@ class Settings extends StatelessWidget {
           value: theme,
           onChanged: (value) {
             value
-                ? context.read<ThemeCubit>().themeChanged(MyThemeKeys.dark)
-                : context.read<ThemeCubit>().themeChanged(MyThemeKeys.light);
+                ? themeCubit.themeChanged(MyThemeKeys.dark)
+                : themeCubit.themeChanged(MyThemeKeys.light);
           }),
     );
   }
 
   Widget _authSwitch(BuildContext context) {
     return ListTile(
-      onTap: () async {
-        await showDialog(
+      key: const ValueKey('AuthButton'),
+      onTap: () {
+        showDialog(
             context: context,
             builder: (context) => AlertDialog(
                   title: Text('Enable Bio Auth?',
@@ -214,7 +231,7 @@ class Settings extends StatelessWidget {
                           primary: Theme.of(context).primaryColor),
                       onPressed: () {
                         Navigator.pop(context);
-                        context.read<HomeCubit>().setAuthKey(false);
+                        homeCubit.setAuthKey(false);
                       },
                       child: const Text('no'),
                     ),
@@ -223,7 +240,7 @@ class Settings extends StatelessWidget {
                           primary: Theme.of(context).primaryColor),
                       onPressed: () {
                         Navigator.pop(context);
-                        context.read<HomeCubit>().setAuthKey(true);
+                        homeCubit.setAuthKey(true);
                       },
                       child: const Text('Yes'),
                     )

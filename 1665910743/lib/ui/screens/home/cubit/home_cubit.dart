@@ -1,5 +1,4 @@
-import 'package:bloc/bloc.dart';
-import 'package:meta/meta.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../repository/database_repository.dart';
 
@@ -9,11 +8,13 @@ class HomeCubit extends Cubit<HomeState> {
   DataBaseRepository dataBaseRepository;
 
   HomeCubit({required this.dataBaseRepository})
-      : super(HomeState(
-          searchMode: false,
-          searchResult: '',
-          authKey: false,
-        ));
+      : super(
+          const HomeState(
+              searchMode: false,
+              searchResult: '',
+              authKey: false,
+              showBookmarked: false),
+        );
 
   void enterSearchMode() {
     emit(
@@ -21,6 +22,7 @@ class HomeCubit extends Cubit<HomeState> {
         searchMode: true,
         searchResult: '',
         authKey: state.authKey,
+        showBookmarked: state.showBookmarked,
       ),
     );
   }
@@ -31,6 +33,7 @@ class HomeCubit extends Cubit<HomeState> {
         searchMode: state.searchMode,
         searchResult: value,
         authKey: state.authKey,
+        showBookmarked: state.showBookmarked,
       ),
     );
   }
@@ -41,6 +44,19 @@ class HomeCubit extends Cubit<HomeState> {
         searchResult: '',
         searchMode: false,
         authKey: state.authKey,
+        showBookmarked: state.showBookmarked,
+      ),
+    );
+  }
+
+  void showBookmaked() {
+    
+    emit(
+      HomeState(
+        searchMode: state.searchMode,
+        searchResult: state.searchResult,
+        showBookmarked: !state.showBookmarked,
+        authKey: state.authKey,
       ),
     );
   }
@@ -50,8 +66,9 @@ class HomeCubit extends Cubit<HomeState> {
 
     emit(
       HomeState(
-        searchMode: false,
-        searchResult: '',
+        searchMode: state.searchMode,
+        searchResult: state.searchResult,
+        showBookmarked: state.showBookmarked,
         authKey: key ?? false,
       ),
     );
@@ -65,6 +82,7 @@ class HomeCubit extends Cubit<HomeState> {
         searchResult: '',
         searchMode: false,
         authKey: key,
+        showBookmarked: state.showBookmarked,
       ),
     );
   }

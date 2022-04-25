@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../models/event_category.dart';
 import 'cubit/category_cubit.dart';
 
 Future<void> displayTextInputDialog({
+  required CategoryCubit categoryCubit,
   required BuildContext context,
   required EventCategory category,
   required bool pinned,
@@ -13,6 +13,7 @@ Future<void> displayTextInputDialog({
   return showDialog(
       context: context,
       builder: (context) => EditDialog(
+            cubit: categoryCubit,
             context: context,
             category: category,
             pinned: pinned,
@@ -21,6 +22,7 @@ Future<void> displayTextInputDialog({
 }
 
 class EditDialog extends StatefulWidget {
+  final CategoryCubit cubit;
   final BuildContext context;
   final bool pinned;
   final EventCategory category;
@@ -32,6 +34,7 @@ class EditDialog extends StatefulWidget {
     required this.pinned,
     required this.category,
     required this.dbKey,
+    required this.cubit,
   }) : super(key: key);
 
   @override
@@ -39,7 +42,7 @@ class EditDialog extends StatefulWidget {
 }
 
 class _EditDialogState extends State<EditDialog> {
-  final _controller = TextEditingController();
+  final TextEditingController _controller = TextEditingController();
 
   @override
   void dispose() {
@@ -49,7 +52,6 @@ class _EditDialogState extends State<EditDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final cubit = context.read<CategoryCubit>();
     return AlertDialog(
       elevation: 5,
       shape: const RoundedRectangleBorder(
@@ -57,31 +59,46 @@ class _EditDialogState extends State<EditDialog> {
           Radius.circular(25.0),
         ),
       ),
-      title: const Center(child: Text('Rename your event')),
+      title: Center(
+        child: Text(
+          'Rename your event',
+          style: Theme.of(context).textTheme.bodyText1,
+        ),
+      ),
       actionsAlignment: MainAxisAlignment.spaceEvenly,
       actions: [
         _pinButton(
           context,
-          cubit,
+          widget.cubit,
         ),
         _renameButton(
           context,
-          cubit,
+          widget.cubit,
           widget.category.title,
         ),
         _deleteButton(
           context,
-          cubit,
+          widget.cubit,
         )
       ],
       content: TextField(
+        style: TextStyle(color: Theme.of(context).primaryColor),
+        decoration: InputDecoration(
+          focusedBorder: OutlineInputBorder(
+            borderSide:
+                BorderSide(color: Theme.of(context).primaryColor, width: 1),
+          ),
+        ),
         controller: _controller,
       ),
     );
   }
 
   Widget _renameButton(
-      BuildContext context, CategoryCubit cubit, String oldTitle) {
+    BuildContext context,
+    CategoryCubit cubit,
+    String oldTitle,
+  ) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         primary: Theme.of(context).primaryColor,
@@ -111,7 +128,6 @@ class _EditDialogState extends State<EditDialog> {
       child: IconButton(
         onPressed: () {
           cubit.remove(widget.category, widget.dbKey);
-
           Navigator.pop(context);
         },
         icon: const Icon(Icons.delete_forever),
@@ -127,33 +143,21 @@ class _EditDialogState extends State<EditDialog> {
       backgroundColor: Theme.of(context).primaryColor,
       foregroundColor: Colors.white,
       child: IconButton(
-        onPressed: () {
-          Navigator.pop(context);
-
-          if (widget.category.pinned == false) {
-            setState(
-              () {
-                cubit.pin(
-                  widget.category,
-                  widget.dbKey,
-                );
-              },
-            );
-          } else {
-            setState(
-              () {
-                cubit.unpin(
-                  widget.category,
-                  widget.dbKey,
-                );
-              },
-            );
-          }
-        },
-        icon: widget.pinned
-            ? const Icon(Icons.push_pin)
-            : const Icon(Icons.push_pin_outlined),
-      ),
+          onPressed: () {
+            Navigator.pop(context);
+            if (widget.category.pinned == false) {
+              cubit.pin(
+                widget.category,
+                widget.dbKey,
+              );
+            } else {
+              cubit.unpin(
+                widget.category,
+                widget.dbKey,
+              );
+            }
+          },
+          icon: Icon(widget.pinned ? Icons.push_pin : Icons.push_pin_outlined)),
     );
   }
 }

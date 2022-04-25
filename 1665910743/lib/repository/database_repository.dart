@@ -1,7 +1,6 @@
 import '../models/event.dart';
 import '../models/event_category.dart';
 
-//
 abstract class DataBaseRepository {
   Future<void> addCategory(EventCategory event);
   Future<void> removeCategory(String key);

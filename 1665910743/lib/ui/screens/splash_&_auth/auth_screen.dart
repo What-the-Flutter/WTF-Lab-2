@@ -1,45 +1,54 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:lottie/lottie.dart';
 
+import '../../theme/theme_cubit/theme_cubit.dart';
+import '../home/cubit/home_cubit.dart';
 import '../home/home_widget.dart';
-
-//TODO: bloc
-
-enum _SupportState {
-  unknown,
-  supported,
-  unsupported,
-}
+import 'cubit/auth_cubit.dart';
 
 class BioAuth extends StatefulWidget {
-  const BioAuth({Key? key}) : super(key: key);
+  final AuthCubit authCubit;
+
+  const BioAuth({
+    Key? key,
+    required this.authCubit,
+  }) : super(key: key);
 
   @override
   State<BioAuth> createState() => _BioAuthState();
 }
 
-class _BioAuthState extends State<BioAuth> {
+class _BioAuthState extends State<BioAuth> with TickerProviderStateMixin {
   final LocalAuthentication auth = LocalAuthentication();
-  _SupportState _supportState = _SupportState.unknown;
-  bool? _canCheckBiometrics;
-  List<BiometricType>? _availableBiometrics;
-  String _authorized = 'Not Authorized';
-  bool _isAuthenticating = false;
+  late final AnimationController _controller;
 
   @override
   void initState() {
     super.initState();
     auth.isDeviceSupported().then(
-          (isSupported) => setState(() => _supportState = isSupported
-              ? _SupportState.supported
-              : _SupportState.unsupported),
-        );
-    if (_supportState == _SupportState.supported) _checkBiometrics();
-    if (_canCheckBiometrics != null && _canCheckBiometrics == true) {
+      (isSupported) {
+        isSupported
+            ? widget.authCubit.supportState(SupportState.supported)
+            : widget.authCubit.supportState(SupportState.unsupported);
+      },
+    );
+    if (widget.authCubit.state.supportState == SupportState.supported) {
+      _checkBiometrics();
+    }
+    if (widget.authCubit.state.canCheckBiometrics != null &&
+        widget.authCubit.state.canCheckBiometrics == true) {
       _authenticateWithBiometrics();
     }
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 2000),
+      vsync: this,
+    );
+    Future.delayed(const Duration(seconds: 1))
+        .then((_) => _controller.forward());
   }
 
   Future<void> _checkBiometrics() async {
@@ -56,57 +65,51 @@ class _BioAuthState extends State<BioAuth> {
     }
     if (!mounted) return;
 
-    setState(() {
-      _availableBiometrics = avalibleBio;
-      _canCheckBiometrics = canCheckBiometrics;
-    });
+    widget.authCubit.availableBiometrics(avalibleBio);
+    widget.authCubit.canCheckBiometrics(canCheckBiometrics);
   }
 
   Future<void> _authenticateWithBiometrics() async {
     var authenticated = false;
     try {
-      setState(() {
-        _isAuthenticating = true;
-        _authorized = 'Authenticating';
-      });
+      widget.authCubit.isAuthenticating(true);
+      widget.authCubit.authorized('Authenticating');
       authenticated = await auth.authenticate(
           localizedReason:
               'Scan your fingerprint (or face or whatever) to authenticate',
           useErrorDialogs: true,
           stickyAuth: true,
           biometricOnly: true);
-      setState(() {
-        _isAuthenticating = false;
-        _authorized = 'Authenticating';
-      });
+      widget.authCubit.isAuthenticating(false);
+      widget.authCubit.authorized('Authenticating');
     } on PlatformException catch (e) {
       print(e);
-      setState(() {
-        _isAuthenticating = false;
-        _authorized = 'Error - ${e.message}';
-      });
+      widget.authCubit.isAuthenticating(false);
+      widget.authCubit.authorized('Error - ${e.message}');
+
       return;
     }
     if (!mounted) return;
 
     final message = authenticated ? 'Authorized' : 'Not Authorized';
-    setState(() {
-      _authorized = message;
-      (_authorized == 'Authorized')
-          ? Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: ((context) => const Home()),
-              ),
-            )
-          // ignore: unnecessary_statements
-          : null;
-    });
+    widget.authCubit.authorized(message);
+
+    if (message == 'Authorized') {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: ((context) => Home(
+                homeCubit: context.read<HomeCubit>(),
+                themeCubit: context.read<ThemeCubit>(),
+              )),
+        ),
+      );
+    }
   }
 
   void _cancelAuthentication() async {
     await auth.stopAuthentication();
-    setState(() => _isAuthenticating = false);
+    widget.authCubit.isAuthenticating(false);
   }
 
   @override
@@ -122,7 +125,7 @@ class _BioAuthState extends State<BioAuth> {
             Container(
               decoration: BoxDecoration(
                   image: const DecorationImage(
-                    opacity: 0.5,
+                    opacity: 0.1,
                     image: AssetImage('assets/auth_back.jpg'),
                     fit: BoxFit.fitWidth,
                   ),
@@ -188,24 +191,37 @@ class _BioAuthState extends State<BioAuth> {
   }
 
   Widget _authButton(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        if (_supportState == _SupportState.supported &&
-            _authorized == 'Not Authorized') {
-          _authenticateWithBiometrics();
-        } else if (_supportState == _SupportState.supported &&
-            _authorized == 'Authorized') {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const Home()),
-          );
-        }
-      },
-      child: Icon(
-        Icons.fingerprint,
-        size: MediaQuery.of(context).size.width * 0.2,
-        color: Theme.of(context).primaryColor,
-      ),
+    return BlocBuilder<AuthCubit, AuthState>(
+      bloc: widget.authCubit,
+      builder: ((context, state) => GestureDetector(
+            onTap: () {
+              if (state.supportState == SupportState.supported &&
+                  state.authorized == 'Not Authorized') {
+                _authenticateWithBiometrics();
+              } else if (state.supportState == SupportState.supported &&
+                  state.authorized == 'Authorized') {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => Home(
+                            homeCubit: context.read<HomeCubit>(),
+                            themeCubit: context.read<ThemeCubit>(),
+                          )),
+                );
+              }
+            },
+            child: Center(
+              child: Container(
+                child: Lottie.asset(
+                  'assets/biometric.json',
+                  controller: _controller,
+                  repeat: false,
+                  width: 200,
+                  height: 200,
+                ),
+              ),
+            ),
+          )),
     );
   }
 }

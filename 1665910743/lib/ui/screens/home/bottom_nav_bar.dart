@@ -21,7 +21,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
     return CurvedNavigationBar(
       animationDuration: const Duration(milliseconds: 300),
       color: Theme.of(context).primaryColor,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Colors.transparent,
       buttonBackgroundColor: Theme.of(context).primaryColor,
       height: 60,
       items: const [

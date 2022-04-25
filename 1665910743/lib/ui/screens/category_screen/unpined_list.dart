@@ -4,33 +4,46 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../models/event_category.dart';
 import '../chat_screen/chat_screen.dart';
+import '../chat_screen/cubit/event_cubit.dart';
 import 'cubit/category_cubit.dart';
 import 'edit_category_dialog.dart';
 
 class UnpinedCategory extends StatelessWidget {
-  const UnpinedCategory({Key? key}) : super(key: key);
+  final CategoryCubit categoryCubit;
+  final EventCubit eventCubit;
+
+  const UnpinedCategory(
+      {Key? key, required this.categoryCubit, required this.eventCubit})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Center(
       child: BlocBuilder<CategoryCubit, CategoryState>(
-        bloc: context.read<CategoryCubit>(),
+        bloc: categoryCubit,
         builder: (context, state) {
           return ListView.builder(
             itemCount: state.categoryList.length,
             itemBuilder: ((context, index) {
+              final _events = eventCubit.state.eventList.where((element) =>
+                  element.categoryTitle == state.categoryList[index].title);
+              final _subtitle =
+                  _events.isNotEmpty ? _events.last.title : 'No events';
+
               return GestureDetector(
                 onTap: (() => Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                         builder: ((context) => ChatScreen(
                               categoryTitle: state.categoryList[index].title,
+                              eventCubit: eventCubit,
                             )),
                       ),
                     )),
                 onLongPress: () {
                   HapticFeedback.heavyImpact();
                   displayTextInputDialog(
+                      categoryCubit: categoryCubit,
                       context: context,
                       category: EventCategory(
                         title: state.categoryList[index].title,
@@ -48,6 +61,10 @@ class UnpinedCategory extends StatelessWidget {
                   title: Text(
                     state.categoryList[index].title,
                     style: Theme.of(context).textTheme.bodyText1,
+                  ),
+                  subtitle: Text(
+                    _subtitle,
+                    style: Theme.of(context).textTheme.bodyText2,
                   ),
                   trailing: (state.categoryList[index].pinned)
                       ? Icon(
