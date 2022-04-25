@@ -101,6 +101,7 @@ class _ChatListBodyState extends State<ChatListBody> {
                                         MediaQuery.of(context).size.width * 0.5,
                                     height: MediaQuery.of(context).size.height *
                                         0.3,
+                                    fit: BoxFit.cover,
                                   )
                                 : null),
                       ),

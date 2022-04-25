@@ -13,9 +13,13 @@ class SettingsCubit extends Cubit<SettingsState> {
   SettingsCubit({
     required this.alignRight,
     required this.image,
-  }) : super(SettingsState(
-          chatTileAlignment: Alignment.centerLeft,
-        ));
+  }) : super(
+          SettingsState(
+            chatTileAlignment:
+                alignRight ? Alignment.centerRight : Alignment.centerLeft,
+            backgroundImagePath: image,
+          ),
+        );
 
   Future<void> alignmentLeft() async {
     final _prefs = await SharedPreferences.getInstance();
@@ -28,14 +32,13 @@ class SettingsCubit extends Cubit<SettingsState> {
     final _prefs = await SharedPreferences.getInstance();
     _prefs.setBool('align', true);
 
-    
-
     emit(state.copyWith(chatTileAlignment: Alignment.centerRight));
   }
 
   Future<void> removeBackrgoundImage() async {
     final _prefs = await SharedPreferences.getInstance();
     _prefs.setString('image', '');
+
     emit(
       SettingsState(
         chatTileAlignment: state.chatTileAlignment,
@@ -45,18 +48,18 @@ class SettingsCubit extends Cubit<SettingsState> {
   }
 
   void getBackgroundImage() async {
-          final _prefs = await SharedPreferences.getInstance();
-
+    final _prefs = await SharedPreferences.getInstance();
     final picker = ImagePicker();
-
     final _pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
     if (_pickedFile != null) {
-    _prefs.setString('image', _pickedFile.path);
-      emit(SettingsState(
-        chatTileAlignment: state.chatTileAlignment,
-        backgroundImagePath: _pickedFile.path,
-      ));
+      _prefs.setString('image', _pickedFile.path);
+      emit(
+        SettingsState(
+          chatTileAlignment: state.chatTileAlignment,
+          backgroundImagePath: _pickedFile.path,
+        ),
+      );
     }
   }
 }

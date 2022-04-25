@@ -23,7 +23,7 @@ class Journal extends StatelessWidget {
       builder: ((context, state) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
-          theme: state.copyWith(textTheme: _textTheme),
+          theme: state.copyWith(textTheme: _textTheme, useMaterial3: true),
           home: (authKey)
               ? BioAuth(
                   authCubit: context.watch<AuthCubit>(),

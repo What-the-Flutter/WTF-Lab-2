@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../models/event_category.dart';
 import 'cubit/category_cubit.dart';
 
 Future<void> displayTextInputDialog({
+  required CategoryCubit categoryCubit,
   required BuildContext context,
   required EventCategory category,
   required bool pinned,
@@ -13,6 +13,7 @@ Future<void> displayTextInputDialog({
   return showDialog(
       context: context,
       builder: (context) => EditDialog(
+            cubit: categoryCubit,
             context: context,
             category: category,
             pinned: pinned,
@@ -21,6 +22,7 @@ Future<void> displayTextInputDialog({
 }
 
 class EditDialog extends StatefulWidget {
+  final CategoryCubit cubit;
   final BuildContext context;
   final bool pinned;
   final EventCategory category;
@@ -32,6 +34,7 @@ class EditDialog extends StatefulWidget {
     required this.pinned,
     required this.category,
     required this.dbKey,
+    required this.cubit,
   }) : super(key: key);
 
   @override
@@ -39,7 +42,7 @@ class EditDialog extends StatefulWidget {
 }
 
 class _EditDialogState extends State<EditDialog> {
-  final _controller = TextEditingController();
+  final TextEditingController _controller = TextEditingController();
 
   @override
   void dispose() {
@@ -49,7 +52,6 @@ class _EditDialogState extends State<EditDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final cubit = context.read<CategoryCubit>();
     return AlertDialog(
       elevation: 5,
       shape: const RoundedRectangleBorder(
@@ -67,16 +69,16 @@ class _EditDialogState extends State<EditDialog> {
       actions: [
         _pinButton(
           context,
-          cubit,
+          widget.cubit,
         ),
         _renameButton(
           context,
-          cubit,
+          widget.cubit,
           widget.category.title,
         ),
         _deleteButton(
           context,
-          cubit,
+          widget.cubit,
         )
       ],
       content: TextField(

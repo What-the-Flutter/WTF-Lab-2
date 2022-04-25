@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:lottie/lottie.dart';
 
+import '../../../constants.dart' as constants;
 import '../../widgets/event_tile.dart';
 import '../../widgets/event_tile_actions.dart';
 import '../chat_screen/cubit/event_cubit.dart';
@@ -17,17 +18,20 @@ class Timeline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<HomeCubit, HomeState>(
-      bloc: context.read<HomeCubit>(),
-      builder: ((context, state) => state.searchMode
-          ? SearchResultList(
-              eventCubit: context.read<EventCubit>(),
-              homeCubit: context.read<HomeCubit>(),
-            )
-          : BodyList(
-              eventCubit: context.read<EventCubit>(),
-              homeCubit: context.read<HomeCubit>(),
-            )),
+    return Padding(
+      padding: constants.listViewPadding,
+      child: BlocBuilder<HomeCubit, HomeState>(
+        bloc: context.read<HomeCubit>(),
+        builder: ((context, state) => state.searchMode
+            ? SearchResultList(
+                eventCubit: context.read<EventCubit>(),
+                homeCubit: context.read<HomeCubit>(),
+              )
+            : BodyList(
+                eventCubit: context.read<EventCubit>(),
+                homeCubit: context.read<HomeCubit>(),
+              )),
+      ),
     );
   }
 }

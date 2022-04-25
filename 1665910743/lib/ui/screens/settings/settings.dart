@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:simple_gradient_text/simple_gradient_text.dart';
 
@@ -12,12 +11,21 @@ import '../home/cubit/home_cubit.dart';
 import 'cubit/settings_cubit.dart';
 
 class Settings extends StatelessWidget {
-  const Settings({Key? key}) : super(key: key);
+  final ThemeCubit themeCubit;
+  final HomeCubit homeCubit;
+  final SettingsCubit settingsCubit;
+  final FontCubit fontCubit;
+
+  const Settings(
+      {Key? key,
+      required this.themeCubit,
+      required this.homeCubit,
+      required this.settingsCubit,
+      required this.fontCubit})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.read<ThemeCubit>().state == MyThemes.darkTheme;
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
@@ -26,7 +34,7 @@ class Settings extends StatelessWidget {
         padding: constants.listViewPadding,
         child: ListView(
           children: [
-            _nightSide(context, theme),
+            _nightSide(context),
             _authSwitch(context),
             _bubbleAlignment(context),
             _fontSize(context),
@@ -74,13 +82,11 @@ class Settings extends StatelessWidget {
                       style: ElevatedButton.styleFrom(
                           primary: Theme.of(context).primaryColor),
                       onPressed: () {
-                        context.read<FontCubit>().fontChange(MyFontSize.medium);
-                        context.read<SettingsCubit>().alignmentLeft();
-                        context
-                            .read<ThemeCubit>()
-                            .themeChanged(MyThemeKeys.light);
-                        context.read<HomeCubit>().setAuthKey(false);
-                        context.read<SettingsCubit>().removeBackrgoundImage();
+                        fontCubit.fontChange(MyFontSize.medium);
+                        settingsCubit.alignmentLeft();
+                        themeCubit.themeChanged(MyThemeKeys.light);
+                        homeCubit.setAuthKey(false);
+                        settingsCubit.removeBackrgoundImage();
                         Navigator.pop(context);
                       },
                       child: const Text('Yes'),
@@ -102,7 +108,7 @@ class Settings extends StatelessWidget {
   Widget _chooseBackground(BuildContext context) {
     return ListTile(
       key: const ValueKey('ChooseBackgroundButton'),
-      onTap: () => context.read<SettingsCubit>().getBackgroundImage(),
+      onTap: settingsCubit.getBackgroundImage,
       leading: const Icon(Icons.image),
       title: Text(
         'Chat Background',
@@ -120,21 +126,21 @@ class Settings extends StatelessWidget {
               actions: [
                 CupertinoActionSheetAction(
                   onPressed: () {
-                    context.read<FontCubit>().fontChange(MyFontSize.small);
+                    fontCubit.fontChange(MyFontSize.small);
                     Navigator.pop(context);
                   },
                   child: Text('Small', style: FontSize.small.bodyText1),
                 ),
                 CupertinoActionSheetAction(
                   onPressed: () {
-                    context.read<FontCubit>().fontChange(MyFontSize.medium);
+                    fontCubit.fontChange(MyFontSize.medium);
                     Navigator.pop(context);
                   },
                   child: Text('Medium', style: FontSize.medium.bodyText1),
                 ),
                 CupertinoActionSheetAction(
                   onPressed: () {
-                    context.read<FontCubit>().fontChange(MyFontSize.large);
+                    fontCubit.fontChange(MyFontSize.large);
                     Navigator.pop(context);
                   },
                   child: Text('Lagre', style: FontSize.large.bodyText1),
@@ -165,7 +171,7 @@ class Settings extends StatelessWidget {
                           primary: Theme.of(context).primaryColor),
                       onPressed: () {
                         Navigator.pop(context);
-                        context.read<SettingsCubit>().alignmentLeft();
+                        settingsCubit.alignmentLeft();
                       },
                       child: const Text('Left'),
                     ),
@@ -174,7 +180,7 @@ class Settings extends StatelessWidget {
                           primary: Theme.of(context).primaryColor),
                       onPressed: () {
                         Navigator.pop(context);
-                        context.read<SettingsCubit>().alignmentRight();
+                        settingsCubit.alignmentRight();
                       },
                       child: const Text('Right'),
                     )
@@ -189,7 +195,9 @@ class Settings extends StatelessWidget {
     );
   }
 
-  Widget _nightSide(BuildContext context, bool theme) {
+  Widget _nightSide(BuildContext context) {
+    final theme = themeCubit.state == MyThemes.darkTheme;
+
     return ListTile(
       key: const ValueKey('NightSideButton'),
       leading: const Icon(Icons.sunny),
@@ -202,8 +210,8 @@ class Settings extends StatelessWidget {
           value: theme,
           onChanged: (value) {
             value
-                ? context.read<ThemeCubit>().themeChanged(MyThemeKeys.dark)
-                : context.read<ThemeCubit>().themeChanged(MyThemeKeys.light);
+                ? themeCubit.themeChanged(MyThemeKeys.dark)
+                : themeCubit.themeChanged(MyThemeKeys.light);
           }),
     );
   }
@@ -223,7 +231,7 @@ class Settings extends StatelessWidget {
                           primary: Theme.of(context).primaryColor),
                       onPressed: () {
                         Navigator.pop(context);
-                        context.read<HomeCubit>().setAuthKey(false);
+                        homeCubit.setAuthKey(false);
                       },
                       child: const Text('no'),
                     ),
@@ -232,7 +240,7 @@ class Settings extends StatelessWidget {
                           primary: Theme.of(context).primaryColor),
                       onPressed: () {
                         Navigator.pop(context);
-                        context.read<HomeCubit>().setAuthKey(true);
+                        homeCubit.setAuthKey(true);
                       },
                       child: const Text('Yes'),
                     )

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-const listViewPadding = EdgeInsets.all(5.0);
+const listViewPadding = EdgeInsets.all(7.0);
 
 List<Icon> iconPack = const [
   Icon(Icons.track_changes),

@@ -7,10 +7,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_journal/ui/screens/chat_screen/chat_list_body.dart';
 import 'package:my_journal/ui/screens/chat_screen/icon_grid.dart';
 import 'package:my_journal/ui/screens/chat_screen/tags_grid.dart';
+import 'package:my_journal/ui/screens/settings/cubit/settings_cubit.dart';
 
 import '../../../constants.dart' as constants;
 import '../chat_screen/cubit/event_cubit.dart';
-import '../settings/cubit/settings_cubit.dart';
 import 'chat_screen_nav_bar.dart';
 
 class ChatScreenBody extends StatefulWidget {
@@ -54,39 +54,42 @@ class _ChatScreenBodyState extends State<ChatScreenBody> {
       onTap: (() => widget.eventCubit.iconAdd(false)),
       child: BlocBuilder<SettingsCubit, SettingsState>(
         bloc: context.read<SettingsCubit>(),
-        builder: (context, settingState) => Container(
-          decoration: (settingState.backgroundImagePath.length > 2)
-              ? BoxDecoration(
-                  image: DecorationImage(
-                      image: Image.file(File(settingState.backgroundImagePath))
-                          .image,
-                      fit: BoxFit.cover),
-                )
-              : null,
-          padding: constants.listViewPadding,
-          child: BlocBuilder<EventCubit, EventState>(
-            bloc: widget.eventCubit,
-            builder: (context, state) => Column(
-              children: [
-                ChatListBody(
-                  categoryTitle: widget.categoryTitle,
-                  eventCubit: widget.eventCubit,
-                ),
-                state.iconAdd
-                    ? TagsGrid(eventCubit: widget.eventCubit)
-                    : const SizedBox(),
-                state.iconAdd
-                    ? IconsGrid(eventCubit: widget.eventCubit)
-                    : const SizedBox(),
-                ChatScreenNavBar(
-                  categoryTitle: widget.categoryTitle,
-                  controller: _controller,
-                  eventCubit: widget.eventCubit,
-                ),
-              ],
+        builder: (context, settingState) {
+          return Container(
+            decoration: (settingState.backgroundImagePath.length > 2)
+                ? BoxDecoration(
+                    image: DecorationImage(
+                        image:
+                            Image.file(File(settingState.backgroundImagePath))
+                                .image,
+                        fit: BoxFit.cover),
+                  )
+                : null,
+            padding: constants.listViewPadding,
+            child: BlocBuilder<EventCubit, EventState>(
+              bloc: widget.eventCubit,
+              builder: (context, state) => Column(
+                children: [
+                  ChatListBody(
+                    categoryTitle: widget.categoryTitle,
+                    eventCubit: widget.eventCubit,
+                  ),
+                  state.iconAdd
+                      ? TagsGrid(eventCubit: widget.eventCubit)
+                      : const SizedBox(),
+                  state.iconAdd
+                      ? IconsGrid(eventCubit: widget.eventCubit)
+                      : const SizedBox(),
+                  ChatScreenNavBar(
+                    categoryTitle: widget.categoryTitle,
+                    controller: _controller,
+                    eventCubit: widget.eventCubit,
+                  ),
+                ],
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }

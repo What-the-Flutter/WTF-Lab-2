@@ -60,14 +60,14 @@ class EventTile extends StatelessWidget {
                 ? _TileWithImage(
                     image: image,
                     title: title,
-                    formattedDate: date.mmddyy(),
+                    formattedDate: date.mmdd(),
                     favorite: favorite,
                     iconCode: iconCode,
                     tag: tag,
                   )
                 : _TileWithoutImage(
                     title: title,
-                    formattedDate: date.mmddyy(),
+                    formattedDate: date.mmdd(),
                     favorite: favorite,
                     iconCode: iconCode,
                     tag: tag,

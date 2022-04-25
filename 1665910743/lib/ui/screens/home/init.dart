@@ -10,6 +10,7 @@ import '../Category_Screen/cubit/category_cubit.dart';
 import '../chat_screen/cubit/event_cubit.dart';
 import '../settings/cubit/settings_cubit.dart';
 import '../splash_&_auth/cubit/auth_cubit.dart';
+import '../timeline_screen/cubit/filter_cubit.dart';
 import 'cubit/home_cubit.dart';
 import 'journal.dart';
 
@@ -80,6 +81,9 @@ class BlocsProvider extends StatelessWidget {
         ),
         BlocProvider(
           create: (_) => FontCubit(initSize: fontSize),
+        ),
+        BlocProvider(
+          create: (_) => FilterCubit(),
         ),
       ],
       child: Journal(),

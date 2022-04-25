@@ -6,7 +6,7 @@ import '../../../constants.dart';
 import '../../../models/event_category.dart';
 import '../../theme/theme_cubit/theme_cubit.dart';
 import '../../theme/theme_data.dart';
-import 'cubit/category_cubit.dart';
+import '../Category_Screen/cubit/category_cubit.dart';
 
 Future<void> addTaskDialog(BuildContext context) {
   return showModalBottomSheet(
@@ -21,7 +21,9 @@ Future<void> addTaskDialog(BuildContext context) {
         child: Padding(
           padding:
               EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-          child: ModalBody(),
+          child: ModalBody(
+            categoryCubit: context.read<CategoryCubit>(),
+          ),
         ),
       );
     },
@@ -29,7 +31,12 @@ Future<void> addTaskDialog(BuildContext context) {
 }
 
 class ModalBody extends StatefulWidget {
-  ModalBody({Key? key}) : super(key: key);
+  final CategoryCubit categoryCubit;
+
+  ModalBody({
+    Key? key,
+    required this.categoryCubit,
+  }) : super(key: key);
 
   @override
   State<ModalBody> createState() => _ModalBodyState();
@@ -80,7 +87,10 @@ class _ModalBodyState extends State<ModalBody> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   _addTextField(screenSize, context),
-                  _addButton(context),
+                  _addButton(
+                    context,
+                    widget.categoryCubit,
+                  ),
                 ],
               ),
             ),
@@ -164,24 +174,24 @@ class _ModalBodyState extends State<ModalBody> {
     );
   }
 
-  Widget _addButton(BuildContext context) {
+  Widget _addButton(BuildContext context, CategoryCubit cubit) {
     return IconButton(
       onPressed: () {
         if (_selectedIndexAvatar == -1) {
-          context.read<CategoryCubit>().add(EventCategory(
-                title: _controller.text,
-                pinned: false,
-                icon: iconPack[7],
-              ));
+          cubit.add(EventCategory(
+            title: _controller.text,
+            pinned: false,
+            icon: iconPack[7],
+          ));
           Navigator.pop(
             context,
           );
         } else {
-          context.read<CategoryCubit>().add(EventCategory(
-                title: _controller.text,
-                pinned: false,
-                icon: iconPack[_selectedIndexAvatar],
-              ));
+          cubit.add(EventCategory(
+            title: _controller.text,
+            pinned: false,
+            icon: iconPack[_selectedIndexAvatar],
+          ));
           Navigator.pop(
             context,
           );

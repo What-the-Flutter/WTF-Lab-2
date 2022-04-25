@@ -7,8 +7,12 @@ import 'package:intl/intl.dart';
 import 'package:my_journal/ui/screens/Category_Screen/cubit/category_cubit.dart';
 
 import '../screens/chat_screen/cubit/event_cubit.dart';
+import '../screens/home/cubit/home_cubit.dart';
+import '../screens/settings/cubit/settings_cubit.dart';
 import '../screens/settings/settings.dart';
 import '../screens/stats.dart/stats_screen.dart';
+import '../theme/font_cubit/font_cubit.dart';
+import '../theme/theme_cubit/theme_cubit.dart';
 
 class JourneyDrawer extends StatelessWidget {
   const JourneyDrawer({Key? key}) : super(key: key);
@@ -35,7 +39,12 @@ class JourneyDrawer extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: ((_) => const Settings()),
+                  builder: ((_) => Settings(
+                        themeCubit: context.read<ThemeCubit>(),
+                        homeCubit: context.read<HomeCubit>(),
+                        settingsCubit: context.read<SettingsCubit>(),
+                        fontCubit: context.read<FontCubit>(),
+                      )),
                 ),
               );
             },

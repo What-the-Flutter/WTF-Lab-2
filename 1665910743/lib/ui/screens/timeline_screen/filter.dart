@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 // ignore: prefer_relative_imports
 import 'package:my_journal/ui/screens/Category_Screen/cubit/category_cubit.dart';
+
+import 'cubit/filter_cubit.dart';
 
 Future<void> filterDialog(BuildContext context) {
   return showModalBottomSheet(
@@ -71,15 +72,24 @@ class FilterBody extends StatelessWidget {
                   return ListView.builder(
                     itemCount: state.categoryList.length,
                     itemBuilder: ((context, index) {
-                      return ListTile(
-                        onTap: (() {}),
-                        leading: Icon(
-                          Icons.circle,
-                          color: Theme.of(context).primaryColor,
-                        ),
-                        title: Text(
-                          state.categoryList[index].title,
-                          style: Theme.of(context).textTheme.bodyText1,
+                      var _filetCubit = context.read<FilterCubit>();
+                      return BlocBuilder<FilterCubit, List<String>>(
+                        bloc: _filetCubit,
+                        builder: (context, filterList) => ListTile(
+                          onTap: (() {
+                            _filetCubit.addCategoryFromFilter(
+                                state.categoryList[index].title);
+                          }),
+                          leading: Icon(
+                            filterList.contains(state.categoryList[index].title)
+                                ? Icons.circle
+                                : Icons.circle_outlined,
+                            color: Theme.of(context).primaryColor,
+                          ),
+                          title: Text(
+                            state.categoryList[index].title,
+                            style: Theme.of(context).textTheme.bodyText1,
+                          ),
                         ),
                       );
                     }),

@@ -1,5 +1,3 @@
-
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../models/event.dart';
@@ -32,7 +30,7 @@ class EventCubit extends Cubit<EventState> {
   }
 
   Future<void> removeEventInCategory({required String key}) async {
-   await dataBaseRepository.removeEvent(key);
+    await dataBaseRepository.removeEvent(key);
 
     final _changes = await dataBaseRepository.getEvents();
 
@@ -42,7 +40,6 @@ class EventCubit extends Cubit<EventState> {
   }
 
   Future<void> removeMultipleEvents() async {
-    print(state.hasSelected);
     for (final el in state.hasSelected) {
       await dataBaseRepository.removeEvent(el);
     }

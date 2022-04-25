@@ -8,6 +8,7 @@ import '../../../constants.dart';
 import '../../../models/event.dart';
 import '../chat_screen/bookmarks.dart';
 import '../chat_screen/cubit/event_cubit.dart';
+import 'nav_bar_animation.dart';
 
 class ChatScreenNavBar extends StatefulWidget {
   final EventCubit eventCubit;
@@ -28,29 +29,190 @@ class ChatScreenNavBar extends StatefulWidget {
 class _ChatScreenNavBarState extends State<ChatScreenNavBar>
     with SingleTickerProviderStateMixin {
   final picker = ImagePicker();
-//TODO: animation to bloc
-  late final AnimationController _controller = AnimationController(
-    duration: const Duration(milliseconds: 500),
-    vsync: this,
-  );
-  late final Animation<Offset> _offsetAnimation = Tween<Offset>(
-    begin: Offset.zero,
-    end: const Offset(0.0, -2.0),
-  ).animate(
-    CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOutCirc,
-    ),
-  );
-  late final Animation<double> _scaleAnimation = Tween<double>(
-    begin: 1,
-    end: 3,
-  ).animate(
-    CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOutCirc,
-    ),
-  );
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final animate = context.watch<EventCubit>().state.animate;
+    if (animate) {
+      _controller.forward().then((_) => _controller.reverse());
+    } else {
+      _controller.stop();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<EventCubit, EventState>(
+      bloc: widget.eventCubit,
+      builder: ((context, state) => SafeArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                state.selectedImage != null
+                    ? _imagePreview(
+                        context,
+                        state.selectedImage!,
+                      )
+                    : const SizedBox(),
+                Material(
+                  elevation: 10,
+                  borderRadius: BorderRadius.circular(15),
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                  child: Row(
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          if (state.hasSelected.isEmpty) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => BookmarkEvents(
+                                  eventCubit: widget.eventCubit,
+                                ),
+                              ),
+                            );
+                          } else {
+                            widget.eventCubit.removeMultipleEvents();
+                          }
+                        },
+                        icon: SlideTransition(
+                          position: offsetAnimation(_controller),
+                          child: ScaleTransition(
+                            scale: scaleAnimation(_controller),
+                            child: Icon(
+                              state.hasSelected.isNotEmpty
+                                  ? Icons.delete
+                                  : Icons.bookmark,
+                              color: Theme.of(context).primaryColor,
+                            ),
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          widget.eventCubit.iconAdd(true);
+                        },
+                        icon: Icon(
+                          (state.selectedIcon == -1)
+                              ? Icons.bubble_chart
+                              : iconPack[state.selectedIcon].icon,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                      Expanded(
+                        child: TextField(
+                          style:
+                              TextStyle(color: Theme.of(context).primaryColor),
+                          decoration: InputDecoration(
+                            hintText: ' Enter event',
+                            hintStyle: TextStyle(
+                                color: Theme.of(context).primaryColor),
+                            border: InputBorder.none,
+                          ),
+                          controller: widget.controller,
+                        ),
+                      ),
+                      IconButton(
+                          onPressed: () async {
+                            if (widget.controller.value.text.isNotEmpty) {
+                              if (state.selectedIcon == -1) {
+                                widget.eventCubit.addEvent(
+                                  event: Event(
+                                    image: state.selectedImage != null
+                                        ? state.selectedImage!
+                                        : '',
+                                    iconCode: 0,
+                                    title: widget.controller.text,
+                                    date: DateTime.now(),
+                                    favorite: false,
+                                    categoryTitle: widget.categoryTitle,
+                                    tag: state.selectedTag,
+                                  ),
+                                );
+                              } else {
+                                widget.eventCubit.addEvent(
+                                  event: Event(
+                                    image: state.selectedImage != null
+                                        ? state.selectedImage!
+                                        : '',
+                                    title: widget.controller.text,
+                                    date: DateTime.now(),
+                                    favorite: false,
+                                    iconCode: iconPack[state.selectedIcon]
+                                        .icon!
+                                        .codePoint,
+                                    categoryTitle: widget.categoryTitle,
+                                    tag: state.selectedTag,
+                                  ),
+                                );
+                              }
+                              widget.eventCubit.iconSelect(-1);
+                              widget.controller.clear();
+                              widget.eventCubit.imageSelect(null);
+                            } else if (widget.controller.value.text.isEmpty) {
+                              await getImage();
+                            }
+                          },
+                          icon: Icon(
+                            widget.controller.value.text.isEmpty
+                                ? Icons.photo_camera
+                                : Icons.send,
+                            color: Theme.of(context).primaryColor,
+                          ))
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          )),
+    );
+  }
+
+  Widget _imagePreview(
+    BuildContext context,
+    String imagePath,
+  ) {
+    return Padding(
+        padding: const EdgeInsets.only(right: 5.0, bottom: 10),
+        child: Material(
+          elevation: 10,
+          borderRadius: BorderRadius.circular(50),
+          color: Theme.of(context).scaffoldBackgroundColor,
+          child: Padding(
+            padding: const EdgeInsets.all(2.0),
+            child: CircleAvatar(
+              backgroundColor: Theme.of(context).primaryColor,
+              radius: 27,
+              child: ClipOval(
+                child: Image.file(
+                  File(imagePath),
+                  fit: BoxFit.cover,
+                  width: 50,
+                  height: 50,
+                ),
+              ),
+            ),
+          ),
+        ));
+  }
 
   Future getImage() async {
     final _pickedFile = await picker.pickImage(source: ImageSource.gallery);
@@ -66,158 +228,5 @@ class _ChatScreenNavBarState extends State<ChatScreenNavBar>
         ),
       );
     }
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final animate = context.watch<EventCubit>().state.animate;
-    if (animate) {
-      _controller.forward().then((_) => _controller.reverse());
-    } else {
-      _controller.stop();
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<EventCubit, EventState>(
-      bloc: widget.eventCubit,
-      builder: ((context, state) => SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                state.selectedImage != null
-                    ? _imagePreview(context, state.selectedImage!)
-                    : const SizedBox(),
-                Row(
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        if (state.hasSelected.isEmpty) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => BookmarkEvents(
-                                eventCubit: widget.eventCubit,
-                              ),
-                            ),
-                          );
-                        } else {
-                          widget.eventCubit.removeMultipleEvents();
-                        }
-                      },
-                      icon: SlideTransition(
-                        position: _offsetAnimation,
-                        child: ScaleTransition(
-                          scale: _scaleAnimation,
-                          child: Icon(
-                            state.hasSelected.isNotEmpty
-                                ? Icons.delete
-                                : Icons.bookmark,
-                            color: Theme.of(context).primaryColor,
-                          ),
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        widget.eventCubit.iconAdd(true);
-                      },
-                      icon: Icon(
-                        (state.selectedIcon == -1)
-                            ? Icons.bubble_chart
-                            : iconPack[state.selectedIcon].icon,
-                        color: Theme.of(context).primaryColor,
-                      ),
-                    ),
-                    Expanded(
-                      child: TextField(
-                        style: TextStyle(color: Theme.of(context).primaryColor),
-                        decoration: InputDecoration(
-                          hintText: ' Enter event',
-                          hintStyle:
-                              TextStyle(color: Theme.of(context).primaryColor),
-                          border: InputBorder.none,
-                        ),
-                        controller: widget.controller,
-                      ),
-                    ),
-                    IconButton(
-                        onPressed: () async {
-                          if (widget.controller.value.text.isNotEmpty) {
-                            if (state.selectedIcon == -1) {
-                              widget.eventCubit.addEvent(
-                                event: Event(
-                                  image: state.selectedImage != null
-                                      ? state.selectedImage!
-                                      : '',
-                                  iconCode: 0,
-                                  title: widget.controller.text,
-                                  date: DateTime.now(),
-                                  favorite: false,
-                                  categoryTitle: widget.categoryTitle,
-                                  tag: state.selectedTag,
-                                ),
-                              );
-                            } else {
-                              widget.eventCubit.addEvent(
-                                event: Event(
-                                  image: state.selectedImage != null
-                                      ? state.selectedImage!
-                                      : '',
-                                  title: widget.controller.text,
-                                  date: DateTime.now(),
-                                  favorite: false,
-                                  iconCode: iconPack[state.selectedIcon]
-                                      .icon!
-                                      .codePoint,
-                                  categoryTitle: widget.categoryTitle,
-                                  tag: state.selectedTag,
-                                ),
-                              );
-                            }
-                            widget.eventCubit.iconSelect(-1);
-                            widget.controller.clear();
-                            widget.eventCubit.imageSelect(null);
-                          } else if (widget.controller.value.text.isEmpty) {
-                            await getImage();
-                          }
-                        },
-                        icon: Icon(
-                          widget.controller.value.text.isEmpty
-                              ? Icons.photo_camera
-                              : Icons.send,
-                          color: Theme.of(context).primaryColor,
-                        ))
-                  ],
-                ),
-              ],
-            ),
-          )),
-    );
-  }
-
-  Widget _imagePreview(BuildContext context, String imagePath) {
-    return Padding(
-        padding: const EdgeInsets.only(right: 8.0),
-        child: CircleAvatar(
-          backgroundColor: Theme.of(context).primaryColor,
-          radius: 27,
-          child: ClipOval(
-            child: Image.file(
-              File(imagePath),
-              fit: BoxFit.cover,
-              width: 50,
-              height: 50,
-            ),
-          ),
-        ));
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
   }
 }

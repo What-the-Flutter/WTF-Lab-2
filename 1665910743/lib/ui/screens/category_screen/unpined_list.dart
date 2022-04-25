@@ -25,9 +25,8 @@ class UnpinedCategory extends StatelessWidget {
           return ListView.builder(
             itemCount: state.categoryList.length,
             itemBuilder: ((context, index) {
-              final _events = eventCubit.state.eventList.where(
-                  (element) =>
-                      element.categoryTitle == state.categoryList[index].title);
+              final _events = eventCubit.state.eventList.where((element) =>
+                  element.categoryTitle == state.categoryList[index].title);
               final _subtitle =
                   _events.isNotEmpty ? _events.last.title : 'No events';
 
@@ -44,6 +43,7 @@ class UnpinedCategory extends StatelessWidget {
                 onLongPress: () {
                   HapticFeedback.heavyImpact();
                   displayTextInputDialog(
+                      categoryCubit: categoryCubit,
                       context: context,
                       category: EventCategory(
                         title: state.categoryList[index].title,
