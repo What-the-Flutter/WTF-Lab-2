@@ -7,7 +7,10 @@ import '../category_page/category_page.dart';
 import '../create_category_page/create_category_cubit.dart';
 import '../create_category_page/create_category_page.dart';
 import '../models/category.dart';
-import '../utils/app_theme.dart';
+import '../settings_page/settings_cubit.dart';
+import '../settings_page/settings_page.dart';
+import '../utils/theme/app_theme.dart';
+import '../utils/theme/theme_cubit.dart';
 import '../widgets/main_page_widgets/main_bottom_bar.dart';
 import 'home_cubit.dart';
 import 'home_state.dart';
@@ -36,24 +39,19 @@ class _HomePageState extends State<HomePage> {
               SliverAppBar(
                 pinned: true,
                 expandedHeight: 190,
-                leading: IconButton(
-                  icon: const Icon(Icons.menu),
-                  onPressed: () {},
-                ),
                 title: const Center(
                   child: Text('Home'),
                 ),
                 actions: [
                   IconButton(
                     icon: const Icon(Icons.invert_colors),
-                    onPressed: () =>
-                        InheritedCustomTheme.of(context).themeData == AppTheme.lightTheme
-                            ? InheritedCustomTheme.of(context).switchTheme(ThemeKeys.dark)
-                            : InheritedCustomTheme.of(context).switchTheme(ThemeKeys.light),
+                    onPressed: () => context.read<ThemeCubit>().state == AppTheme.lightTheme
+                        ? context.read<ThemeCubit>().changeTheme(ThemeKeys.dark)
+                        : context.read<ThemeCubit>().changeTheme(ThemeKeys.light),
                   ),
                 ],
                 flexibleSpace: FlexibleSpaceBar(
-                  background: (InheritedCustomTheme.of(context).themeData == AppTheme.lightTheme)
+                  background: context.read<ThemeCubit>().state == AppTheme.lightTheme
                       ? Image.asset(
                           'assets/images/app_bar_bg_light.jpg',
                           fit: BoxFit.fill,
@@ -72,6 +70,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ],
           ),
+          drawer: _drawer(),
           floatingActionButton: FloatingActionButton(
             onPressed: _createPage,
             child: const Icon(Icons.add),
@@ -86,8 +85,15 @@ class _HomePageState extends State<HomePage> {
     final category = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => BlocProvider.value(
-          value: BlocProvider.of<CreateCategoryPageCubit>(context),
+        builder: (_) => MultiBlocProvider(
+          providers: [
+            BlocProvider.value(
+              value: BlocProvider.of<CreateCategoryPageCubit>(context),
+            ),
+            BlocProvider.value(
+              value: BlocProvider.of<ThemeCubit>(context),
+            ),
+          ],
           child: CreateCategoryPage(),
         ),
       ),
@@ -101,7 +107,7 @@ class _HomePageState extends State<HomePage> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       child: Card(
-        color: InheritedCustomTheme.of(context).themeData.cardColor,
+        color: context.read<ThemeCubit>().state.cardColor,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
         ),
@@ -130,6 +136,9 @@ class _HomePageState extends State<HomePage> {
                     ),
                     BlocProvider.value(
                       value: BlocProvider.of<HomeCubit>(context),
+                    ),
+                    BlocProvider.value(
+                      value: BlocProvider.of<ThemeCubit>(context),
                     ),
                   ],
                   child: CategoryPage(
@@ -325,6 +334,63 @@ class _HomePageState extends State<HomePage> {
           TextButton(
             onPressed: () => Navigator.pop(context, 'OK'),
             child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _drawer() {
+    return Drawer(
+      backgroundColor: context.read<ThemeCubit>().state.colorScheme.secondary,
+      child: ListView(
+        children: [
+          SizedBox(
+            height: 145,
+            child: DrawerHeader(
+              decoration: BoxDecoration(
+                color: context.read<ThemeCubit>().state.colorScheme.primary,
+              ),
+              child: Align(
+                alignment: Alignment.bottomLeft,
+                child: Text(
+                  DateFormat.yMMMMd().format(DateTime.now()).toString(),
+                  style: const TextStyle(
+                    fontSize: 20,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const ListTile(
+            title: Text('Search'),
+            leading: Icon(Icons.search),
+          ),
+          const ListTile(
+            title: Text('Notifications'),
+            leading: Icon(Icons.notifications),
+          ),
+          const ListTile(
+            title: Text('Statistics'),
+            leading: Icon(Icons.timeline),
+          ),
+          ListTile(
+            title: const Text('Settings'),
+            leading: const Icon(Icons.settings),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => BlocProvider<SettingsCubit>(
+                  create: (context) => SettingsCubit(),
+                  child: SettingsPage(),
+                ),
+              ),
+            ),
+          ),
+          const ListTile(
+            title: Text('Feedback'),
+            leading: Icon(Icons.mail),
           ),
         ],
       ),

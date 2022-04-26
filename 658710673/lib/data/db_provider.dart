@@ -34,7 +34,7 @@ class DBProvider {
         );
         db.execute(
           'CREATE TABLE $eventsTable(${EventFields.id} INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, '
-          '${EventFields.categoryId} INTEGER, ${EventFields.description} TEXT, '
+          '${EventFields.category} INTEGER, ${EventFields.description} TEXT, '
           '${EventFields.isBookmarked} BOOL, ${EventFields.timeOfCreation} TEXT, '
           '${EventFields.attachment} TEXT, ${EventFields.sectionIcon} INTEGER, ${EventFields.sectionTitle} TEXT); ',
         );
@@ -59,7 +59,7 @@ class DBProvider {
 
     await db.delete(
       eventsTable,
-      where: '${EventFields.categoryId} = ?',
+      where: '${EventFields.category} = ?',
       whereArgs: [category.id],
     );
 
@@ -92,14 +92,7 @@ class DBProvider {
     return List.generate(
       maps.length,
       (i) {
-        return Category.fromDB(
-          id: maps[i][CategoryFields.id],
-          title: maps[i][CategoryFields.title],
-          icon: Icon(
-            IconData(maps[i][CategoryFields.icon], fontFamily: 'MaterialIcons'),
-          ),
-          timeOfCreation: DateTime.parse(maps[i][CategoryFields.timeOfCreation]),
-        );
+        return Category.fromMap(maps[i]);
       },
     );
   }
@@ -143,7 +136,7 @@ class DBProvider {
 
     final List<Map<String, dynamic>> maps = await db.query(
       eventsTable,
-      where: '${EventFields.categoryId} = ?',
+      where: '${EventFields.category} = ?',
       whereArgs: [category.id],
       orderBy: 'id',
     );
@@ -151,16 +144,7 @@ class DBProvider {
     return List.generate(
       maps.length,
       (i) {
-        return Event.fromDB(
-          maps[i][EventFields.description],
-          maps[i][EventFields.categoryId],
-          id: maps[i][EventFields.id],
-          timeOfCreation: DateTime.parse(maps[i][EventFields.timeOfCreation]),
-          attachment: maps[i][EventFields.attachment],
-          isBookmarked: maps[i][EventFields.isBookmarked] == 1 ? true : false,
-          sectionIcon: maps[i][EventFields.sectionIcon],
-          sectionTitle: maps[i][EventFields.sectionTitle],
-        );
+        return Event.fromMap(maps[i]);
       },
     );
   }

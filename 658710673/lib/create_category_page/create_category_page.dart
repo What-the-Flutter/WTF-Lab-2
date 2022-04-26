@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../models/category.dart';
-import '../utils/app_theme.dart';
 import '../utils/constants.dart';
+import '../utils/theme/theme_cubit.dart';
 import 'create_category_cubit.dart';
 import 'create_category_state.dart';
 
@@ -102,7 +102,10 @@ class _CreateCategoryPageState extends State<CreateCategoryPage> {
                   );
                 } else {
                   category = widget.editCategory!.copyWith(
-                      title: _textController.text, icon: CategoryIcons.icons[state.selectedIcon]);
+                      id: widget.editCategory!.timeOfCreation.millisecondsSinceEpoch,
+                      title: _textController.text,
+                      icon: CategoryIcons.icons[state.selectedIcon],
+                      timeOfCreation: widget.editCategory!.timeOfCreation);
                 }
                 Navigator.of(context).pop(category);
               } else {
@@ -127,7 +130,7 @@ class _CreateCategoryPageState extends State<CreateCategoryPage> {
             child: CircleAvatar(
               backgroundColor: state.selectedIcon != index
                   ? Colors.black12
-                  : InheritedCustomTheme.of(context).themeData.colorScheme.primary,
+                  : context.read<ThemeCubit>().state.colorScheme.primary,
               foregroundColor: Colors.white,
               child: IconButton(
                 onPressed: () =>
