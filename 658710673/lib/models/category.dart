@@ -19,41 +19,46 @@ class Category {
     required this.icon,
   }) : timeOfCreation = DateTime.now();
 
-  Category.fromDB({
-    this.id,
-    required this.title,
-    required this.icon,
-    required this.timeOfCreation,
-  });
+  Category.withTime(
+      {this.id, required this.title, required this.icon, required this.timeOfCreation});
+
+  factory Category.fromDB(Map<dynamic, dynamic> json) {
+    return Category.withTime(
+        id: json[CategoryFields.id],
+        title: json[CategoryFields.title],
+        icon: json[CategoryFields.icon],
+        timeOfCreation: json[CategoryFields.timeOfCreation]);
+  }
 
   Category copyWith({
     int? id,
     String? title,
     Icon? icon,
+    DateTime? timeOfCreation,
   }) {
-    return Category(
-      id: id ?? this.id,
-      title: title ?? this.title,
-      icon: icon ?? this.icon,
-    );
+    return Category.withTime(
+        id: id ?? this.id,
+        title: title ?? this.title,
+        icon: icon ?? this.icon,
+        timeOfCreation: timeOfCreation ?? this.timeOfCreation);
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
-      'timeOfCreation': timeOfCreation.toIso8601String(),
-      'icon': icon.icon!.codePoint,
-      'title': title,
+      CategoryFields.id: id,
+      CategoryFields.timeOfCreation: timeOfCreation.toIso8601String(),
+      CategoryFields.icon: icon.icon!.codePoint,
+      CategoryFields.title: title,
     };
   }
 
   Category.fromMap(Map<dynamic, dynamic> data)
-      : id = data['id'],
-        timeOfCreation = data['timeOfCreation'],
-        title = data['title'],
+      : id = data[CategoryFields.id],
+        timeOfCreation = DateTime.parse(data[CategoryFields.timeOfCreation]),
+        title = data[CategoryFields.title],
         icon = Icon(
           IconData(
-            data['icon'],
+            data[CategoryFields.icon],
             fontFamily: 'MaterialIcons',
           ),
         );

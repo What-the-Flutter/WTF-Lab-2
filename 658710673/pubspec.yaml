@@ -24,6 +24,12 @@ dev_dependencies:
   flutter_bloc: ^8.0.1
   sqflite: ^2.0.2
   path: ^1.8.0
+  firebase_auth: ^3.3.12
+  firebase_core: ^1.13.1
+  firebase_database: ^9.0.8
+  firebase_storage: ^10.2.10
+  local_auth: ^2.0.0
+  get_it: ^7.2.0
 
 flutter:
   uses-material-design: true

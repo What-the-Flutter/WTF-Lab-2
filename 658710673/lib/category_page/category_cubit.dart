@@ -1,9 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../data/db_provider.dart';
+import '../data/firebase_provider.dart';
 import '../home_page/home_cubit.dart';
 import '../models/category.dart';
 import '../models/event.dart';
@@ -11,13 +12,18 @@ import '../models/section.dart';
 import 'category_state.dart';
 
 class CategoryCubit extends Cubit<CategoryState> {
-  CategoryCubit() : super(CategoryState(events: [], searchedEvents: []));
+  CategoryCubit({required User? user})
+      : _user = user,
+        super(CategoryState(events: [], searchedEvents: []));
+
+  final User? _user;
+  late final FirebaseProvider _db = FirebaseProvider(user: _user);
 
   final defaultSection = Section(title: '', iconData: Icons.bubble_chart);
 
   void init(Category category) async {
     emit(state.copyWith(category: category, selectedSection: defaultSection));
-    final events = await DBProvider.db.getAllCategoryEvents(category);
+    final events = await _db.getAllCategoryEvents(category);
     emit(state.copyWith(events: events));
   }
 
@@ -51,9 +57,12 @@ class CategoryCubit extends Cubit<CategoryState> {
 
     if (image == null) return;
     emit(state.copyWith(isAttachment: true));
-    final event = Event('', category.id, attachment: image.path);
-    final newEvent = await DBProvider.db.addEvent(event);
-    state.events.add(newEvent);
+    final event = Event(
+        description: '',
+        category: category.title,
+        attachment: image.path);
+    await _db.addEvent(event);
+    state.events.add(event);
     emit(state.copyWith(events: state.events));
   }
 
@@ -66,17 +75,17 @@ class CategoryCubit extends Cubit<CategoryState> {
       changeMessageEditMode();
       final selectedEventIndex = state.events.indexWhere((element) => element.isSelected == true);
       state.events[selectedEventIndex].description = text;
-      await DBProvider.db.updateEvent(state.events[selectedEventIndex]);
+      await _db.updateEvent(state.events[selectedEventIndex]);
       cancelSelectedEvents();
     } else {
       final event = Event(
-        text,
-        category.id,
+        description: text,
+        category: category.title,
         sectionTitle: defaultSection.title,
         sectionIcon: defaultSection.iconData.codePoint,
       );
-      final newEvent = await DBProvider.db.addEvent(event);
-      state.events.add(newEvent);
+      await _db.addEvent(event);
+      state.events.add(event);
     }
     changeWritingMode(text);
 
@@ -86,7 +95,7 @@ class CategoryCubit extends Cubit<CategoryState> {
   void deleteEvent() async {
     for (var i = 0; i < state.events.length; i++) {
       if (state.events[i].isSelected) {
-        await DBProvider.db.deleteEvent(state.events[i]);
+        await _db.deleteEvent(state.events[i]);
         state.events.removeAt(i);
         i--;
       }
@@ -132,12 +141,12 @@ class CategoryCubit extends Cubit<CategoryState> {
     cancelSelectedEvents();
   }
 
-  void changeEventBookmark() async {
+  void changeEventBookmark() {
     for (var event in state.events) {
       if (event.isSelected) {
         event.isSelected = false;
         event.isBookmarked = !event.isBookmarked;
-        await DBProvider.db.updateEvent(event);
+        _db.updateEvent(event);
       }
     }
     emit(state.copyWith(events: state.events));
@@ -160,7 +169,7 @@ class CategoryCubit extends Cubit<CategoryState> {
       }
     }
     emit(state.copyWith(events: events));
-    await DBProvider.db.updateEvent(events[index]);
+    _db.updateEvent(events[index]);
   }
 
   void search(String query) {
@@ -188,8 +197,8 @@ class CategoryCubit extends Cubit<CategoryState> {
     for (var event in state.events) {
       if (event.isSelected) {
         eventsToReply.add(event);
-        event.categoryId = category!.id;
-        await DBProvider.db.updateEvent(event);
+        event.category = category!.title;
+        await _db.updateEvent(event);
       }
     }
     deleteEvent();

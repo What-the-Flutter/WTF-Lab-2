@@ -8,8 +8,8 @@ import '../home_page/home_cubit.dart';
 import '../models/category.dart';
 import '../models/event.dart';
 import '../models/section.dart';
-import '../utils/app_theme.dart';
 import '../utils/constants.dart';
+import '../utils/theme/theme_cubit.dart';
 import 'category_cubit.dart';
 import 'category_state.dart';
 
@@ -219,13 +219,13 @@ class _CategoryPageState extends State<CategoryPage> {
           ),
         ),
         background: Container(
-          color: InheritedCustomTheme.of(context).themeData.colorScheme.primary,
+          color: context.read<ThemeCubit>().state.colorScheme.primary,
           alignment: Alignment.centerLeft,
           child: Stack(
             children: [
               CircleAvatar(
                 radius: 35,
-                backgroundColor: InheritedCustomTheme.of(context).themeData.colorScheme.primary,
+                backgroundColor: context.read<ThemeCubit>().state.colorScheme.primary,
                 child: const Icon(
                   Icons.edit,
                   color: Colors.white,
@@ -235,13 +235,13 @@ class _CategoryPageState extends State<CategoryPage> {
           ),
         ),
         secondaryBackground: Container(
-          color: InheritedCustomTheme.of(context).themeData.colorScheme.primary,
+          color: context.read<ThemeCubit>().state.colorScheme.primary,
           alignment: Alignment.centerRight,
           child: Stack(
             children: [
               CircleAvatar(
                 radius: 35,
-                backgroundColor: InheritedCustomTheme.of(context).themeData.colorScheme.primary,
+                backgroundColor: context.read<ThemeCubit>().state.colorScheme.primary,
                 child: const Icon(
                   Icons.delete,
                   color: Colors.white,
@@ -275,8 +275,8 @@ class _CategoryPageState extends State<CategoryPage> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
         color: events[index].isSelected
-            ? InheritedCustomTheme.of(context).themeData.colorScheme.primary
-            : InheritedCustomTheme.of(context).themeData.highlightColor,
+            ? context.read<ThemeCubit>().state.colorScheme.primary
+            : context.read<ThemeCubit>().state.highlightColor,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
