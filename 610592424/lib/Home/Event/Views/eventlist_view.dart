@@ -1,36 +1,44 @@
-import 'package:diploma/Home/Entities/event.dart';
-import 'package:diploma/Home/Entities/event_holder.dart';
-import 'package:diploma/Home/Additional/icons_set.dart';
-
+import 'package:diploma/NewHome/Additional/theme_widget.dart';
+import 'package:diploma/NewHome/Event/Assets/event_icons_set.dart';
+import 'package:diploma/NewHome/Event/Cubit/eventslist_cubit.dart';
+import 'package:diploma/NewHome/Event/Models/event.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-enum States { normal, singleSelected, multiSelected, editing }
+enum States { normal, singleSelected, multiSelected, editing, searching }
 
-class EventsScreen extends StatefulWidget {
-  final EventHolder eventHolder;
-
-  const EventsScreen(this.eventHolder, {Key? key}) : super(key: key);
+class EventListView extends StatefulWidget {
+  const EventListView({Key? key}) : super(key: key);
 
   @override
-  State<EventsScreen> createState() => _EventsScreenState();
+  State<EventListView> createState() => _EventListViewState();
 }
 
-class _EventsScreenState extends State<EventsScreen> {
+class _EventListViewState extends State<EventListView> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: _appBar(context),
-      body: Column(
-        children: [
-          Expanded(child: _eventsList()),
-          Align(
-            alignment: Alignment.bottomLeft,
-            child: _bottomTextField(),
-          ),
-        ],
+    return Theme(
+      data: GeneralTheme.of(context).myTheme.themeData,
+      child: Scaffold(
+        appBar: _appBar(context),
+        body: Column(
+          children: [
+            Expanded(child: _eventsList()),
+            Align(
+              alignment: Alignment.bottomLeft,
+              child: _bottomTextField(),
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    context.read<EventListCubit>().deselectAllEvents();
   }
 
   States _currentState = States.normal;
@@ -41,28 +49,23 @@ class _EventsScreenState extends State<EventsScreen> {
   final _keyForTextField = GlobalKey<FormFieldState<String>>();
   Icon? _chosenIcon;
 
-  void _setState(States state) {
-    setState(() {
-      _currentState = state;
-    });
-  }
+  void _setState(States state) => setState(() {
+        _currentState = state;
+      });
 
   void _setNormalState() {
     setState(() {
       _currentState = States.normal;
       _tempEventId = null;
       _chosenIcon = null;
-      for (var element in widget.eventHolder.events) {
-        element.isSelected = false;
-      }
+      context.read<EventListCubit>().deselectAllEvents();
     });
   }
 
   void _setEditingState() {
     assert(_currentState == States.singleSelected);
 
-    Event tempEvent = widget.eventHolder.events
-        .firstWhere((element) => element.isSelected == true);
+    Event tempEvent = context.read<EventListCubit>().getSingleSelected();
 
     setState(() {
       _tempEventId = tempEvent.id;
@@ -71,28 +74,20 @@ class _EventsScreenState extends State<EventsScreen> {
     });
   }
 
-  void _changePictureListVisibility() {
-    setState(() {
-      _showImageList = !_showImageList;
-    });
+  void _setSearchingState(){
+    _setState(States.searching);
+    _applySearch("");
   }
 
-  void _changeEventSelection(Event event) {
-    event.isSelected = !event.isSelected;
-  }
-
-  int _getItemsSelectedNumber() {
-    return widget.eventHolder.events
-        .where((element) => element.isSelected == true)
-        .length;
-  }
+  void _changePictureListVisibility() => setState(() {
+        _showImageList = !_showImageList;
+      });
 
   void _setChosenIcon(Icon icon, [bool deleteIcon = false]) {
     setState(() {
       if (deleteIcon) {
         _chosenIcon = null;
-      }
-      else{
+      } else {
         _chosenIcon = icon;
       }
 
@@ -105,8 +100,9 @@ class _EventsScreenState extends State<EventsScreen> {
       return;
     }
 
-    _changeEventSelection(event);
-    int itemsSelected = _getItemsSelectedNumber();
+    context.read<EventListCubit>().changeEventSelection(event.id);
+
+    var itemsSelected = context.read<EventListCubit>().eventsSelected;
 
     setState(() {
       if (itemsSelected == 0) {
@@ -124,91 +120,63 @@ class _EventsScreenState extends State<EventsScreen> {
     assert(_currentState == States.editing);
     assert(_keyForTextField.currentState!.validate());
 
-    Event _editedEvent = widget.eventHolder.events
-        .firstWhere((element) => element.id == _tempEventId!);
+    var _newEvent = Event(
+      _tempEventId!,
+      _keyForTextField.currentState!.value!,
+      _chosenIcon,
+    );
 
-    setState(() {
-      _editedEvent.text = _keyForTextField.currentState!.value!;
-      _editedEvent.icon = _chosenIcon;
+    context.read<EventListCubit>().editEvent(_newEvent);
 
-      _setNormalState();
-    });
+    _setNormalState();
   }
 
   void _addEvent() {
     assert(_currentState == States.normal);
     assert(_keyForTextField.currentState!.validate());
 
-    setState(() {
-      Event tempEvent;
-      if (widget.eventHolder.events.isNotEmpty) {
-        tempEvent = Event(widget.eventHolder.events.last.id + 1,
-            _keyForTextField.currentState!.value!, _chosenIcon);
-      } else {
-        tempEvent =
-            Event(0, _keyForTextField.currentState!.value!, _chosenIcon);
-      }
+    Event tempEvent = Event(
+      -1,
+      _keyForTextField.currentState!.value!,
+      _chosenIcon,
+    );
 
-      widget.eventHolder.events.add(tempEvent);
-
-      _setNormalState();
-    });
-  }
-
-  void _deleteAllSelected() {
-    assert(_currentState == States.singleSelected ||
-        _currentState == States.multiSelected);
-
-    setState(() {
-      widget.eventHolder.events
-          .removeWhere((element) => element.isSelected == true);
-
-      _setNormalState();
-    });
+    context.read<EventListCubit>().addEvent(tempEvent);
   }
 
   void _copyAllSelected() {
-    assert(_currentState == States.singleSelected ||
-        _currentState == States.multiSelected);
+    context.read<EventListCubit>().copyAllSelected();
+    _setNormalState();
+  }
 
-    List<Event> events = widget.eventHolder.events
-        .where((element) => element.isSelected == true)
-        .toList();
+  void _deleteAllSelected() {
+    context.read<EventListCubit>().deleteAllSelected();
+    _setNormalState();
+  }
 
-    String _tempString = "";
-
-    setState(() {
-      for (var element in events) {
-        _tempString += "${element.text} ";
-        element.isSelected = true;
-      }
-      Clipboard.setData(ClipboardData(text: _tempString));
-
-      _setNormalState();
-    });
+  void _applySearch(String text){
+    context.read<EventListCubit>().applySearch(text);
   }
 
   AppBar _appBar(BuildContext context) {
     switch (_currentState) {
       case States.normal:
         return AppBar(
-          backgroundColor: Colors.green,
           leading: IconButton(
-            ///добавить логику возврата на предыдущую страницу
             onPressed: () {
               Navigator.pop(context);
             },
             icon: const Icon(Icons.arrow_back_outlined),
           ),
           title: Center(
-            child: Text(widget.eventHolder.title),
+            child: Text(context.read<EventListCubit>().eventHolderTitle),
           ),
-          actions: const [
+          actions: [
             IconButton(
-              onPressed: null,
-              icon: Icon(Icons.search_outlined),
+              onPressed: () => _setSearchingState(),
+              icon: const Icon(Icons.search_outlined),
             ),
-            IconButton(
+            const IconButton(
               onPressed: null,
               icon: Icon(Icons.bookmark_border_outlined),
             ),
@@ -216,20 +184,20 @@ class _EventsScreenState extends State<EventsScreen> {
         );
       case States.editing:
         return AppBar(
-          backgroundColor: Colors.green,
           leading: IconButton(
-              onPressed: () => _setNormalState(),
-              icon: const Icon(Icons.close)),
+            onPressed: () => _setNormalState(),
+            icon: const Icon(Icons.close),
+          ),
           title: const Center(
             child: Text("Editing mode"),
           ),
         );
       case States.singleSelected:
         return AppBar(
-          backgroundColor: Colors.green,
           leading: IconButton(
-              onPressed: () => _setNormalState(),
-              icon: const Icon(Icons.close)),
+            onPressed: () => _setNormalState(),
+            icon: const Icon(Icons.close),
+          ),
           actions: [
             IconButton(
               onPressed: () => _setEditingState(),
@@ -239,9 +207,10 @@ class _EventsScreenState extends State<EventsScreen> {
               onPressed: () => _copyAllSelected(),
               icon: const Icon(Icons.content_copy_outlined),
             ),
-            const IconButton(
-              onPressed: null,
-              icon: Icon(Icons.bookmark_border_outlined),
+            IconButton(
+              onPressed: () => _forwardAllSelected(context)
+                  .then((value) => _setNormalState()),
+              icon: const Icon(Icons.shortcut_outlined),
             ),
             IconButton(
               onPressed: () => _deleteAllSelected(),
@@ -251,18 +220,19 @@ class _EventsScreenState extends State<EventsScreen> {
         );
       case States.multiSelected:
         return AppBar(
-          backgroundColor: Colors.green,
           leading: IconButton(
-              onPressed: () => _setNormalState(),
-              icon: const Icon(Icons.close)),
+            onPressed: () => _setNormalState(),
+            icon: const Icon(Icons.close),
+          ),
           actions: [
             IconButton(
               onPressed: () => _copyAllSelected(),
               icon: const Icon(Icons.content_copy_outlined),
             ),
-            const IconButton(
-              onPressed: null,
-              icon: Icon(Icons.bookmark_border_outlined),
+            IconButton(
+              onPressed: () => _forwardAllSelected(context)
+                  .then((value) => _setNormalState()),
+              icon: const Icon(Icons.shortcut_outlined),
             ),
             IconButton(
               onPressed: () => _deleteAllSelected(),
@@ -270,60 +240,77 @@ class _EventsScreenState extends State<EventsScreen> {
             ),
           ],
         );
+      case States.searching:
+        return AppBar(
+          leading: IconButton(
+            onPressed: () => _setNormalState(),
+            icon: const Icon(Icons.close),
+          ),
+          title: TextFormField(
+            cursorColor: Colors.red,
+            autofocus: false,
+            onChanged: (text) => _applySearch(text),
+          ),
+        );
       default:
         throw Exception("wrong state");
     }
   }
 
-  ListView _eventsList() {
-    return ListView.builder(
-      shrinkWrap: true,
-      itemCount: widget.eventHolder.events.length,
-      itemBuilder: (context, index) => Align(
-        alignment: Alignment.bottomLeft,
-        child: GestureDetector(
-          onTap: () => _onEventTapOrPress(widget.eventHolder.events[index]),
-          onLongPress: () =>
-              _onEventTapOrPress(widget.eventHolder.events[index]),
-          child: Container(
-            margin: const EdgeInsets.all(5),
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: widget.eventHolder.events[index].isSelected
-                  ? Colors.amber.shade700
-                  : Colors.amber,
+  BlocBuilder _eventsList() {
+    return BlocBuilder<EventListCubit, List<Event>>(builder: (context, state) {
+      return ListView.builder(
+        shrinkWrap: true,
+        itemCount: state.length,
+        itemBuilder: (context, index) => Align(
+          alignment: Alignment.bottomLeft,
+          child: GestureDetector(
+            onTap: () => _onEventTapOrPress(state[index]),
+            onLongPress: () => _onEventTapOrPress(state[index]),
+            child: Container(
+              margin: const EdgeInsets.all(5),
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: state[index].isSelected
+                    ? Colors.amber.shade700
+                    : Colors.amber,
+              ),
+              child: (state[index].icon == null)
+                  ? Text(state[index].text)
+                  : Column(
+                      //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        state[index].icon!,
+                        const SizedBox(
+                          height: 3,
+                          width: 1,
+                        ),
+                        Text(state[index].text),
+                      ],
+                    ),
             ),
-            child: (widget.eventHolder.events[index].icon == null)
-                ? Text(widget.eventHolder.events[index].text)
-                : Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      widget.eventHolder.events[index].icon!,
-                      const SizedBox(height: 3),
-                      Text(widget.eventHolder.events[index].text),
-                    ],
-                  ),
           ),
         ),
-      ),
-    );
+      );
+    });
   }
 
   Column _bottomTextField() {
-    switch(_currentState){
+    switch (_currentState) {
       case States.normal:
         return Column(
           children: [
             _showImageList
                 ? Container(
-              height: 120,
-              padding: const EdgeInsets.all(7),
-              child: _imageList(),
-            )
+                    height: 120,
+                    padding: const EdgeInsets.all(7),
+                    child: _imageList(),
+                  )
                 : Container(
-              child: null,
-            ),
+                    child: null,
+                  ),
             Container(
               padding: const EdgeInsets.fromLTRB(20, 5, 0, 5),
               child: Row(
@@ -358,13 +345,13 @@ class _EventsScreenState extends State<EventsScreen> {
           children: [
             _showImageList
                 ? Container(
-              height: 120,
-              padding: const EdgeInsets.all(7),
-              child: _imageList(),
-            )
+                    height: 120,
+                    padding: const EdgeInsets.all(7),
+                    child: _imageList(),
+                  )
                 : Container(
-              child: null,
-            ),
+                    child: null,
+                  ),
             Container(
               padding: const EdgeInsets.fromLTRB(20, 5, 0, 5),
               child: Row(
@@ -378,8 +365,9 @@ class _EventsScreenState extends State<EventsScreen> {
                   Expanded(
                     child: TextFormField(
                       key: _keyForTextField,
-                      initialValue: widget.eventHolder.events
-                          .firstWhere((element) => element.id == _tempEventId!)
+                      initialValue: context
+                          .read<EventListCubit>()
+                          .getEvent(_tempEventId!)
                           .text,
                       validator: (String? value) {
                         return (value == null || value.isEmpty)
@@ -397,18 +385,21 @@ class _EventsScreenState extends State<EventsScreen> {
             ),
           ],
         );
+      case States.searching:
+        return Column();
       default:
         return Column(
           children: [
             Container(
               padding: const EdgeInsets.fromLTRB(20, 5, 0, 5),
-              color: Colors.grey,
               child: Row(
                 children: [
                   Expanded(
-                      child: TextFormField(
-                        readOnly: true,
-                      )),
+                    child: TextFormField(
+                      readOnly: true,
+                      initialValue: "Choose events",
+                    ),
+                  ),
                   const IconButton(
                     onPressed: null,
                     icon: Icon(Icons.send),
@@ -424,7 +415,7 @@ class _EventsScreenState extends State<EventsScreen> {
   ListView _imageList() {
     return ListView.builder(
       scrollDirection: Axis.horizontal,
-      itemCount: mySetOfIcons.length,
+      itemCount: setOfEventIcons.length,
       itemBuilder: (context, index) => Container(
         margin: const EdgeInsets.all(10),
         child: Column(
@@ -437,44 +428,46 @@ class _EventsScreenState extends State<EventsScreen> {
                 color: (index == 0) ? Colors.white : Colors.black54,
               ),
               child: IconButton(
-                icon: mySetOfIcons[index],
+                icon: setOfEventIcons[index],
                 color: Colors.white,
                 iconSize: 40,
-                onPressed: () => _setChosenIcon(mySetOfIcons[index], index == 0),
+                onPressed: () =>
+                    _setChosenIcon(setOfEventIcons[index], index == 0),
               ),
             ),
-            /*Text(mySetOfIcons[index].icon.toString(),
-                style: const TextStyle(fontSize: 20)),*/
           ],
         ),
       ),
     );
+  }
 
-    /*return ListView(
-      scrollDirection: Axis.horizontal,
-      children: [
-        Container(
-          margin: const EdgeInsets.all(10),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(3),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: Colors.black54,
-                ),
-                child: const Icon(
-                  Icons.event,
-                  color: Colors.white,
-                  size: 40,
+  Future _forwardAllSelected(BuildContext myContext) async {
+    return await showDialog(
+      context: myContext,
+      barrierDismissible: true,
+      builder: (context) {
+        return SimpleDialog(
+          title: const Text('Choose page'),
+          children: [
+            for (var eventHolder
+                in myContext.read<EventListCubit>().getEventForwardingHoldersList())
+              SimpleDialogOption(
+                onPressed: () {
+                  myContext
+                      .read<EventListCubit>()
+                      .forwardAllSelected(eventHolder.id);
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Icon(eventHolder.picture.icon),
+                    Text(eventHolder.title),
+                  ],
                 ),
               ),
-              const Text("Event", style: TextStyle(fontSize: 20))
-            ],
-          ),
-        ),
-      ],
-    );*/
+          ],
+        );
+      },
+    );
   }
 }

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
-class MyTheme{
+class MyTheme {
   ThemeData themeData;
-  bool isLight = true;
+  var isLight = true;
+
   MyTheme(this.themeData);
 }
 
@@ -16,12 +17,12 @@ class GeneralTheme extends InheritedWidget {
   }) : super(key: key, child: child);
 
   static GeneralTheme of(BuildContext context) {
-    final GeneralTheme? result =
-        context.dependOnInheritedWidgetOfExactType<GeneralTheme>();
+    final result = context.dependOnInheritedWidgetOfExactType<GeneralTheme>();
     assert(result != null, 'No GeneralTheme found in context');
     return result!;
   }
 
   @override
-  bool updateShouldNotify(GeneralTheme oldWidget) => myTheme != oldWidget.myTheme;
+  bool updateShouldNotify(GeneralTheme oldWidget) =>
+      myTheme != oldWidget.myTheme;
 }
