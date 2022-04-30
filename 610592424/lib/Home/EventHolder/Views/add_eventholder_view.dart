@@ -1,39 +1,42 @@
-import '../Entities/event_holder.dart';
-import '../Additional/theme_widget.dart';
-import '../Additional/eventholder_icons_set.dart';
-
 import 'package:flutter/material.dart';
+import 'package:diploma/NewHome/EventHolder/Models/event_holder.dart';
+import 'package:diploma/NewHome/Additional/theme_widget.dart';
+import 'package:diploma/NewHome/EventHolder/Assets/eventholder_icons_set.dart';
 
-enum EventHolderScreenStates {
+enum EventHolderViewStates {
   adding,
   editing,
 }
 
-class AddEventHolderScreen extends StatefulWidget {
-  final EventHolderScreenStates state;
+class AddEventHolderView extends StatefulWidget {
+  final EventHolderViewStates state;
   final EventHolder? eventHolder;
 
-  const AddEventHolderScreen(this.state, {this.eventHolder, Key? key})
-      : super(key: key);
+  const AddEventHolderView(
+    this.state, {
+    this.eventHolder,
+    Key? key,
+  }) : super(key: key);
 
   @override
-  State<AddEventHolderScreen> createState() => _AddEventHolderScreenState();
+  State<AddEventHolderView> createState() => _AddEventHolderViewState();
 }
 
-class _AddEventHolderScreenState extends State<AddEventHolderScreen> {
+class _AddEventHolderViewState extends State<AddEventHolderView> {
   late int _selectedIconIndex;
   late final TextEditingController _textController;
-  late   bool _emptyText;
+  late bool _emptyText;
+
   @override
   void initState() {
     super.initState();
 
-    _selectedIconIndex = widget.state == EventHolderScreenStates.adding
+    _selectedIconIndex = widget.state == EventHolderViewStates.adding
         ? 0
         : widget.eventHolder!.pictureIndex;
 
     _textController = TextEditingController(
-        text: widget.state == EventHolderScreenStates.adding
+        text: widget.state == EventHolderViewStates.adding
             ? ""
             : widget.eventHolder!.title);
 
@@ -90,43 +93,42 @@ class _AddEventHolderScreenState extends State<AddEventHolderScreen> {
             ),
             Expanded(
               child: GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                      maxCrossAxisExtent: 70,
-                      childAspectRatio: 1,
-                      crossAxisSpacing: 20,
-                      mainAxisSpacing: 20),
-                  itemCount: setOfEventholderIcons.length,
-                  itemBuilder: (context, index) {
-                    return GestureDetector(
-                      onTap: () => _setSelectedIcon(index),
-                      child: Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: index == _selectedIconIndex
-                              ? Colors.lightGreen
-                              : Colors.green,
-                        ),
-                        child: setOfEventholderIcons[index],
+                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 70,
+                    childAspectRatio: 1,
+                    crossAxisSpacing: 20,
+                    mainAxisSpacing: 20),
+                itemCount: setOfEventholderIcons.length,
+                itemBuilder: (context, index) {
+                  return GestureDetector(
+                    onTap: () => _setSelectedIcon(index),
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: index == _selectedIconIndex
+                            ? Colors.lightGreen
+                            : Colors.green,
                       ),
-                    );
-                  }),
+                      child: setOfEventholderIcons[index],
+                    ),
+                  );
+                },
+              ),
             ),
           ],
         ),
       ),
       floatingActionButton: _emptyText
           ? FloatingActionButton(
-              onPressed: () {
-                Navigator.pop(context, null);
-              },
+              onPressed: () => Navigator.pop(context, null),
               child: const Icon(Icons.cancel, color: Colors.black87),
               backgroundColor: Colors.yellow,
             )
           : FloatingActionButton(
               onPressed: () {
                 switch (widget.state) {
-                  case EventHolderScreenStates.adding:
+                  case EventHolderViewStates.adding:
                     Navigator.pop(
                       context,
                       EventHolder(
@@ -136,7 +138,7 @@ class _AddEventHolderScreenState extends State<AddEventHolderScreen> {
                       ),
                     );
                     break;
-                  case EventHolderScreenStates.editing:
+                  case EventHolderViewStates.editing:
                     widget.eventHolder!.title = _textController.text;
                     widget.eventHolder!.pictureIndex = _selectedIconIndex;
                     Navigator.pop(
