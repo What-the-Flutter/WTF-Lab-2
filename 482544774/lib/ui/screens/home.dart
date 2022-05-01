@@ -8,13 +8,20 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.separated(
-      padding: const EdgeInsets.all(10.0),
-      itemCount: categoryList.length,
-      separatorBuilder: (_, index) => const Divider(),
-      itemBuilder: (_, index) {
-        return ListItem(index);
-      },
+    return Scaffold(
+      body: ListView.separated(
+        padding: const EdgeInsets.all(10.0),
+        itemCount: categoryList.length,
+        separatorBuilder: (_, index) => const Divider(),
+        itemBuilder: (_, index) {
+          return ListItem(index);
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(Icons.add),
+        onPressed: () => {},
+        tooltip: 'Add category',
+      ),
     );
   }
 }

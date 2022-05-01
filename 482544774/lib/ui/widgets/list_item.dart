@@ -4,9 +4,9 @@ import '../../data/category_list.dart';
 import '../screens/event.dart';
 
 class ListItem extends StatelessWidget {
-  const ListItem(this.index, {Key? key}) : super(key: key);
-
   final int index;
+
+  const ListItem(this.index, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

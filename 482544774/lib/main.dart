@@ -43,10 +43,12 @@ class _HomeState extends State<Home> {
     ExploreScreen(),
   ];
 
-  void _onItemTapped(int index){
-    setState(() {
-      _selectedIndex = index;
-    });
+  void _onItemTapped(int index) {
+    setState(
+      () {
+        _selectedIndex = index;
+      },
+    );
   }
 
   @override
@@ -72,12 +74,7 @@ class _HomeState extends State<Home> {
         ],
         centerTitle: true,
       ),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
-        onPressed: () => {},
-        tooltip: 'Add category',
-      ),
-      body: _screens.elementAt(_selectedIndex), 
+      body: _screens.elementAt(_selectedIndex),
       bottomNavigationBar: BottomNavBar(_selectedIndex, _onItemTapped),
     );
   }

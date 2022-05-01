@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import '../widgets/app_bar_button.dart';
 import '../widgets/input_event_bar.dart';
 
-
 class EventScreen extends StatefulWidget {
   EventScreen({Key? key}) : super(key: key);
 
@@ -22,14 +21,16 @@ class _EventScreenState extends State<EventScreen> {
   final _editController = TextEditingController();
   bool enableOptions = false;
   late int _selectedIndex;
-  
+
   void changeOptions() => setState(() => enableOptions = !enableOptions);
 
   void _addEvent() {
-    setState(() {
-      eventList.add(_controller.text);
-      _controller.clear();
-    });
+    setState(
+      () {
+        eventList.add(_controller.text);
+        _controller.clear();
+      },
+    );
   }
 
   int selectedIndex(String str) {
@@ -49,19 +50,27 @@ class _EventScreenState extends State<EventScreen> {
     return showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('AlertDialog Title'),
+        title: const Text('Edit'),
         content: TextField(
           controller: _editController,
         ),
         actions: <Widget>[
           TextButton(
-            onPressed: () => Navigator.pop(context, 'Cancel'),
+            onPressed: () {
+              Navigator.pop(context);
+              setState(() => enableOptions = false);
+            },
             child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () {
-              Navigator.pop(context, 'OK');
-              setState(() => eventList[index] = _editController.text);
+              Navigator.pop(context);
+              setState(
+                () {
+                  eventList[index] = _editController.text;
+                  enableOptions = false;
+                },
+              );
             },
             child: const Text('OK'),
           ),
@@ -70,13 +79,26 @@ class _EventScreenState extends State<EventScreen> {
     );
   }
 
-  void deleteEvent(int index) => setState(() => eventList.removeAt(index));
+  void deleteEvent(int index) {
+    setState(
+      () {
+        eventList.removeAt(index);
+        enableOptions = false;
+      },
+    );
+  }
 
   void copyEvent(int index) {
-    Clipboard.setData(ClipboardData(text: eventList[index])).then((_) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Your text copied to clipboard')));
-    });
+    Clipboard.setData(ClipboardData(text: eventList[index])).then(
+      (_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Your text copied to clipboard'),
+          ),
+        );
+      },
+    );
+    setState(() => enableOptions = false);
   }
 
   @override
@@ -112,29 +134,31 @@ class _EventScreenState extends State<EventScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.end,
                     crossAxisAlignment: CrossAxisAlignment.end,
-                    children: (eventList.map((event) {
-                      return GestureDetector(
-                        onLongPress: () => setState(() {
-                          enableOptions = true;
-                          selectedIndex(event);
-                        }),
-                        child: Container(
-                          key: UniqueKey(),
-                          padding: const EdgeInsets.all(10.0),
-                          margin: const EdgeInsets.symmetric(
-                            vertical: 5.0,
-                            horizontal: 5.0,
+                    children: eventList.map(
+                      (event) {
+                        return GestureDetector(
+                          onLongPress: () => setState(
+                            () {
+                              enableOptions = true;
+                              selectedIndex(event);
+                            },
                           ),
-                          decoration: BoxDecoration(
-                            color: Colors.lime[400],
-                            borderRadius: BorderRadius.circular(10.0),
+                          child: Container(
+                            key: UniqueKey(),
+                            padding: const EdgeInsets.all(10.0),
+                            margin: const EdgeInsets.symmetric(
+                              vertical: 5.0,
+                              horizontal: 5.0,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.lime[400],
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            child: Text(event),
                           ),
-                          child: Text(
-                            event,
-                          ),
-                        ),
-                      );
-                    }).toList()),
+                        );
+                      },
+                    ).toList(),
                   ),
                 ),
               ),
