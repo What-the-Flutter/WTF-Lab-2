@@ -13,21 +13,19 @@ class Category {
   final Icon icon;
   String title;
 
-  Category({
-    this.id,
-    required this.title,
-    required this.icon,
-  }) : timeOfCreation = DateTime.now();
-
-  Category.withTime(
-      {this.id, required this.title, required this.icon, required this.timeOfCreation});
+  Category({this.id, required this.title, required this.icon, required this.timeOfCreation});
 
   factory Category.fromDB(Map<dynamic, dynamic> json) {
-    return Category.withTime(
+    return Category(
         id: json[CategoryFields.id],
         title: json[CategoryFields.title],
         icon: json[CategoryFields.icon],
         timeOfCreation: json[CategoryFields.timeOfCreation]);
+  }
+
+  factory Category.withoutId(String title, Icon icon) {
+    final now = DateTime.now();
+    return Category(id: now.millisecondsSinceEpoch, title: title, icon: icon, timeOfCreation: now);
   }
 
   Category copyWith({
@@ -36,7 +34,7 @@ class Category {
     Icon? icon,
     DateTime? timeOfCreation,
   }) {
-    return Category.withTime(
+    return Category(
         id: id ?? this.id,
         title: title ?? this.title,
         icon: icon ?? this.icon,

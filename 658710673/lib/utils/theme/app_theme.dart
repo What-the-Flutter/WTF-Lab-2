@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../constants.dart';
 
 enum ThemeKeys { light, dark }
+enum FontSizeKeys { small, medium, large }
 
 class AppTheme {
   static final ThemeData lightTheme = ThemeData(

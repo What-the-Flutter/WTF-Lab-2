@@ -18,7 +18,7 @@ class Event {
   bool isSelected = false;
   String sectionTitle;
   int? sectionIcon;
-  String? category;
+  int? category;
 
   Event({
     required this.description,
@@ -58,7 +58,7 @@ class Event {
 
   Event copyWith({
     String? description,
-    String? category,
+    int? category,
     int? id,
     String? attachment,
     bool? isBookmarked,

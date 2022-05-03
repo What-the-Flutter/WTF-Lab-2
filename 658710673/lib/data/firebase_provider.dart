@@ -55,16 +55,6 @@ class FirebaseProvider {
   }
 
   Future<void> updateCategory(Category category) async {
-    // final databaseEvent = await _ref
-    //     .child(user?.uid ?? 'user')
-    //     .child('events')
-    //     .orderByChild('category')
-    //     .equalTo('${category.timeOfCreation.millisecondsSinceEpoch}')
-    //     .once();
-    // for (final child in databaseEvent.snapshot.children) {
-    //       child.ref.update({EventFields.category: category.id});
-    // }
-
     try {
       _ref
           .child(user?.uid ?? 'user')
@@ -95,7 +85,7 @@ class FirebaseProvider {
         .child(user?.uid ?? 'user')
         .child('events')
         .orderByChild('category')
-        .equalTo('${category.title}')
+        .equalTo(category.id)
         .once();
     for (final child in databaseEvent.snapshot.children) {
       child.ref.remove();
@@ -137,7 +127,7 @@ class FirebaseProvider {
         .child(user?.uid ?? 'user')
         .child('events')
         .orderByChild(EventFields.category)
-        .equalTo('${category.title}')
+        .equalTo(category.id)
         .once();
     for (final child in databaseEvent.snapshot.children) {
       final map = child.value as Map<dynamic, dynamic>;

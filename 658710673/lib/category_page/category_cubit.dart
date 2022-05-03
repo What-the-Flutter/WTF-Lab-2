@@ -57,10 +57,7 @@ class CategoryCubit extends Cubit<CategoryState> {
 
     if (image == null) return;
     emit(state.copyWith(isAttachment: true));
-    final event = Event(
-        description: '',
-        category: category.title,
-        attachment: image.path);
+    final event = Event(description: '', category: category.id, attachment: image.path);
     await _db.addEvent(event);
     state.events.add(event);
     emit(state.copyWith(events: state.events));
@@ -80,7 +77,7 @@ class CategoryCubit extends Cubit<CategoryState> {
     } else {
       final event = Event(
         description: text,
-        category: category.title,
+        category: category.id,
         sectionTitle: defaultSection.title,
         sectionIcon: defaultSection.iconData.codePoint,
       );
@@ -197,7 +194,7 @@ class CategoryCubit extends Cubit<CategoryState> {
     for (var event in state.events) {
       if (event.isSelected) {
         eventsToReply.add(event);
-        event.category = category!.title;
+        event.category = category!.id;
         await _db.updateEvent(event);
       }
     }

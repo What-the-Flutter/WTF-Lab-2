@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../models/category.dart';
+import '../settings_page/settings_cubit.dart';
 import '../utils/constants.dart';
 import '../utils/theme/theme_cubit.dart';
 import 'create_category_cubit.dart';
@@ -58,13 +59,20 @@ class _CreateCategoryPageState extends State<CreateCategoryPage> {
                   alignment: Alignment.center,
                   child: Text(
                     (widget.editCategory == null) ? 'Create a new page' : 'Edit page',
-                    style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: BlocProvider.of<SettingsCubit>(context).state.fontSize,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 Container(
                   alignment: Alignment.center,
                   margin: const EdgeInsets.fromLTRB(0, 16, 0, 0),
                   child: TextField(
+                    style: TextStyle(
+                      fontSize: BlocProvider.of<SettingsCubit>(context).state.fontSize,
+                      fontStyle: FontStyle.italic,
+                    ),
                     controller: _textController,
                     maxLines: 1,
                     decoration: InputDecoration(
@@ -96,9 +104,9 @@ class _CreateCategoryPageState extends State<CreateCategoryPage> {
               if (_textController.text.isNotEmpty) {
                 late Category category;
                 if (widget.editCategory == null) {
-                  category = Category(
-                    title: _textController.text,
-                    icon: CategoryIcons.icons[state.selectedIcon],
+                  category = Category.withoutId(
+                    _textController.text,
+                    CategoryIcons.icons[state.selectedIcon],
                   );
                 } else {
                   category = widget.editCategory!.copyWith(

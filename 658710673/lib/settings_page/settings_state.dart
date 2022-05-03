@@ -1,21 +1,31 @@
-import 'package:flutter/material.dart';
-
 class SettingsState {
-  final ThemeData theme;
-  final bool useBiometrics;
+  final double fontSize;
+  final bool isBubbleChatLeft;
+  final bool isDateCenterAlign;
+  final bool isLocalAuth;
+  final String backgroundImagePath;
 
   SettingsState({
-    required this.theme,
-    required this.useBiometrics,
+    required this.fontSize,
+    this.isBubbleChatLeft = true,
+    this.isDateCenterAlign = false,
+    this.isLocalAuth = false,
+    this.backgroundImagePath = '',
   });
 
   SettingsState copyWith({
-    ThemeData? theme,
-    bool? useBiometrics,
+    double? fontSize,
+    bool? isBubbleChatLeft,
+    bool? isDateCenterAlign,
+    bool? isLocalAuth,
+    String? backgroundImagePath,
   }) {
     return SettingsState(
-      theme: theme ?? this.theme,
-      useBiometrics: useBiometrics ?? this.useBiometrics,
+      fontSize: fontSize ?? this.fontSize,
+      isBubbleChatLeft: isBubbleChatLeft ?? this.isBubbleChatLeft,
+      isDateCenterAlign: isDateCenterAlign ?? this.isDateCenterAlign,
+      isLocalAuth: isLocalAuth ?? this.isLocalAuth,
+      backgroundImagePath: backgroundImagePath ?? this.backgroundImagePath,
     );
   }
 }
