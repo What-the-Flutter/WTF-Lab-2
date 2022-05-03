@@ -8,6 +8,7 @@ import '../home_page/home_cubit.dart';
 import '../models/category.dart';
 import '../models/event.dart';
 import '../models/section.dart';
+import '../settings_page/settings_cubit.dart';
 import '../utils/constants.dart';
 import '../utils/theme/theme_cubit.dart';
 import 'category_cubit.dart';
@@ -39,7 +40,7 @@ class _CategoryPageState extends State<CategoryPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext ctx) {
     return BlocBuilder<CategoryCubit, CategoryState>(
       builder: (context, state) {
         return Scaffold(
@@ -55,7 +56,19 @@ class _CategoryPageState extends State<CategoryPage> {
           body: Column(
             children: [
               Expanded(
-                child: state.events.isEmpty ? _bodyWithoutEvents() : _bodyWithEvents(state),
+                child: Container(
+                  decoration: context.read<SettingsCubit>().isBackgroundSet()
+                      ? BoxDecoration(
+                          image: DecorationImage(
+                            image: Image.file(
+                                    File(context.read<SettingsCubit>().state.backgroundImagePath))
+                                .image,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      : const BoxDecoration(),
+                  child: state.events.isEmpty ? _bodyWithoutEvents() : _bodyWithEvents(state, ctx),
+                ),
               ),
               Align(
                 alignment: Alignment.bottomLeft,
@@ -71,7 +84,13 @@ class _CategoryPageState extends State<CategoryPage> {
   AppBar _appBar(CategoryState state) {
     return AppBar(
       title: Center(
-        child: Text(widget.category.title),
+        child: Text(
+          widget.category.title,
+          style: TextStyle(
+            fontSize: BlocProvider.of<SettingsCubit>(context).state.fontSize,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
       actions: [
         IconButton(
@@ -95,6 +114,9 @@ class _CategoryPageState extends State<CategoryPage> {
       ),
       title: Center(
         child: TextField(
+          style: TextStyle(
+            fontSize: BlocProvider.of<SettingsCubit>(context).state.fontSize,
+          ),
           controller: _searchController,
           decoration: const InputDecoration(
             hintText: 'Search',
@@ -108,8 +130,14 @@ class _CategoryPageState extends State<CategoryPage> {
 
   AppBar _messageEditBar(CategoryState state) {
     return AppBar(
-      title: const Center(
-        child: Text('Edit mode'),
+      title: Center(
+        child: Text(
+          'Edit mode',
+          style: TextStyle(
+            fontSize: BlocProvider.of<SettingsCubit>(context).state.fontSize,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
       actions: [
         IconButton(
@@ -183,7 +211,10 @@ class _CategoryPageState extends State<CategoryPage> {
             'This is the page where you can track everything about '
             '"${widget.category.title}"!',
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 17, color: Colors.black),
+            style: TextStyle(
+              fontSize: BlocProvider.of<SettingsCubit>(context).state.fontSize,
+              color: Colors.black,
+            ),
           ),
           const SizedBox(
             height: 18,
@@ -195,70 +226,105 @@ class _CategoryPageState extends State<CategoryPage> {
             'on the bookmark icon on the top right corner to show the '
             'bookmarked events only.',
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 16, color: Colors.grey),
+            style: TextStyle(
+              fontSize: BlocProvider.of<SettingsCubit>(context).state.fontSize,
+              color: Colors.grey,
+            ),
           ),
         ],
       ),
     );
   }
 
-  ListView _bodyWithEvents(CategoryState state) {
+  ListView _bodyWithEvents(CategoryState state, BuildContext ctx) {
     return ListView.builder(
       shrinkWrap: true,
       itemCount: state.isSearchMode ? state.searchedEvents.length : state.events.length,
-      itemBuilder: (context, index) => Dismissible(
-        key: Key(state.events[index].toString()),
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: GestureDetector(
-            onTap: () => BlocProvider.of<CategoryCubit>(context).tapOnEvent(index, _textController),
-            onLongPress: () => BlocProvider.of<CategoryCubit>(context).selectEvent(index),
-            child: state.isSearchMode
-                ? _eventMessage(index, state, state.searchedEvents)
-                : _eventMessage(index, state, state.events),
-          ),
-        ),
-        background: Container(
-          color: context.read<ThemeCubit>().state.colorScheme.primary,
-          alignment: Alignment.centerLeft,
-          child: Stack(
-            children: [
-              CircleAvatar(
-                radius: 35,
-                backgroundColor: context.read<ThemeCubit>().state.colorScheme.primary,
-                child: const Icon(
-                  Icons.edit,
-                  color: Colors.white,
-                ),
+      itemBuilder: (context, index) => Column(
+        children: [
+          index == 0 ||
+                  DateFormat.yMMMMd().format(state.events[index].timeOfCreation) !=
+                      DateFormat.yMMMMd().format(state.events[index - 1].timeOfCreation)
+              ? Align(
+                  alignment: BlocProvider.of<SettingsCubit>(context).state.isDateCenterAlign
+                      ? Alignment.center
+                      : Alignment.centerLeft,
+                  child: Container(
+                    width: 140,
+                    alignment: Alignment.center,
+                    margin: const EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: context.read<ThemeCubit>().state.colorScheme.primary,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      DateFormat.yMMMMd().format(state.events[index].timeOfCreation).toString(),
+                      style: TextStyle(
+                        fontSize: BlocProvider.of<SettingsCubit>(context).state.fontSize,
+                      ),
+                    ),
+                  ),
+                )
+              : const SizedBox(),
+          Dismissible(
+            key: Key(state.events[index].toString()),
+            child: Align(
+              alignment: BlocProvider.of<SettingsCubit>(context).state.isBubbleChatLeft
+                  ? Alignment.centerLeft
+                  : Alignment.centerRight,
+              child: GestureDetector(
+                onTap: () =>
+                    BlocProvider.of<CategoryCubit>(context).tapOnEvent(index, _textController),
+                onLongPress: () => BlocProvider.of<CategoryCubit>(context).selectEvent(index),
+                child: state.isSearchMode
+                    ? _eventMessage(index, state, state.searchedEvents)
+                    : _eventMessage(index, state, state.events),
               ),
-            ],
-          ),
-        ),
-        secondaryBackground: Container(
-          color: context.read<ThemeCubit>().state.colorScheme.primary,
-          alignment: Alignment.centerRight,
-          child: Stack(
-            children: [
-              CircleAvatar(
-                radius: 35,
-                backgroundColor: context.read<ThemeCubit>().state.colorScheme.primary,
-                child: const Icon(
-                  Icons.delete,
-                  color: Colors.white,
-                ),
+            ),
+            background: Container(
+              color: context.read<ThemeCubit>().state.colorScheme.primary,
+              alignment: Alignment.centerLeft,
+              child: Stack(
+                children: [
+                  CircleAvatar(
+                    radius: 35,
+                    backgroundColor: context.read<ThemeCubit>().state.colorScheme.primary,
+                    child: const Icon(
+                      Icons.edit,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
+            secondaryBackground: Container(
+              color: context.read<ThemeCubit>().state.colorScheme.primary,
+              alignment: Alignment.centerRight,
+              child: Stack(
+                children: [
+                  CircleAvatar(
+                    radius: 35,
+                    backgroundColor: context.read<ThemeCubit>().state.colorScheme.primary,
+                    child: const Icon(
+                      Icons.delete,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            onDismissed: (direction) {
+              if (direction == DismissDirection.startToEnd) {
+                BlocProvider.of<CategoryCubit>(context).selectEvent(index);
+                _textController.text = BlocProvider.of<CategoryCubit>(context).editEvent();
+              } else {
+                BlocProvider.of<CategoryCubit>(context).selectEvent(index);
+                BlocProvider.of<CategoryCubit>(context).deleteEvent();
+              }
+            },
           ),
-        ),
-        onDismissed: (direction) {
-          if (direction == DismissDirection.startToEnd) {
-            BlocProvider.of<CategoryCubit>(context).selectEvent(index);
-            _textController.text = BlocProvider.of<CategoryCubit>(context).editEvent();
-          } else {
-            BlocProvider.of<CategoryCubit>(context).selectEvent(index);
-            BlocProvider.of<CategoryCubit>(context).deleteEvent();
-          }
-        },
+        ],
       ),
     );
   }
@@ -294,7 +360,9 @@ class _CategoryPageState extends State<CategoryPage> {
               : Wrap(),
           Text(
             events[index].description.toString(),
-            style: const TextStyle(fontSize: 18),
+            style: TextStyle(
+              fontSize: BlocProvider.of<SettingsCubit>(context).state.fontSize,
+            ),
           ),
           if (events[index].attachment != null)
             ConstrainedBox(
@@ -311,8 +379,9 @@ class _CategoryPageState extends State<CategoryPage> {
               if (events[index].isSelected) const Icon(Icons.done, size: 12),
               Text(
                 DateFormat().add_jm().format(events[index].timeOfCreation).toString(),
-                style: const TextStyle(
-                  fontSize: 11,
+                style: TextStyle(
+                  fontSize: BlocProvider.of<SettingsCubit>(context).state.fontSize,
+                  fontStyle: FontStyle.italic,
                 ),
               ),
               if (events[index].isBookmarked) const Icon(Icons.bookmark, size: 12),
@@ -336,6 +405,9 @@ class _CategoryPageState extends State<CategoryPage> {
           ),
           Expanded(
             child: TextField(
+              style: TextStyle(
+                fontSize: BlocProvider.of<SettingsCubit>(context).state.fontSize,
+              ),
               onChanged: (text) => BlocProvider.of<CategoryCubit>(context).changeWritingMode(text),
               keyboardType: TextInputType.multiline,
               maxLines: null,
@@ -419,7 +491,12 @@ class _CategoryPageState extends State<CategoryPage> {
               Navigator.pop(context);
             },
           ),
-          Text(section.title),
+          Text(
+            section.title,
+            style: TextStyle(
+              fontSize: BlocProvider.of<SettingsCubit>(context).state.fontSize,
+            ),
+          ),
         ],
       ),
     );
@@ -430,18 +507,33 @@ class _CategoryPageState extends State<CategoryPage> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: const Text('Do you want to delete events?'),
+        title: Text(
+          'Do you want to delete events?',
+          style: TextStyle(
+            fontSize: BlocProvider.of<SettingsCubit>(context).state.fontSize,
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () {
               BlocProvider.of<CategoryCubit>(ctx).deleteEvent();
               Navigator.pop(context);
             },
-            child: const Text('Yes'),
+            child: Text(
+              'Yes',
+              style: TextStyle(
+                fontSize: BlocProvider.of<SettingsCubit>(context).state.fontSize,
+              ),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('No'),
+            child: Text(
+              'No',
+              style: TextStyle(
+                fontSize: BlocProvider.of<SettingsCubit>(context).state.fontSize,
+              ),
+            ),
           )
         ],
       ),
@@ -461,13 +553,15 @@ class _CategoryPageState extends State<CategoryPage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Padding(
-                padding: EdgeInsets.only(top: 20, left: 20, right: 20),
+              Padding(
+                padding: const EdgeInsets.only(top: 20, left: 20, right: 20),
                 child: Text(
                   'Select the page you want '
                   'to migrate the selected '
                   'event(s) to!',
-                  style: TextStyle(fontSize: 18),
+                  style: TextStyle(
+                    fontSize: BlocProvider.of<SettingsCubit>(context).state.fontSize,
+                  ),
                 ),
               ),
               const SizedBox(height: 10),
@@ -491,6 +585,9 @@ class _CategoryPageState extends State<CategoryPage> {
         return RadioListTile<int>(
           title: Text(
             ctx.read<HomeCubit>().state.categories[index].title,
+            style: TextStyle(
+              fontSize: BlocProvider.of<SettingsCubit>(context).state.fontSize,
+            ),
           ),
           activeColor: Theme.of(context).primaryColor,
           value: index,
@@ -511,8 +608,7 @@ class _CategoryPageState extends State<CategoryPage> {
           child: Text(
             'Cancel',
             style: TextStyle(
-              color: Theme.of(context).primaryColor,
-              fontSize: 16,
+              fontSize: BlocProvider.of<SettingsCubit>(context).state.fontSize,
             ),
           ),
         ),
@@ -524,8 +620,7 @@ class _CategoryPageState extends State<CategoryPage> {
           child: Text(
             'Move',
             style: TextStyle(
-              color: Theme.of(context).primaryColor,
-              fontSize: 16,
+              fontSize: BlocProvider.of<SettingsCubit>(context).state.fontSize,
             ),
           ),
         )

@@ -27,6 +27,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     BlocProvider.of<HomeCubit>(context).init();
+    BlocProvider.of<SettingsCubit>(context).initSettings();
   }
 
   @override
@@ -39,8 +40,13 @@ class _HomePageState extends State<HomePage> {
               SliverAppBar(
                 pinned: true,
                 expandedHeight: 190,
-                title: const Center(
-                  child: Text('Home'),
+                title: Center(
+                  child: Text(
+                    'Home',
+                    style: TextStyle(
+                      fontSize: context.read<SettingsCubit>().state.fontSize,
+                    ),
+                  ),
                 ),
                 actions: [
                   IconButton(
@@ -121,10 +127,19 @@ class _HomePageState extends State<HomePage> {
             alignment: Alignment.centerLeft,
             child: Text(
               category.title,
-              style: Theme.of(context).textTheme.headline6,
+              style: TextStyle(
+                fontSize: BlocProvider.of<SettingsCubit>(context).state.fontSize,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
-          subtitle: const Text('No events. Click to create one'),
+          subtitle: Text(
+            'No events. Click to create one',
+            style: TextStyle(
+              fontStyle: FontStyle.italic,
+              fontSize: BlocProvider.of<SettingsCubit>(context).state.fontSize,
+            ),
+          ),
           onTap: () async {
             await Navigator.push(
               context,
@@ -140,6 +155,9 @@ class _HomePageState extends State<HomePage> {
                     BlocProvider.value(
                       value: BlocProvider.of<ThemeCubit>(context),
                     ),
+                    BlocProvider.value(
+                      value: BlocProvider.of<SettingsCubit>(context),
+                    ),
                   ],
                   child: CategoryPage(
                     category: category,
@@ -147,7 +165,6 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             );
-            setState(() {});
           },
           onLongPress: () => _showModalBottomActions(context, index, state),
         ),
@@ -355,42 +372,74 @@ class _HomePageState extends State<HomePage> {
                 alignment: Alignment.bottomLeft,
                 child: Text(
                   DateFormat.yMMMMd().format(DateTime.now()).toString(),
-                  style: const TextStyle(
-                    fontSize: 20,
+                  style: TextStyle(
+                    fontSize: context.read<SettingsCubit>().state.fontSize,
                     color: Colors.white,
                   ),
                 ),
               ),
             ),
           ),
-          const ListTile(
-            title: Text('Search'),
-            leading: Icon(Icons.search),
-          ),
-          const ListTile(
-            title: Text('Notifications'),
-            leading: Icon(Icons.notifications),
-          ),
-          const ListTile(
-            title: Text('Statistics'),
-            leading: Icon(Icons.timeline),
+          ListTile(
+            title: Text(
+              'Search',
+              style: TextStyle(
+                fontSize: BlocProvider.of<SettingsCubit>(context).state.fontSize,
+              ),
+            ),
+            leading: const Icon(Icons.search),
           ),
           ListTile(
-            title: const Text('Settings'),
+            title: Text(
+              'Notifications',
+              style: TextStyle(
+                fontSize: BlocProvider.of<SettingsCubit>(context).state.fontSize,
+              ),
+            ),
+            leading: const Icon(Icons.notifications),
+          ),
+          ListTile(
+            title: Text(
+              'Statistics',
+              style: TextStyle(
+                fontSize: BlocProvider.of<SettingsCubit>(context).state.fontSize,
+              ),
+            ),
+            leading: const Icon(Icons.timeline),
+          ),
+          ListTile(
+            title: Text(
+              'Settings',
+              style: TextStyle(
+                fontSize: BlocProvider.of<SettingsCubit>(context).state.fontSize,
+              ),
+            ),
             leading: const Icon(Icons.settings),
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => BlocProvider<SettingsCubit>(
-                  create: (context) => SettingsCubit(),
-                  child: SettingsPage(),
+                builder: (_) => MultiBlocProvider(
+                  providers: [
+                    BlocProvider.value(
+                      value: BlocProvider.of<SettingsCubit>(context),
+                    ),
+                    BlocProvider.value(
+                      value: BlocProvider.of<ThemeCubit>(context),
+                    ),
+                  ],
+                  child: const SettingsPage(),
                 ),
               ),
             ),
           ),
-          const ListTile(
-            title: Text('Feedback'),
-            leading: Icon(Icons.mail),
+          ListTile(
+            title: Text(
+              'Feedback',
+              style: TextStyle(
+                fontSize: BlocProvider.of<SettingsCubit>(context).state.fontSize,
+              ),
+            ),
+            leading: const Icon(Icons.mail),
           ),
         ],
       ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'theme/app_theme.dart';
+
 class Constants {
   static const lSecondaryColor = Color(0xFFedf0f7);
   static const lPrimaryColor = Color(0xFF747DF2);
@@ -8,6 +10,14 @@ class Constants {
   static const dSecondaryColor = Color(0xFF293D58);
   static const dPrimaryColor = Color(0xFF6996CD);
   static const dIconColor = Colors.white;
+}
+
+class FontSizes {
+  static const fontSizes = <FontSizeKeys, double>{
+    FontSizeKeys.small : 12.0,
+    FontSizeKeys.medium : 16.0,
+    FontSizeKeys.large : 20.0,
+  };
 }
 
 class CategoryIcons {

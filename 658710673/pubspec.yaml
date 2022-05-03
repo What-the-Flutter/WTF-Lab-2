@@ -30,6 +30,7 @@ dev_dependencies:
   firebase_storage: ^10.2.10
   local_auth: ^2.0.0
   get_it: ^7.2.0
+  share_plus: ^4.0.4
 
 flutter:
   uses-material-design: true
