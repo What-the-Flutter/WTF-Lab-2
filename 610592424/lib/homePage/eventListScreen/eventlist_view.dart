@@ -1,20 +1,30 @@
-import 'package:diploma/NewHome/Additional/theme_widget.dart';
-import 'package:diploma/NewHome/Event/Assets/event_icons_set.dart';
-import 'package:diploma/NewHome/Event/Cubit/eventslist_cubit.dart';
-import 'package:diploma/NewHome/Event/Models/event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'package:diploma/homePage/theme/theme_widget.dart';
+import 'package:diploma/homePage/assets/event_icons_set.dart';
+import 'package:diploma/homePage/models/event.dart';
+import './cubit/eventlist_cubit.dart';
+import './cubit/eventlist_state.dart';
 
 enum States { normal, singleSelected, multiSelected, editing, searching }
 
 class EventListView extends StatefulWidget {
-  const EventListView({Key? key}) : super(key: key);
+  final String title;
+
+  const EventListView(this.title, {Key? key}) : super(key: key);
 
   @override
   State<EventListView> createState() => _EventListViewState();
 }
 
 class _EventListViewState extends State<EventListView> {
+  @override
+  void initState() {
+    super.initState();
+    BlocProvider.of<EventListCubit>(context).init();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Theme(
@@ -34,20 +44,14 @@ class _EventListViewState extends State<EventListView> {
     );
   }
 
-  @override
-  void initState() {
-    super.initState();
-
-    context.read<EventListCubit>().deselectAllEvents();
-  }
-
   States _currentState = States.normal;
   int? _tempEventId;
 
   bool _showImageList = false;
 
   final _keyForTextField = GlobalKey<FormFieldState<String>>();
-  Icon? _chosenIcon;
+
+  int _chosenIconIndex = 0;
 
   void _setState(States state) => setState(() {
         _currentState = state;
@@ -57,7 +61,7 @@ class _EventListViewState extends State<EventListView> {
     setState(() {
       _currentState = States.normal;
       _tempEventId = null;
-      _chosenIcon = null;
+      _chosenIconIndex = 0;
       context.read<EventListCubit>().deselectAllEvents();
     });
   }
@@ -68,13 +72,13 @@ class _EventListViewState extends State<EventListView> {
     Event tempEvent = context.read<EventListCubit>().getSingleSelected();
 
     setState(() {
-      _tempEventId = tempEvent.id;
-      _chosenIcon = tempEvent.icon;
+      _tempEventId = tempEvent.eventId;
+      _chosenIconIndex = tempEvent.iconIndex ?? 0;
       _currentState = States.editing;
     });
   }
 
-  void _setSearchingState(){
+  void _setSearchingState() {
     _setState(States.searching);
     _applySearch("");
   }
@@ -83,13 +87,9 @@ class _EventListViewState extends State<EventListView> {
         _showImageList = !_showImageList;
       });
 
-  void _setChosenIcon(Icon icon, [bool deleteIcon = false]) {
+  void _setChosenIcon(int iconIndex) {
     setState(() {
-      if (deleteIcon) {
-        _chosenIcon = null;
-      } else {
-        _chosenIcon = icon;
-      }
+      _chosenIconIndex = iconIndex;
 
       _changePictureListVisibility();
     });
@@ -100,7 +100,7 @@ class _EventListViewState extends State<EventListView> {
       return;
     }
 
-    context.read<EventListCubit>().changeEventSelection(event.id);
+    context.read<EventListCubit>().changeEventSelection(event.eventId);
 
     var itemsSelected = context.read<EventListCubit>().eventsSelected;
 
@@ -123,7 +123,8 @@ class _EventListViewState extends State<EventListView> {
     var _newEvent = Event(
       _tempEventId!,
       _keyForTextField.currentState!.value!,
-      _chosenIcon,
+      -1,
+      _chosenIconIndex == 0 ? null : _chosenIconIndex,
     );
 
     context.read<EventListCubit>().editEvent(_newEvent);
@@ -138,7 +139,8 @@ class _EventListViewState extends State<EventListView> {
     Event tempEvent = Event(
       -1,
       _keyForTextField.currentState!.value!,
-      _chosenIcon,
+      -1,
+      _chosenIconIndex == 0 ? null : _chosenIconIndex,
     );
 
     context.read<EventListCubit>().addEvent(tempEvent);
@@ -154,7 +156,7 @@ class _EventListViewState extends State<EventListView> {
     _setNormalState();
   }
 
-  void _applySearch(String text){
+  void _applySearch(String text) {
     context.read<EventListCubit>().applySearch(text);
   }
 
@@ -169,7 +171,7 @@ class _EventListViewState extends State<EventListView> {
             icon: const Icon(Icons.arrow_back_outlined),
           ),
           title: Center(
-            child: Text(context.read<EventListCubit>().eventHolderTitle),
+            child: Text(widget.title),
           ),
           actions: [
             IconButton(
@@ -258,36 +260,37 @@ class _EventListViewState extends State<EventListView> {
   }
 
   BlocBuilder _eventsList() {
-    return BlocBuilder<EventListCubit, List<Event>>(builder: (context, state) {
+    return BlocBuilder<EventListCubit, EventListState>(
+        builder: (context, state) {
       return ListView.builder(
         shrinkWrap: true,
-        itemCount: state.length,
+        itemCount: state.events.length,
         itemBuilder: (context, index) => Align(
           alignment: Alignment.bottomLeft,
           child: GestureDetector(
-            onTap: () => _onEventTapOrPress(state[index]),
-            onLongPress: () => _onEventTapOrPress(state[index]),
+            onTap: () => _onEventTapOrPress(state.events[index]),
+            onLongPress: () => _onEventTapOrPress(state.events[index]),
             child: Container(
               margin: const EdgeInsets.all(5),
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                color: state[index].isSelected
+                color: state.events[index].isSelected
                     ? Colors.amber.shade700
                     : Colors.amber,
               ),
-              child: (state[index].icon == null)
-                  ? Text(state[index].text)
+              child: (state.events[index].icon == null)
+                  ? Text(state.events[index].text)
                   : Column(
                       //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        state[index].icon!,
+                        state.events[index].icon!,
                         const SizedBox(
                           height: 3,
                           width: 1,
                         ),
-                        Text(state[index].text),
+                        Text(state.events[index].text),
                       ],
                     ),
             ),
@@ -317,9 +320,9 @@ class _EventListViewState extends State<EventListView> {
                 children: [
                   IconButton(
                     onPressed: () => _changePictureListVisibility(),
-                    icon: (_chosenIcon == null)
+                    icon: (_chosenIconIndex == 0)
                         ? const Icon(Icons.grain)
-                        : _chosenIcon!,
+                        : setOfEventIcons[_chosenIconIndex],
                   ),
                   Expanded(
                     child: TextFormField(
@@ -358,9 +361,9 @@ class _EventListViewState extends State<EventListView> {
                 children: [
                   IconButton(
                     onPressed: () => _changePictureListVisibility(),
-                    icon: (_chosenIcon == null)
+                    icon: (_chosenIconIndex == 0)
                         ? const Icon(Icons.grain)
-                        : _chosenIcon!,
+                        : setOfEventIcons[_chosenIconIndex],
                   ),
                   Expanded(
                     child: TextFormField(
@@ -431,8 +434,7 @@ class _EventListViewState extends State<EventListView> {
                 icon: setOfEventIcons[index],
                 color: Colors.white,
                 iconSize: 40,
-                onPressed: () =>
-                    _setChosenIcon(setOfEventIcons[index], index == 0),
+                onPressed: () => _setChosenIcon(index),
               ),
             ),
           ],
@@ -442,6 +444,8 @@ class _EventListViewState extends State<EventListView> {
   }
 
   Future _forwardAllSelected(BuildContext myContext) async {
+    var eventholders =
+        await myContext.read<EventListCubit>().getEventForwardingHoldersList();
     return await showDialog(
       context: myContext,
       barrierDismissible: true,
@@ -449,13 +453,12 @@ class _EventListViewState extends State<EventListView> {
         return SimpleDialog(
           title: const Text('Choose page'),
           children: [
-            for (var eventHolder
-                in myContext.read<EventListCubit>().getEventForwardingHoldersList())
+            for (var eventHolder in eventholders)
               SimpleDialogOption(
                 onPressed: () {
                   myContext
                       .read<EventListCubit>()
-                      .forwardAllSelected(eventHolder.id);
+                      .forwardAllSelected(eventHolder.eventholderId);
                 },
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,

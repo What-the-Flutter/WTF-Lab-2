@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
-import 'Home/Screens/event_holders_screen.dart';
-import 'Home/Additional/theme_widget.dart';
 
-void main() {
+import 'package:diploma/homePage/nominalDataBase/shared_preferences_provider.dart';
+import 'homePage/eventHolderScreen/eventholder_page.dart';
+import 'homePage/theme/theme_widget.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SharedPreferencesProvider.init();
+  final _prefsProvider = SharedPreferencesProvider();
   runApp(
-    GeneralTheme(
-      myTheme: MyTheme(ThemeData.light()),
-      child: const MaterialApp(
-        title: "Diploma project",
-        home: EventHoldersScreen(),
+      GeneralTheme(
+        myTheme: MyTheme(_prefsProvider.getTheme()),
+        child: const MaterialApp(
+          title: "Diploma project",
+          home: EventHolderPage(),
+        ),
       ),
-    ),
   );
 }
+

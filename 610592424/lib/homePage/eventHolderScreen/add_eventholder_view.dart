@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:diploma/NewHome/EventHolder/Models/event_holder.dart';
-import 'package:diploma/NewHome/Additional/theme_widget.dart';
-import 'package:diploma/NewHome/EventHolder/Assets/eventholder_icons_set.dart';
+
+import 'package:diploma/homePage/models/event_holder.dart';
+import 'package:diploma/homePage/theme/theme_widget.dart';
+import 'package:diploma/homePage/assets/eventholder_icons_set.dart';
 
 enum EventHolderViewStates {
   adding,
@@ -33,7 +34,7 @@ class _AddEventHolderViewState extends State<AddEventHolderView> {
 
     _selectedIconIndex = widget.state == EventHolderViewStates.adding
         ? 0
-        : widget.eventHolder!.pictureIndex;
+        : widget.eventHolder!.iconIndex;
 
     _textController = TextEditingController(
         text: widget.state == EventHolderViewStates.adding
@@ -97,7 +98,8 @@ class _AddEventHolderViewState extends State<AddEventHolderView> {
                     maxCrossAxisExtent: 70,
                     childAspectRatio: 1,
                     crossAxisSpacing: 20,
-                    mainAxisSpacing: 20),
+                    mainAxisSpacing: 20,
+                ),
                 itemCount: setOfEventholderIcons.length,
                 itemBuilder: (context, index) {
                   return GestureDetector(
@@ -121,7 +123,7 @@ class _AddEventHolderViewState extends State<AddEventHolderView> {
       ),
       floatingActionButton: _emptyText
           ? FloatingActionButton(
-              onPressed: () => Navigator.pop(context, null),
+              onPressed: () => Navigator.pop(context),
               child: const Icon(Icons.cancel, color: Colors.black87),
               backgroundColor: Colors.yellow,
             )
@@ -132,15 +134,14 @@ class _AddEventHolderViewState extends State<AddEventHolderView> {
                     Navigator.pop(
                       context,
                       EventHolder(
-                        events: [],
                         title: _textController.text,
-                        pictureIndex: _selectedIconIndex,
+                        iconIndex: _selectedIconIndex,
                       ),
                     );
                     break;
                   case EventHolderViewStates.editing:
                     widget.eventHolder!.title = _textController.text;
-                    widget.eventHolder!.pictureIndex = _selectedIconIndex;
+                    widget.eventHolder!.iconIndex = _selectedIconIndex;
                     Navigator.pop(
                       context,
                       widget.eventHolder!,

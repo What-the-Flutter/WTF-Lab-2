@@ -1,10 +1,12 @@
-import 'package:diploma/NewHome/EventHolder/Views/add_eventholder_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:diploma/NewHome/EventHolder/Cubit/eventholder_cubit.dart';
-import 'package:diploma/NewHome/EventHolder/Models/event_holder.dart';
-import 'package:diploma/NewHome/Additional/theme_widget.dart';
-import 'package:diploma/NewHome/Event/Views/eventlist_page.dart';
+
+import 'package:diploma/homePage/models/event_holder.dart';
+import 'package:diploma/homePage/theme/theme_widget.dart';
+import 'package:diploma/homePage/eventListScreen/eventList_page.dart';
+import 'add_eventholder_view.dart';
+import './cubit/eventholder_cubit.dart';
+import './cubit/eventholder_state.dart';
 
 class EventHolderView extends StatefulWidget {
   const EventHolderView({Key? key}) : super(key: key);
@@ -15,6 +17,12 @@ class EventHolderView extends StatefulWidget {
 
 class _EventHolderViewState extends State<EventHolderView> {
   @override
+  void initState() {
+    super.initState();
+    BlocProvider.of<EventHolderCubit>(context).init();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Theme(
       data: GeneralTheme.of(context).myTheme.themeData,
@@ -24,18 +32,6 @@ class _EventHolderViewState extends State<EventHolderView> {
         floatingActionButton: _floatingActionButton(context),
       ),
     );
-  }
-
-  void _changeTheme() {
-    setState(() {
-      GeneralTheme.of(context).myTheme.themeData =
-          GeneralTheme.of(context).myTheme.isLight
-              ? ThemeData.dark()
-              : ThemeData.light();
-
-      GeneralTheme.of(context).myTheme.isLight =
-          !GeneralTheme.of(context).myTheme.isLight;
-    });
   }
 
   AppBar _appBar() {
@@ -49,7 +45,9 @@ class _EventHolderViewState extends State<EventHolderView> {
       ),
       actions: [
         IconButton(
-          onPressed: () => _changeTheme(),
+          onPressed: () => setState(() {
+            BlocProvider.of<EventHolderCubit>(context).changeTheme(context);
+          }),
           icon: const Icon(Icons.color_lens),
         ),
       ],
@@ -57,31 +55,47 @@ class _EventHolderViewState extends State<EventHolderView> {
   }
 
   BlocBuilder _body(BuildContext context) {
-    return BlocBuilder<EventHolderCubit, List<EventHolder>>(
-        builder: (context, state) {
-      return ListView(
-        children: <Widget>[
-          for (var element in state)
-            ListTile(
-              leading: element.picture,
-              title: Text(element.title),
-              subtitle: Text(element.subTitle),
-              onTap: () async {
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) {
-                      return EventListPage(element.id);
-                    },
-                  ),
-                );
-                setState(() {});
-              },
-              onLongPress: () => _createActionsMenu(element.id, context),
-            )
-        ],
-      );
-    });
+    return BlocBuilder<EventHolderCubit, EventHolderState>(
+      builder: (context, state) {
+        return ListView(
+          children: <Widget>[
+            for (var element in state.eventHolders)
+              ListTile(
+                leading: element.picture,
+                title: Text(element.title),
+                subtitle: FutureBuilder(
+                  future: BlocProvider.of<EventHolderCubit>(context)
+                      .getEventHolderLastEventText(element.eventholderId),
+                  builder:
+                      (BuildContext context, AsyncSnapshot<String> snapshot) {
+                    if (snapshot.hasData) {
+                      return Text(snapshot.data!);
+                    } else {
+                      return const Text('no events');
+                    }
+                  },
+                ),
+                onTap: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) {
+                        return EventListPage(
+                          element.eventholderId,
+                          element.title,
+                        );
+                      },
+                    ),
+                  );
+                  setState(() {});
+                },
+                onLongPress: () =>
+                    _createActionsMenu(element.eventholderId, context),
+              )
+          ],
+        );
+      },
+    );
   }
 
   void _createActionsMenu(int id, BuildContext context) {
@@ -122,11 +136,11 @@ class _EventHolderViewState extends State<EventHolderView> {
               ),
               Expanded(
                 child: ListTile(
-                  onTap: () {
-                    EventHolder tempHolder = context
+                  onTap: () async {
+                    EventHolder tempHolder = await context
                         .read<EventHolderCubit>()
                         .getEventHolder(id);
-                    Navigator.push(
+                    var result = await Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) {
@@ -136,14 +150,12 @@ class _EventHolderViewState extends State<EventHolderView> {
                           );
                         },
                       ),
-                    ).then(
-                      (value) => {
-                        if (value != null)
-                          context
-                              .read<EventHolderCubit>()
-                              .editEventHolder(value as EventHolder)
-                      },
                     );
+                    if (result != null) {
+                      context
+                          .read<EventHolderCubit>()
+                          .editEventHolder(result as EventHolder);
+                    }
                   },
                   leading: const Icon(
                     Icons.edit,
@@ -170,7 +182,7 @@ class _EventHolderViewState extends State<EventHolderView> {
     );
   }
 
-  FloatingActionButton _floatingActionButton(BuildContext context){
+  FloatingActionButton _floatingActionButton(BuildContext context) {
     return FloatingActionButton(
       onPressed: () {
         Navigator.push(
@@ -183,7 +195,7 @@ class _EventHolderViewState extends State<EventHolderView> {
             },
           ),
         ).then(
-              (value) => {
+          (value) => {
             if (value != null)
               context
                   .read<EventHolderCubit>()
