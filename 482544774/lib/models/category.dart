@@ -2,14 +2,17 @@ import 'package:flutter/material.dart';
 
 class Category {
   final String id;
-  final String name;
-  final String status;
-  final Icon icon;
+  final IconData icon;
+  String name;
+  List<String> events;
+  bool pinned;
+
 
   Category({
     required this.id,
     required this.name,
-    required this.status,
     required this.icon,
+    required this.events,
+    required this.pinned, 
   });
 }

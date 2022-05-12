@@ -6,28 +6,22 @@ List<Category> categoryList = <Category>[
   Category(
     id: 'ct1',
     name: 'Hobby',
-    status: 'No events.',
-    icon: const Icon(
-      Icons.accessibility_outlined,
-      color: Colors.white,
-    ),
+    icon: Icons.accessibility_outlined,
+    events: ['Read book'],
+    pinned: false,
   ),
   Category(
     id: 'ct2',
     name: 'Family',
-    status: 'No events.',
-    icon: const Icon(
-      Icons.chair,
-      color: Colors.white,
-    ),
+    icon: Icons.chair,
+    events: ['Eat dinner'],
+    pinned: false,
   ),
   Category(
     id: 'ct3',
     name: 'Sport',
-    status: 'No events.',
-    icon: const Icon(
-      Icons.fitness_center,
-      color: Colors.white,
-    ),
+    icon: Icons.fitness_center, 
+    events: ['Play footbal'],
+    pinned: false,
   ),
 ];

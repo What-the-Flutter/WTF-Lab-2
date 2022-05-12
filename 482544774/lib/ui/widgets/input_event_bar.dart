@@ -18,7 +18,10 @@ class InputEventBar extends StatelessWidget {
             Expanded(
               child: TextButton(
                 onPressed: () => {},
-                child: const Icon(Icons.color_lens),
+                child: Icon(
+                  Icons.color_lens,
+                  color: Theme.of(context).primaryColor,
+                ),
               ),
             ),
             Expanded(
@@ -33,7 +36,10 @@ class InputEventBar extends StatelessWidget {
             Expanded(
               child: TextButton(
                 onPressed: addEvent,
-                child: const Icon(Icons.send),
+                child: Icon(
+                  Icons.send,
+                  color: Theme.of(context).primaryColor,
+                ),
               ),
             ),
           ],
