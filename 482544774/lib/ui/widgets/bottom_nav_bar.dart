@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 class BottomNavBar extends StatelessWidget {
-  const BottomNavBar(this.selectedIndex, this.onTap, {Key? key})
-      : super(key: key);
-
   final int selectedIndex;
   final Function(int) onTap;
+  
+  const BottomNavBar(this.selectedIndex, this.onTap, {Key? key})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {

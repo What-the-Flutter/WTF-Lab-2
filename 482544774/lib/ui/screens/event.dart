@@ -4,38 +4,38 @@ import 'package:flutter/services.dart';
 import '../widgets/app_bar_button.dart';
 import '../widgets/input_event_bar.dart';
 
-
 class EventScreen extends StatefulWidget {
-  EventScreen({Key? key}) : super(key: key);
+  final String title;
+  final List<String> events;
+
+  EventScreen({required this.title, required this.events, Key? key})
+      : super(key: key);
 
   @override
   State<EventScreen> createState() => _EventScreenState();
 }
 
 class _EventScreenState extends State<EventScreen> {
-  List<String> eventList = <String>[
-    'Play footbal',
-    'Read book',
-  ];
-
   final _controller = TextEditingController();
   final _editController = TextEditingController();
   bool enableOptions = false;
   late int _selectedIndex;
-  
+
   void changeOptions() => setState(() => enableOptions = !enableOptions);
 
   void _addEvent() {
-    setState(() {
-      eventList.add(_controller.text);
-      _controller.clear();
-    });
+    setState(
+      () {
+        widget.events.add(_controller.text);
+        _controller.clear();
+      },
+    );
   }
 
   int selectedIndex(String str) {
     var index = 0;
 
-    while (!(str == eventList[index])) {
+    while (!(str == widget.events[index])) {
       index++;
     }
 
@@ -44,24 +44,32 @@ class _EventScreenState extends State<EventScreen> {
   }
 
   Future<void> editEvent(int index) async {
-    _editController.text = eventList[index];
+    _editController.text = widget.events[index];
 
     return showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('AlertDialog Title'),
+        title: const Text('Edit'),
         content: TextField(
           controller: _editController,
         ),
         actions: <Widget>[
           TextButton(
-            onPressed: () => Navigator.pop(context, 'Cancel'),
+            onPressed: () {
+              Navigator.pop(context);
+              setState(() => enableOptions = false);
+            },
             child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () {
-              Navigator.pop(context, 'OK');
-              setState(() => eventList[index] = _editController.text);
+              Navigator.pop(context);
+              setState(
+                () {
+                  widget.events[index] = _editController.text;
+                  enableOptions = false;
+                },
+              );
             },
             child: const Text('OK'),
           ),
@@ -70,13 +78,26 @@ class _EventScreenState extends State<EventScreen> {
     );
   }
 
-  void deleteEvent(int index) => setState(() => eventList.removeAt(index));
+  void deleteEvent(int index) {
+    setState(
+      () {
+        widget.events.removeAt(index);
+        enableOptions = false;
+      },
+    );
+  }
 
   void copyEvent(int index) {
-    Clipboard.setData(ClipboardData(text: eventList[index])).then((_) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Your text copied to clipboard')));
-    });
+    Clipboard.setData(ClipboardData(text: widget.events[index])).then(
+      (_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Your text copied to clipboard'),
+          ),
+        );
+      },
+    );
+    setState(() => enableOptions = false);
   }
 
   @override
@@ -86,7 +107,7 @@ class _EventScreenState extends State<EventScreen> {
         leading: enableOptions
             ? AppBarButton(Icons.close, changeOptions)
             : AppBarButton(Icons.arrow_back, () => Navigator.pop(context)),
-        title: enableOptions ? const Text('') : const Text('Travel'),
+        title: enableOptions ? const Text('') : Text(widget.title),
         centerTitle: true,
         actions: enableOptions
             ? [
@@ -112,29 +133,36 @@ class _EventScreenState extends State<EventScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.end,
                     crossAxisAlignment: CrossAxisAlignment.end,
-                    children: (eventList.map((event) {
-                      return GestureDetector(
-                        onLongPress: () => setState(() {
-                          enableOptions = true;
-                          selectedIndex(event);
-                        }),
-                        child: Container(
-                          key: UniqueKey(),
-                          padding: const EdgeInsets.all(10.0),
-                          margin: const EdgeInsets.symmetric(
-                            vertical: 5.0,
-                            horizontal: 5.0,
+                    children: widget.events.map(
+                      (event) {
+                        return GestureDetector(
+                          onLongPress: () => setState(
+                            () {
+                              enableOptions = true;
+                              selectedIndex(
+                                event,
+                              );
+                            },
                           ),
-                          decoration: BoxDecoration(
-                            color: Colors.lime[400],
-                            borderRadius: BorderRadius.circular(10.0),
+                          child: Container(
+                            key: UniqueKey(),
+                            padding: const EdgeInsets.all(10.0),
+                            margin: const EdgeInsets.symmetric(
+                              vertical: 5.0,
+                              horizontal: 5.0,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).cardColor,
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            child: Text(
+                              event,
+                              style: Theme.of(context).primaryTextTheme.bodyText1,
+                            ),
                           ),
-                          child: Text(
-                            event,
-                          ),
-                        ),
-                      );
-                    }).toList()),
+                        );
+                      },
+                    ).toList(),
                   ),
                 ),
               ),
