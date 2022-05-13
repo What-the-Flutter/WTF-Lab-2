@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../constants.dart';
+import '../../models/category.dart';
 import '../../widgets/list_item.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -91,25 +92,9 @@ class ListViewHome extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      children: const <Widget>[
-        Divider(),
-        ListItem(
-          'Travel',
-          'No events. Click to create one.',
-          Icons.flight_takeoff,
-        ),
-        ListItem(
-          'Family',
-          'No events. Click to create one.',
-          Icons.weekend,
-        ),
-        ListItem(
-          'Sport',
-          'No events. Click to create one.',
-          Icons.sports_football,
-        ),
-      ],
+    return ListView.builder(
+      itemCount: categories.length,
+      itemBuilder: (context, index) => ListItem(category: categories[index]),
     );
   }
 }
@@ -125,9 +110,9 @@ class FloatingActionButtonHome extends StatefulWidget {
 class _FloatingActionButtonHomeState extends State<FloatingActionButtonHome> {
   @override
   Widget build(BuildContext context) {
-    return const FloatingActionButton(
-      onPressed: null,
-      child: Icon(
+    return FloatingActionButton(
+      onPressed: () {},
+      child: const Icon(
         Icons.add,
         size: 36,
       ),
@@ -148,16 +133,15 @@ class AppBarHome extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: Colors.transparent,
       shadowColor: Colors.transparent,
       leading: IconButton(
-        onPressed: null,
-        padding: const EdgeInsets.only(left: 24),
+        onPressed: () {},
         icon: Image.asset('assets/icons/MenuIcon.png'),
       ),
       title: const Text('Home', style: AppFonts.headerTextStyle),
       centerTitle: true,
-      actions: const [
+      actions: [
         IconButton(
-          onPressed: null,
-          icon: Icon(
+          onPressed: () {},
+          icon: const Icon(
             Icons.invert_colors,
             color: AppColors.textColor,
             size: 30,

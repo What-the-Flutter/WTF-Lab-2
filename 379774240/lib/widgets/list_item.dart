@@ -1,24 +1,28 @@
 import 'package:flutter/material.dart';
 
 import '../constants.dart';
+import '../models/category.dart';
+import '../screens/home/add_event_screen.dart';
 
 class ListItem extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final IconData icon;
+  final Category category;
 
-  const ListItem(
-    this.title,
-    this.subtitle,
-    this.icon, {
+  const ListItem({
     Key? key,
+    required this.category,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => AddEvent(category: category)),
+        );
+      },
       title: Text(
-        title,
+        category.name,
         style: const TextStyle(
           fontFamily: 'Montserrat',
           fontWeight: FontWeight.w600,
@@ -26,7 +30,7 @@ class ListItem extends StatelessWidget {
         ),
       ),
       subtitle: Text(
-        subtitle,
+        category.emptymessge,
         style: const TextStyle(
           fontFamily: 'Montserrat',
           fontWeight: FontWeight.w400,
@@ -42,7 +46,7 @@ class ListItem extends StatelessWidget {
         ),
         child: Center(
           child: Icon(
-            icon,
+            category.iconData,
             color: AppColors.primaryColor,
             size: 30,
           ),
