@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:diploma/homePage/models/event_holder.dart';
-import 'package:diploma/homePage/theme/theme_widget.dart';
+import 'package:diploma/theme/theme_widget.dart';
 import 'package:diploma/homePage/assets/eventholder_icons_set.dart';
 
 enum EventHolderViewStates {
@@ -46,6 +46,10 @@ class _AddEventHolderViewState extends State<AddEventHolderView> {
 
   @override
   Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: creatingScaffold(),
+    );
     return Theme(
       data: GeneralTheme.of(context).myTheme.themeData,
       child: Padding(

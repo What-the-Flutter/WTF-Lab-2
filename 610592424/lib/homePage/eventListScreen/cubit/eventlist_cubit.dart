@@ -1,19 +1,23 @@
 import 'package:bloc/bloc.dart';
-import 'package:diploma/homePage/models/event_holder.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:diploma/data_base/firebase_provider.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:diploma/homePage/models/event_holder.dart';
 import 'package:diploma/homePage/models/event.dart';
-import 'package:diploma/homePage/nominalDataBase/db_context.dart';
+import 'package:diploma/data_base/db_context.dart';
+import 'package:image_picker/image_picker.dart';
 import 'eventlist_state.dart';
 
 class EventListCubit extends Cubit<EventListState> {
-  late int _eventHolderId;
+  final int _eventHolderId;
+  final User _user;
+  late final FireBaseProvider _db;
 
-  EventListCubit(int eventHolderId) : super(EventListState([])) {
-    _eventHolderId = eventHolderId;
+  EventListCubit(this._eventHolderId, this._user) : super(EventListState([])) {
+    _db = FireBaseProvider(_user);
   }
-
-  final DBContext _db = DBContext();
 
   void init() async {
     emit(EventListState(await _db.getAllEventsForEventHolder(_eventHolderId)));
@@ -53,11 +57,10 @@ class EventListCubit extends Cubit<EventListState> {
 
   void addEvent(Event event) async {
     await _db.addEvent(
-      Event(
-        -1,
-        event.text,
-        _eventHolderId,
-        event.iconIndex,
+      Event.withoutId(
+        text: event.text,
+        eventholderId: _eventHolderId,
+        iconIndex: event.iconIndex,
       ),
     );
 
@@ -74,7 +77,7 @@ class EventListCubit extends Cubit<EventListState> {
 
   void deleteAllSelected() {
     state.events.where((element) => element.isSelected).forEach((element) {
-      _db.deleteEvent(element.eventId);
+      _db.deleteEvent(element.eventId, hasImage: element.imagePath != null);
     });
     init();
   }
@@ -92,7 +95,9 @@ class EventListCubit extends Cubit<EventListState> {
   }
 
   void forwardAllSelected(int newEventHolderId) {
-    state.events.where((element) => element.isSelected).forEach((element) async {
+    state.events
+        .where((element) => element.isSelected)
+        .forEach((element) async {
       element.eventholderId = newEventHolderId;
       await _db.updateEvent(element);
     });
@@ -106,5 +111,20 @@ class EventListCubit extends Cubit<EventListState> {
     emit(state.copyWith(
       tempList.where((element) => exp.hasMatch(element.text)).toList(),
     ));
+  }
+
+  Future attachImage() async {
+    final image = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (image == null) return;
+    final event = Event.withoutId(
+      text: '',
+      eventholderId: _eventHolderId,
+      imagePath: image.path,
+    );
+    await _db.addEvent(event);
+  }
+
+  Future<Image> fetchImage(int id) async{
+    return Image.memory(await _db.fetchImage(id));
   }
 }

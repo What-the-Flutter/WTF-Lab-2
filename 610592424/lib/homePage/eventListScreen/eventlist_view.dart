@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:diploma/homePage/theme/theme_widget.dart';
 import 'package:diploma/homePage/assets/event_icons_set.dart';
 import 'package:diploma/homePage/models/event.dart';
 import './cubit/eventlist_cubit.dart';
@@ -27,19 +26,16 @@ class _EventListViewState extends State<EventListView> {
 
   @override
   Widget build(BuildContext context) {
-    return Theme(
-      data: GeneralTheme.of(context).myTheme.themeData,
-      child: Scaffold(
-        appBar: _appBar(context),
-        body: Column(
-          children: [
-            Expanded(child: _eventsList()),
-            Align(
-              alignment: Alignment.bottomLeft,
-              child: _bottomTextField(),
-            ),
-          ],
-        ),
+    return Scaffold(
+      appBar: _appBar(context),
+      body: Column(
+        children: [
+          Expanded(child: _eventsList()),
+          Align(
+            alignment: Alignment.bottomLeft,
+            child: _bottomTextField(),
+          ),
+        ],
       ),
     );
   }
@@ -52,6 +48,14 @@ class _EventListViewState extends State<EventListView> {
   final _keyForTextField = GlobalKey<FormFieldState<String>>();
 
   int _chosenIconIndex = 0;
+
+  bool _allowImagePick = true;
+
+  void _setAllowImagePick(String text) {
+    setState(() {
+      _allowImagePick = text.isEmpty;
+    });
+  }
 
   void _setState(States state) => setState(() {
         _currentState = state;
@@ -144,6 +148,8 @@ class _EventListViewState extends State<EventListView> {
     );
 
     context.read<EventListCubit>().addEvent(tempEvent);
+
+    _setNormalState();
   }
 
   void _copyAllSelected() {
@@ -261,43 +267,77 @@ class _EventListViewState extends State<EventListView> {
 
   BlocBuilder _eventsList() {
     return BlocBuilder<EventListCubit, EventListState>(
-        builder: (context, state) {
-      return ListView.builder(
-        shrinkWrap: true,
-        itemCount: state.events.length,
-        itemBuilder: (context, index) => Align(
-          alignment: Alignment.bottomLeft,
-          child: GestureDetector(
-            onTap: () => _onEventTapOrPress(state.events[index]),
-            onLongPress: () => _onEventTapOrPress(state.events[index]),
-            child: Container(
-              margin: const EdgeInsets.all(5),
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: state.events[index].isSelected
-                    ? Colors.amber.shade700
-                    : Colors.amber,
+      builder: (context, state) {
+        return ListView.builder(
+          shrinkWrap: true,
+          itemCount: state.events.length,
+          itemBuilder: (context, index) => Align(
+            alignment: Alignment.bottomLeft,
+            child: GestureDetector(
+              onTap: () => _onEventTapOrPress(state.events[index]),
+              onLongPress: () => _onEventTapOrPress(state.events[index]),
+              child: Container(
+                margin: const EdgeInsets.all(5),
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: state.events[index].isSelected
+                      ? Colors.amber.shade700
+                      : Colors.amber,
+                ),
+                child: state.events[index].imagePath == null
+                    ? Column(
+                        //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          (state.events[index].icon != null)
+                              ? Container(
+                                  margin: const EdgeInsets.fromLTRB(0, 0, 0, 3),
+                                  child: state.events[index].icon!,
+                                )
+                              : const SizedBox.shrink(),
+                          Container(
+                            constraints: const BoxConstraints(maxWidth: 130),
+                            child: Text(state.events[index].text),
+                          ),
+                        ],
+                      )
+                    : FutureBuilder(
+                        future: BlocProvider.of<EventListCubit>(context)
+                            .fetchImage(state.events[index].eventId),
+                        builder: (BuildContext context,
+                            AsyncSnapshot<Image> snapshot) {
+                          if (snapshot.hasData) {
+                            return Container(
+                              constraints: const BoxConstraints(
+                                minHeight: 5.0,
+                                minWidth: 5.0,
+                                maxHeight: 300.0,
+                                maxWidth: 300.0,
+                              ),
+                              child: snapshot.data,
+                            );
+                          }
+                          else if(snapshot.hasError){
+                            return const Text('error occurred');
+                          }
+                          else {
+                            return const SizedBox(
+                              width: 200,
+                              height: 200,
+                              child: Center(
+                                child: Text('loading...'),
+                              ),
+                            );
+                          }
+                        },
+                      ),
               ),
-              child: (state.events[index].icon == null)
-                  ? Text(state.events[index].text)
-                  : Column(
-                      //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        state.events[index].icon!,
-                        const SizedBox(
-                          height: 3,
-                          width: 1,
-                        ),
-                        Text(state.events[index].text),
-                      ],
-                    ),
             ),
           ),
-        ),
-      );
-    });
+        );
+      },
+    );
   }
 
   Column _bottomTextField() {
@@ -327,17 +367,31 @@ class _EventListViewState extends State<EventListView> {
                   Expanded(
                     child: TextFormField(
                       key: _keyForTextField,
+                      initialValue: '',
                       validator: (String? value) {
                         return (value == null || value.isEmpty)
                             ? "The value cannot be empty"
                             : null;
                       },
+                      onChanged: (text) => _setAllowImagePick(text),
                     ),
                   ),
-                  IconButton(
-                    onPressed: () => _addEvent(),
-                    icon: const Icon(Icons.send),
-                  ),
+                  _allowImagePick
+                      ? IconButton(
+                          onPressed: () async {
+                            await BlocProvider.of<EventListCubit>(context)
+                                .attachImage();
+                            BlocProvider.of<EventListCubit>(context).init();
+                          },
+                          icon: const Icon(Icons.image),
+                        )
+                      : IconButton(
+                          onPressed: () {
+                            _addEvent();
+                            _keyForTextField.currentState!.reset();
+                          },
+                          icon: const Icon(Icons.send),
+                        ),
                 ],
               ),
             ),
@@ -380,7 +434,10 @@ class _EventListViewState extends State<EventListView> {
                     ),
                   ),
                   IconButton(
-                    onPressed: () => _editEvent(),
+                    onPressed: () {
+                      _editEvent();
+                      _keyForTextField.currentState!.reset();
+                    },
                     icon: const Icon(Icons.send),
                   ),
                 ],
