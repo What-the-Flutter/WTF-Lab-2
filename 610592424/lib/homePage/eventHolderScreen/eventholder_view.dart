@@ -1,8 +1,8 @@
+import 'package:diploma/homePage/settings_screen/settings_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:diploma/homePage/models/event_holder.dart';
-import 'package:diploma/homePage/theme/theme_widget.dart';
 import 'package:diploma/homePage/eventListScreen/eventList_page.dart';
 import 'add_eventholder_view.dart';
 import './cubit/eventholder_cubit.dart';
@@ -24,13 +24,10 @@ class _EventHolderViewState extends State<EventHolderView> {
 
   @override
   Widget build(BuildContext context) {
-    return Theme(
-      data: GeneralTheme.of(context).myTheme.themeData,
-      child: Scaffold(
-        appBar: _appBar(),
-        body: _body(context),
-        floatingActionButton: _floatingActionButton(context),
-      ),
+    return Scaffold(
+      appBar: _appBar(),
+      body: _body(context),
+      floatingActionButton: _floatingActionButton(context),
     );
   }
 
@@ -45,10 +42,15 @@ class _EventHolderViewState extends State<EventHolderView> {
       ),
       actions: [
         IconButton(
-          onPressed: () => setState(() {
-            BlocProvider.of<EventHolderCubit>(context).changeTheme(context);
-          }),
-          icon: const Icon(Icons.color_lens),
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) {
+                return const SettingsView();
+              },
+            ),
+          ),
+          icon: const Icon(Icons.settings),
         ),
       ],
     );
@@ -76,6 +78,7 @@ class _EventHolderViewState extends State<EventHolderView> {
                   },
                 ),
                 onTap: () async {
+                  var user = BlocProvider.of<EventHolderCubit>(context).getUser;
                   await Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -83,6 +86,7 @@ class _EventHolderViewState extends State<EventHolderView> {
                         return EventListPage(
                           element.eventholderId,
                           element.title,
+                          user,
                         );
                       },
                     ),

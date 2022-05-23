@@ -54,7 +54,7 @@ class DBContext {
     );
   }
 
-  Future<EventHolder> getEventHolder(int eventHolderId) async{
+  Future<EventHolder> getEventHolder(int eventHolderId) async {
     final db = await database;
 
     final List<Map<String, dynamic>> maps = await db.query(
