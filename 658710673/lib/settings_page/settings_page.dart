@@ -64,15 +64,15 @@ class SettingsPage extends StatelessWidget {
       onTap: () async {
         await showDialog(
           context: context,
-          builder: (context) => AlertDialog(
+          builder: (ctx) => AlertDialog(
             title: Text('Are you sure?', style: Theme.of(context).textTheme.bodyText1),
             actions: [
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                     primary: context.read<ThemeCubit>().state.colorScheme.primary),
                 onPressed: () {
-                  context.read<SettingsCubit>().resetSettings();
-                  Navigator.pop(context);
+                  BlocProvider.of<SettingsCubit>(context).resetSettings();
+                  Navigator.pop(ctx);
                 },
                 child: const Text('Yes'),
               )
@@ -116,15 +116,15 @@ class SettingsPage extends StatelessWidget {
       onTap: () async {
         await showDialog(
           context: context,
-          builder: (context) => AlertDialog(
+          builder: (ctx) => AlertDialog(
             title: Text('Are you sure?', style: Theme.of(context).textTheme.bodyText1),
             actions: [
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                     primary: context.read<ThemeCubit>().state.colorScheme.primary),
                 onPressed: () {
-                  context.read<SettingsCubit>().resetBGImage();
-                  Navigator.pop(context);
+                  BlocProvider.of<SettingsCubit>(context).resetBGImage();
+                  Navigator.pop(ctx);
                 },
                 child: const Text('Yes'),
               )
@@ -206,7 +206,7 @@ class SettingsPage extends StatelessWidget {
       onTap: () async {
         await showDialog(
           context: context,
-          builder: (context) => AlertDialog(
+          builder: (ctx) => AlertDialog(
             title: Text(
               'Change Bubble Alignment to:',
               style: Theme.of(context).textTheme.bodyText1,
@@ -216,8 +216,8 @@ class SettingsPage extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                     primary: context.read<ThemeCubit>().state.colorScheme.primary),
                 onPressed: () {
-                  Navigator.pop(context);
-                  context.read<SettingsCubit>().changeBubbleAlignment(true);
+                  Navigator.pop(ctx);
+                  BlocProvider.of<SettingsCubit>(context).changeBubbleAlignment(true);
                 },
                 child: const Text('Left'),
               ),
@@ -225,8 +225,8 @@ class SettingsPage extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                     primary: context.read<ThemeCubit>().state.colorScheme.primary),
                 onPressed: () {
-                  Navigator.pop(context);
-                  context.read<SettingsCubit>().changeBubbleAlignment(false);
+                  Navigator.pop(ctx);
+                  BlocProvider.of<SettingsCubit>(context).changeBubbleAlignment(false);
                 },
                 child: const Text('Right'),
               )
@@ -250,7 +250,7 @@ class SettingsPage extends StatelessWidget {
       onTap: () async {
         await showDialog(
           context: context,
-          builder: (context) => AlertDialog(
+          builder: (ctx) => AlertDialog(
             title: Text(
               'Change Date Bubble Alignment to:',
               style: Theme.of(context).textTheme.bodyText1,
@@ -260,8 +260,8 @@ class SettingsPage extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                     primary: context.read<ThemeCubit>().state.colorScheme.primary),
                 onPressed: () {
-                  Navigator.pop(context);
-                  context.read<SettingsCubit>().changeCentreDateBubble(false);
+                  Navigator.pop(ctx);
+                  BlocProvider.of<SettingsCubit>(context).changeCentreDateBubble(false);
                 },
                 child: const Text('Left'),
               ),
@@ -269,8 +269,8 @@ class SettingsPage extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                     primary: context.read<ThemeCubit>().state.colorScheme.primary),
                 onPressed: () {
-                  Navigator.pop(context);
-                  context.read<SettingsCubit>().changeCentreDateBubble(true);
+                  Navigator.pop(ctx);
+                  BlocProvider.of<SettingsCubit>(context).changeCentreDateBubble(true);
                 },
                 child: const Text('Centre'),
               )
@@ -294,7 +294,7 @@ class SettingsPage extends StatelessWidget {
       onTap: () {
         showDialog(
           context: context,
-          builder: (context) => AlertDialog(
+          builder: (ctx) => AlertDialog(
             title: Text(
               'Enable Bio Auth?',
               style: Theme.of(context).textTheme.bodyText1,
@@ -304,8 +304,8 @@ class SettingsPage extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                     primary: context.read<ThemeCubit>().state.colorScheme.primary),
                 onPressed: () {
-                  context.read<SettingsCubit>().changeLocalAuth(false);
-                  Navigator.pop(context);
+                  BlocProvider.of<SettingsCubit>(context).changeLocalAuth(false);
+                  Navigator.pop(ctx);
                 },
                 child: const Text('No'),
               ),
@@ -313,8 +313,8 @@ class SettingsPage extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                     primary: context.read<ThemeCubit>().state.colorScheme.primary),
                 onPressed: () {
-                  context.read<SettingsCubit>().changeLocalAuth(true);
-                  Navigator.pop(context);
+                  BlocProvider.of<SettingsCubit>(context).changeLocalAuth(true);
+                  Navigator.pop(ctx);
                 },
                 child: const Text('Yes'),
               )

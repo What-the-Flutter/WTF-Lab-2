@@ -34,4 +34,8 @@ class HomeCubit extends Cubit<HomeState> {
     state.categories[index] = category;
     emit(state.copyWith(categories: state.categories));
   }
+
+  void setSelectedTab(int index) {
+    emit(state.copyWith(currTabIndex: index));
+  }
 }

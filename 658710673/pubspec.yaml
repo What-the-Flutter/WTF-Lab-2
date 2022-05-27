@@ -31,6 +31,11 @@ dev_dependencies:
   local_auth: ^2.0.0
   get_it: ^7.2.0
   share_plus: ^4.0.4
+  animated_splash_screen: ^1.1.0
+  page_transition: ^2.0.0
+  animations: ^2.0.2
+  rive: ^0.8.4
+  lottie: ^1.3.0
 
 flutter:
   uses-material-design: true

@@ -8,13 +8,14 @@ import '../data/firebase_provider.dart';
 import '../home_page/home_cubit.dart';
 import '../models/category.dart';
 import '../models/event.dart';
+import '../models/filter_parameters.dart';
 import '../models/section.dart';
 import 'category_state.dart';
 
 class CategoryCubit extends Cubit<CategoryState> {
   CategoryCubit({required User? user})
       : _user = user,
-        super(CategoryState(events: [], searchedEvents: []));
+        super(CategoryState(events: [], searchedEvents: [], filteredEvents: []));
 
   final User? _user;
   late final FirebaseProvider _db = FirebaseProvider(user: _user);
@@ -25,6 +26,12 @@ class CategoryCubit extends Cubit<CategoryState> {
     emit(state.copyWith(category: category, selectedSection: defaultSection));
     final events = await _db.getAllCategoryEvents(category);
     emit(state.copyWith(events: events));
+  }
+
+  void initTimeline() async {
+    emit(state.copyWith(selectedSection: defaultSection));
+    final events = await _db.getAllEvents();
+    emit(state.copyWith(events: events, filteredEvents: events));
   }
 
   void changeFavoriteMode() {
@@ -178,6 +185,32 @@ class CategoryCubit extends Cubit<CategoryState> {
       }
     }
     emit(state.copyWith(searchedEvents: state.searchedEvents));
+  }
+
+  void applyFilters(FilterParameters parameters) {
+    var filteredEvents = <Event>[];
+    var tempList = <Event>[];
+    for (var categoryId in parameters.selectedPagesId) {
+      for (var i = 0; i < state.events.length; i++) {
+        if (state.events.elementAt(i).category == categoryId) {
+          tempList.add(state.events.elementAt(i));
+        }
+      }
+    }
+    if (parameters.searchText != '') {
+      for (var i = 0; i < tempList.length; i++) {
+        if (state.events
+            .elementAt(i)
+            .description
+            .toLowerCase()
+            .contains(parameters.searchText.toLowerCase())) {
+          filteredEvents.add(state.events.elementAt(i));
+        }
+      }
+    } else {
+      filteredEvents.addAll(tempList);
+    }
+    emit(state.copyWith(filteredEvents: filteredEvents));
   }
 
   void setReplyCategory(BuildContext context, int index) {

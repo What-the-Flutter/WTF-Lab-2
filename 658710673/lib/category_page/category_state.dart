@@ -5,6 +5,7 @@ import '../models/section.dart';
 class CategoryState {
   final List<Event> events;
   final List<Event> searchedEvents;
+  final List<Event> filteredEvents;
   final bool isSearchMode;
   final bool isEditingMode;
   final bool isFavoriteMode;
@@ -19,6 +20,7 @@ class CategoryState {
   CategoryState({
     required this.events,
     required this.searchedEvents,
+    required this.filteredEvents,
     this.category,
     this.isFavoriteMode = false,
     this.isSearchMode = false,
@@ -34,6 +36,7 @@ class CategoryState {
   CategoryState copyWith({
     List<Event>? events,
     List<Event>? searchedEvents,
+    List<Event>? filteredEvents,
     Category? category,
     bool? isSearchMode,
     bool? isWritingMode,
@@ -48,6 +51,7 @@ class CategoryState {
     return CategoryState(
       events: events ?? this.events,
       searchedEvents: searchedEvents ?? this.searchedEvents,
+      filteredEvents: filteredEvents ?? this.filteredEvents,
       category: category ?? this.category,
       isSearchMode: isSearchMode ?? this.isSearchMode,
       isWritingMode: isWritingMode ?? this.isWritingMode,

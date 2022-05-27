@@ -3,27 +3,28 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:lottie/lottie.dart';
 
+import '../category_page/category_cubit.dart';
+import '../category_page/category_state.dart';
+import '../filters_page/filters_cubit.dart';
+import '../filters_page/filters_page.dart';
 import '../home_page/home_cubit.dart';
 import '../models/category.dart';
 import '../models/event.dart';
-import '../models/section.dart';
 import '../settings_page/settings_cubit.dart';
-import '../utils/constants.dart';
 import '../utils/theme/theme_cubit.dart';
-import 'category_cubit.dart';
-import 'category_state.dart';
+import '../widgets/main_page_widgets/main_bottom_bar.dart';
+import '../widgets/main_page_widgets/main_drawer.dart';
 
-class CategoryPage extends StatefulWidget {
-  final Category category;
-
-  const CategoryPage({Key? key, required this.category}) : super(key: key);
+class TimelinePage extends StatefulWidget {
+  const TimelinePage({Key? key}) : super(key: key);
 
   @override
-  State<CategoryPage> createState() => _CategoryPageState();
+  State<TimelinePage> createState() => _TimelinePageState();
 }
 
-class _CategoryPageState extends State<CategoryPage> {
+class _TimelinePageState extends State<TimelinePage> {
   final TextEditingController _textController = TextEditingController();
   final TextEditingController _searchController = TextEditingController();
 
@@ -36,7 +37,7 @@ class _CategoryPageState extends State<CategoryPage> {
   @override
   void initState() {
     super.initState();
-    BlocProvider.of<CategoryCubit>(context).init(widget.category);
+    BlocProvider.of<CategoryCubit>(context).initTimeline();
   }
 
   @override
@@ -70,12 +71,14 @@ class _CategoryPageState extends State<CategoryPage> {
                   child: state.events.isEmpty ? _bodyWithoutEvents() : _bodyWithEvents(state, ctx),
                 ),
               ),
-              Align(
-                alignment: Alignment.bottomLeft,
-                child: state.isSearchMode ? Container() : _inputTextField(state),
-              ),
             ],
           ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: _openFiltersPage,
+            child: const Icon(Icons.filter_list),
+          ),
+          bottomNavigationBar: MainBottomBar(),
+          drawer: const MainDrawer(),
         );
       },
     );
@@ -85,7 +88,7 @@ class _CategoryPageState extends State<CategoryPage> {
     return AppBar(
       title: Center(
         child: Text(
-          widget.category.title,
+          'Timeline',
           style: TextStyle(
             fontSize: BlocProvider.of<SettingsCubit>(context).state.fontSize,
             fontWeight: FontWeight.bold,
@@ -188,7 +191,7 @@ class _CategoryPageState extends State<CategoryPage> {
         ),
         IconButton(
           icon: const Icon(Icons.delete),
-          onPressed: () => _dialog(context),
+          onPressed: () => _showDialog(context),
         ),
       ],
     );
@@ -208,8 +211,7 @@ class _CategoryPageState extends State<CategoryPage> {
       child: Column(
         children: [
           Text(
-            'This is the page where you can track everything about '
-            '"${widget.category.title}"!',
+            'Your timeline is empty! ',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: BlocProvider.of<SettingsCubit>(context).state.fontSize,
@@ -220,11 +222,8 @@ class _CategoryPageState extends State<CategoryPage> {
             height: 18,
           ),
           Text(
-            'Add your first event to "${widget.category.title}" page by entering some'
-            'text in the text box below and hitting the send button. Long tap '
-            'the send button to align the event in the opposite direction. Tap '
-            'on the bookmark icon on the top right corner to show the '
-            'bookmarked events only.',
+            'There are no events to be displayed on your timeline, or you have filtered out all your'
+            ' pages in the filter menu',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: BlocProvider.of<SettingsCubit>(context).state.fontSize,
@@ -236,97 +235,106 @@ class _CategoryPageState extends State<CategoryPage> {
     );
   }
 
-  ListView _bodyWithEvents(CategoryState state, BuildContext ctx) {
-    return ListView.builder(
-      shrinkWrap: true,
-      itemCount: state.isSearchMode ? state.searchedEvents.length : state.events.length,
-      itemBuilder: (context, index) => Column(
-        children: [
-          index == 0 ||
-                  DateFormat.yMMMMd().format(state.events[index].timeOfCreation) !=
-                      DateFormat.yMMMMd().format(state.events[index - 1].timeOfCreation)
-              ? Align(
-                  alignment: BlocProvider.of<SettingsCubit>(context).state.isDateCenterAlign
-                      ? Alignment.center
-                      : Alignment.centerLeft,
-                  child: Container(
-                    width: 140,
-                    alignment: Alignment.center,
-                    margin: const EdgeInsets.all(8),
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: context.read<ThemeCubit>().state.colorScheme.primary,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text(
-                      DateFormat.yMMMMd().format(state.events[index].timeOfCreation).toString(),
-                      style: TextStyle(
-                        fontSize: BlocProvider.of<SettingsCubit>(context).state.fontSize,
+  Widget _bodyWithEvents(CategoryState state, BuildContext ctx) {
+    if (state.filteredEvents.isEmpty) {
+      return Lottie.network(
+        'https://assets7.lottiefiles.com/packages/lf20_fmieo0wt.json',
+        repeat: true,
+        reverse: true,
+        animate: true,
+      );
+    } else {
+      return ListView.builder(
+        shrinkWrap: true,
+        itemCount: state.isSearchMode ? state.searchedEvents.length : state.filteredEvents.length,
+        itemBuilder: (context, index) => Column(
+          children: [
+            index == 0 ||
+                    DateFormat.yMMMMd().format(state.events[index].timeOfCreation) !=
+                        DateFormat.yMMMMd().format(state.events[index - 1].timeOfCreation)
+                ? Align(
+                    alignment: BlocProvider.of<SettingsCubit>(context).state.isDateCenterAlign
+                        ? Alignment.center
+                        : Alignment.centerLeft,
+                    child: Container(
+                      width: 140,
+                      alignment: Alignment.center,
+                      margin: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: context.read<ThemeCubit>().state.colorScheme.primary,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        DateFormat.yMMMMd().format(state.events[index].timeOfCreation).toString(),
+                        style: TextStyle(
+                          fontSize: BlocProvider.of<SettingsCubit>(context).state.fontSize,
+                        ),
                       ),
                     ),
-                  ),
-                )
-              : const SizedBox(),
-          Dismissible(
-            key: Key(state.events[index].toString()),
-            child: Align(
-              alignment: BlocProvider.of<SettingsCubit>(context).state.isBubbleChatLeft
-                  ? Alignment.centerLeft
-                  : Alignment.centerRight,
-              child: GestureDetector(
-                onTap: () =>
-                    BlocProvider.of<CategoryCubit>(context).tapOnEvent(index, _textController),
-                onLongPress: () => BlocProvider.of<CategoryCubit>(context).selectEvent(index),
-                child: state.isSearchMode
-                    ? _eventMessage(index, state, state.searchedEvents)
-                    : _eventMessage(index, state, state.events),
+                  )
+                : const SizedBox(),
+            Dismissible(
+              key: Key(state.events[index].toString()),
+              child: Align(
+                alignment: BlocProvider.of<SettingsCubit>(context).state.isBubbleChatLeft
+                    ? Alignment.centerLeft
+                    : Alignment.centerRight,
+                child: GestureDetector(
+                  onTap: () =>
+                      BlocProvider.of<CategoryCubit>(context).tapOnEvent(index, _textController),
+                  onLongPress: () => BlocProvider.of<CategoryCubit>(context).selectEvent(index),
+                  child: state.isSearchMode
+                      ? _eventMessage(index, state, state.searchedEvents)
+                      : _eventMessage(index, state, state.filteredEvents),
+                ),
               ),
-            ),
-            background: Container(
-              color: context.read<ThemeCubit>().state.colorScheme.primary,
-              alignment: Alignment.centerLeft,
-              child: Stack(
-                children: [
-                  CircleAvatar(
-                    radius: 35,
-                    backgroundColor: context.read<ThemeCubit>().state.colorScheme.primary,
-                    child: const Icon(
-                      Icons.edit,
-                      color: Colors.white,
+              background: Container(
+                color: context.read<ThemeCubit>().state.colorScheme.primary,
+                alignment: Alignment.centerLeft,
+                child: Stack(
+                  children: [
+                    CircleAvatar(
+                      radius: 35,
+                      backgroundColor: context.read<ThemeCubit>().state.colorScheme.primary,
+                      child: const Icon(
+                        Icons.edit,
+                        color: Colors.white,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            secondaryBackground: Container(
-              color: context.read<ThemeCubit>().state.colorScheme.primary,
-              alignment: Alignment.centerRight,
-              child: Stack(
-                children: [
-                  CircleAvatar(
-                    radius: 35,
-                    backgroundColor: context.read<ThemeCubit>().state.colorScheme.primary,
-                    child: const Icon(
-                      Icons.delete,
-                      color: Colors.white,
+              secondaryBackground: Container(
+                color: context.read<ThemeCubit>().state.colorScheme.primary,
+                alignment: Alignment.centerRight,
+                child: Stack(
+                  children: [
+                    CircleAvatar(
+                      radius: 35,
+                      backgroundColor: context.read<ThemeCubit>().state.colorScheme.primary,
+                      child: const Icon(
+                        Icons.delete,
+                        color: Colors.white,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
+              onDismissed: (direction) {
+                if (direction == DismissDirection.startToEnd) {
+                  BlocProvider.of<CategoryCubit>(context).selectEvent(index);
+                  _textController.text = BlocProvider.of<CategoryCubit>(context).editEvent();
+                } else {
+                  BlocProvider.of<CategoryCubit>(context).selectEvent(index);
+                  BlocProvider.of<CategoryCubit>(context).deleteEvent();
+                }
+              },
             ),
-            onDismissed: (direction) {
-              if (direction == DismissDirection.startToEnd) {
-                BlocProvider.of<CategoryCubit>(context).selectEvent(index);
-                _textController.text = BlocProvider.of<CategoryCubit>(context).editEvent();
-              } else {
-                BlocProvider.of<CategoryCubit>(context).selectEvent(index);
-                BlocProvider.of<CategoryCubit>(context).deleteEvent();
-              }
-            },
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
+    }
   }
 
   Widget _eventMessage(int index, CategoryState state, List<Event> events) {
@@ -358,6 +366,18 @@ class _CategoryPageState extends State<CategoryPage> {
                   ],
                 )
               : Wrap(),
+          Text(
+            context
+                .read<HomeCubit>()
+                .state
+                .categories
+                .where((element) => element.id == events[index].category)
+                .toString(),
+            style: TextStyle(
+              fontSize: BlocProvider.of<SettingsCubit>(context).state.fontSize,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
           Text(
             events[index].description.toString(),
             style: TextStyle(
@@ -392,117 +412,7 @@ class _CategoryPageState extends State<CategoryPage> {
     );
   }
 
-  Container _inputTextField(CategoryState state) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 5, 0, 5),
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: () => _showSectionList(state),
-            icon: Icon(
-              state.selectedSection!.iconData,
-            ),
-          ),
-          Expanded(
-            child: TextField(
-              style: TextStyle(
-                fontSize: BlocProvider.of<SettingsCubit>(context).state.fontSize,
-              ),
-              onChanged: (text) => BlocProvider.of<CategoryCubit>(context).changeWritingMode(text),
-              keyboardType: TextInputType.multiline,
-              maxLines: null,
-              decoration: InputDecoration(
-                hintText: 'Enter event',
-                filled: true,
-                contentPadding: const EdgeInsets.all(10),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-              controller: _textController,
-            ),
-          ),
-          state.isWritingMode
-              ? IconButton(
-                  onPressed: () {
-                    BlocProvider.of<CategoryCubit>(context)
-                        .addNewEvent(_textController.text, widget.category);
-                    _textController.text = '';
-                  },
-                  icon: const Icon(Icons.send),
-                )
-              : IconButton(
-                  onPressed: () =>
-                      BlocProvider.of<CategoryCubit>(context).attachImage(widget.category),
-                  icon: const Icon(Icons.image),
-                ),
-        ],
-      ),
-    );
-  }
-
-  Future<dynamic> _showSectionList(CategoryState state) {
-    return showModalBottomSheet(
-      backgroundColor: Theme.of(context).cardColor,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(15),
-        ),
-      ),
-      clipBehavior: Clip.antiAliasWithSaveLayer,
-      context: context,
-      builder: (context) {
-        return Container(
-          height: 70,
-          margin: const EdgeInsets.symmetric(vertical: 10),
-          child: _sectionsList(state),
-        );
-      },
-    );
-  }
-
-  Widget _sectionsList(CategoryState state) {
-    return ListView.builder(
-      scrollDirection: Axis.horizontal,
-      itemCount: sections.length,
-      itemBuilder: (context, index) {
-        return _sectionItem(state, index);
-      },
-    );
-  }
-
-  Widget _sectionItem(CategoryState state, int index) {
-    var section = Section(
-      title: sections.keys.elementAt(index),
-      iconData: sections.values.elementAt(index),
-    );
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 5),
-      child: Column(
-        children: [
-          IconButton(
-            icon: Icon(
-              section.iconData,
-              size: 32,
-            ),
-            onPressed: () {
-              BlocProvider.of<CategoryCubit>(context).setSection(section);
-              Navigator.pop(context);
-            },
-          ),
-          Text(
-            section.title,
-            style: TextStyle(
-              fontSize: BlocProvider.of<SettingsCubit>(context).state.fontSize,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _dialog(BuildContext ctx) {
+  void _showDialog(BuildContext ctx) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -598,6 +508,37 @@ class _CategoryPageState extends State<CategoryPage> {
         );
       },
     );
+  }
+
+  void _openFiltersPage() async {
+    final category = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MultiBlocProvider(
+          providers: [
+            BlocProvider.value(
+              value: BlocProvider.of<FiltersPageCubit>(context),
+            ),
+            BlocProvider.value(
+              value: BlocProvider.of<ThemeCubit>(context),
+            ),
+            BlocProvider.value(
+              value: BlocProvider.of<SettingsCubit>(context),
+            ),
+            BlocProvider.value(
+              value: BlocProvider.of<HomeCubit>(context),
+            ),
+            BlocProvider.value(
+              value: BlocProvider.of<CategoryCubit>(context),
+            ),
+          ],
+          child: FiltersPage(),
+        ),
+      ),
+    );
+    if (category is Category && mounted) {
+      BlocProvider.of<HomeCubit>(context).addCategory(category);
+    }
   }
 
   Widget _replyDialogButtons(CategoryState state) {

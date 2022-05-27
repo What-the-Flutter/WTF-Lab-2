@@ -4,13 +4,17 @@ class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   Future<User?> authorize() async {
-    try {
-      final result = await _auth.signInAnonymously();
-      final user = result.user;
+    final user = _auth.currentUser;
+    if(user != null){
       return user;
-    } catch (e) {
-      print(e);
-      return null;
+    } else {
+      try {
+        final result = await _auth.signInAnonymously();
+        return result.user;
+      } catch (e) {
+        print(e);
+        return null;
+      }
     }
   }
 }
