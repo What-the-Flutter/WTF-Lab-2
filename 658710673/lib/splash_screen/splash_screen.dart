@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../category_page/category_cubit.dart';
 import '../create_category_page/create_category_cubit.dart';
+import '../filters_page/filters_cubit.dart';
 import '../home_page/home_cubit.dart';
 import '../home_page/home_page.dart';
 import '../settings_page/settings_cubit.dart';
@@ -62,6 +63,9 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                           create: (context) => CategoryCubit(user: widget._user),
                         ),
                         BlocProvider<SettingsCubit>(create: (context) => SettingsCubit()),
+                        BlocProvider<FiltersPageCubit>(
+                          create: (context) => FiltersPageCubit(user: widget._user),
+                        ),
                       ],
                       child: HomePage(),
                     );
@@ -82,14 +86,12 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
               child: SizedBox(
                 width: 200,
                 height: 200,
-                child: Column(children: [
-                  Center(
-                    child: Image.asset(
-                      './assets/images/launch_icon.png',
-                      fit: BoxFit.fitWidth,
-                    ),
+                child: Center(
+                  child: Image.asset(
+                    './assets/images/launch_icon.png',
+                    fit: BoxFit.fitWidth,
                   ),
-                ]),
+                ),
               ),
             );
           },

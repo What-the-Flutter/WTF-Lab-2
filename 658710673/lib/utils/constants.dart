@@ -7,16 +7,16 @@ class Constants {
   static const lPrimaryColor = Color(0xFF747DF2);
   static const lIconColor = Colors.black;
 
-  static const dSecondaryColor = Color(0xFF293D58);
-  static const dPrimaryColor = Color(0xFF6996CD);
+  static const dSecondaryColor = Color(0xFF172f3c);
+  static const dPrimaryColor = Color(0xFF5f9095);
   static const dIconColor = Colors.white;
 }
 
 class FontSizes {
   static const fontSizes = <FontSizeKeys, double>{
-    FontSizeKeys.small : 12.0,
-    FontSizeKeys.medium : 16.0,
-    FontSizeKeys.large : 20.0,
+    FontSizeKeys.small: 12.0,
+    FontSizeKeys.medium: 16.0,
+    FontSizeKeys.large: 20.0,
   };
 }
 

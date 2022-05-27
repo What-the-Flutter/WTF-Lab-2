@@ -137,6 +137,20 @@ class FirebaseProvider {
     return events;
   }
 
+  Future<List<Event>> getAllEvents() async {
+    final events = <Event>[];
+    final databaseEvent = await _ref
+        .child(user?.uid ?? 'user')
+        .child('events')
+        .once();
+    for (final child in databaseEvent.snapshot.children) {
+      final map = child.value as Map<dynamic, dynamic>;
+      final event = Event.fromMap(map);
+      events.add(event);
+    }
+    return events;
+  }
+
   Future<List<Category>> getAllCategories() async {
     final categories = <Category>[];
     final databaseEvent = await _ref.child(user?.uid ?? 'user').child('categories').once();

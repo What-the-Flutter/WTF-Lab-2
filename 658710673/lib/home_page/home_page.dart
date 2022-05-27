@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:rive/rive.dart';
 
 import '../category_page/category_cubit.dart';
 import '../category_page/category_page.dart';
@@ -8,10 +9,10 @@ import '../create_category_page/create_category_cubit.dart';
 import '../create_category_page/create_category_page.dart';
 import '../models/category.dart';
 import '../settings_page/settings_cubit.dart';
-import '../settings_page/settings_page.dart';
 import '../utils/theme/app_theme.dart';
 import '../utils/theme/theme_cubit.dart';
 import '../widgets/main_page_widgets/main_bottom_bar.dart';
+import '../widgets/main_page_widgets/main_drawer.dart';
 import 'home_cubit.dart';
 import 'home_state.dart';
 
@@ -62,9 +63,9 @@ class _HomePageState extends State<HomePage> {
                           'assets/images/app_bar_bg_light.jpg',
                           fit: BoxFit.fill,
                         )
-                      : Image.asset(
-                          'assets/images/app_bar_bg_dark.png',
-                          fit: BoxFit.fill,
+                      : const RiveAnimation.asset(
+                          'assets/images/dark.riv',
+                          fit: BoxFit.cover,
                         ),
                 ),
               ),
@@ -76,12 +77,12 @@ class _HomePageState extends State<HomePage> {
               ),
             ],
           ),
-          drawer: _drawer(),
+          drawer: const MainDrawer(),
           floatingActionButton: FloatingActionButton(
             onPressed: _createPage,
             child: const Icon(Icons.add),
           ),
-          bottomNavigationBar: const MainBottomBar(),
+          bottomNavigationBar: MainBottomBar(),
         );
       },
     );
@@ -98,6 +99,9 @@ class _HomePageState extends State<HomePage> {
             ),
             BlocProvider.value(
               value: BlocProvider.of<ThemeCubit>(context),
+            ),
+            BlocProvider.value(
+              value: BlocProvider.of<SettingsCubit>(context),
             ),
           ],
           child: CreateCategoryPage(),
@@ -235,8 +239,18 @@ class _HomePageState extends State<HomePage> {
     final category = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => BlocProvider.value(
-          value: BlocProvider.of<CreateCategoryPageCubit>(context),
+        builder: (_) => MultiBlocProvider(
+          providers: [
+            BlocProvider.value(
+              value: BlocProvider.of<CreateCategoryPageCubit>(context),
+            ),
+            BlocProvider.value(
+              value: BlocProvider.of<ThemeCubit>(context),
+            ),
+            BlocProvider.value(
+              value: BlocProvider.of<SettingsCubit>(context),
+            ),
+          ],
           child: CreateCategoryPage(editCategory: state.categories[index]),
         ),
       ),
@@ -351,95 +365,6 @@ class _HomePageState extends State<HomePage> {
           TextButton(
             onPressed: () => Navigator.pop(context, 'OK'),
             child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _drawer() {
-    return Drawer(
-      backgroundColor: context.read<ThemeCubit>().state.colorScheme.secondary,
-      child: ListView(
-        children: [
-          SizedBox(
-            height: 145,
-            child: DrawerHeader(
-              decoration: BoxDecoration(
-                color: context.read<ThemeCubit>().state.colorScheme.primary,
-              ),
-              child: Align(
-                alignment: Alignment.bottomLeft,
-                child: Text(
-                  DateFormat.yMMMMd().format(DateTime.now()).toString(),
-                  style: TextStyle(
-                    fontSize: context.read<SettingsCubit>().state.fontSize,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          ListTile(
-            title: Text(
-              'Search',
-              style: TextStyle(
-                fontSize: BlocProvider.of<SettingsCubit>(context).state.fontSize,
-              ),
-            ),
-            leading: const Icon(Icons.search),
-          ),
-          ListTile(
-            title: Text(
-              'Notifications',
-              style: TextStyle(
-                fontSize: BlocProvider.of<SettingsCubit>(context).state.fontSize,
-              ),
-            ),
-            leading: const Icon(Icons.notifications),
-          ),
-          ListTile(
-            title: Text(
-              'Statistics',
-              style: TextStyle(
-                fontSize: BlocProvider.of<SettingsCubit>(context).state.fontSize,
-              ),
-            ),
-            leading: const Icon(Icons.timeline),
-          ),
-          ListTile(
-            title: Text(
-              'Settings',
-              style: TextStyle(
-                fontSize: BlocProvider.of<SettingsCubit>(context).state.fontSize,
-              ),
-            ),
-            leading: const Icon(Icons.settings),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => MultiBlocProvider(
-                  providers: [
-                    BlocProvider.value(
-                      value: BlocProvider.of<SettingsCubit>(context),
-                    ),
-                    BlocProvider.value(
-                      value: BlocProvider.of<ThemeCubit>(context),
-                    ),
-                  ],
-                  child: const SettingsPage(),
-                ),
-              ),
-            ),
-          ),
-          ListTile(
-            title: Text(
-              'Feedback',
-              style: TextStyle(
-                fontSize: BlocProvider.of<SettingsCubit>(context).state.fontSize,
-              ),
-            ),
-            leading: const Icon(Icons.mail),
           ),
         ],
       ),
