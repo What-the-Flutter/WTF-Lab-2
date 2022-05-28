@@ -1,36 +1,33 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
-class AppColors {
-  static const Color primaryColor = Color(0xFFF5F4F2);
-  static const Color supportingColor = Color(0xFF82736C);
-  static const Color textColor = Color(0xFF1B1714);
-  static const Color detailsColor = Color(0xFFE0AA7C);
+class LightColors {
+  static const kBackgroundColor = Color(0xFFEFF0EB);
+  static const kSurfaceColor = Color(0xFFD1D7D7);
+  static const kPrimaryColor = Color(0xFF66734A);
+  static const kSecondaryColor = Color(0xFFA8AB74);
+
+  static const kOnBackgroundColor = Color(0XFF484848);
+  static const kOnSurfaceColor = Color(0XFF484848);
+  static const kOnPrimaryColor = Color(0xFFFFFFFF);
+  static const kOnSecondaryColor = Color(0XFFFFFFFF);
+
+  static const kWarningColor = Color(0xFFF3BB1C);
+  static const kErrorColor = Color(0xFFF03738);
 }
 
-class AppFonts {
-  static const double fontSize = 18.0;
+class DarkColors {
+  static const kBackgroundColor = Color(0xFF2F302D);
+  static const kSurfaceColor = Color(0xFFD1D7D7);
+  static const kPrimaryColor = Color(0xFF3F5808);
+  static const kSecondaryColor = Color(0xFFA8AB74);
 
-  static const TextStyle defaultTextStyle = TextStyle(
-    fontSize: fontSize,
-    fontFamily: 'Montserrat',
-    fontWeight: FontWeight.w400,
-    color: AppColors.textColor,
-  );
-  static const TextStyle headerTextStyle = TextStyle(
-    fontSize: fontSize * 1.5,
-    fontFamily: 'Montserrat',
-    fontWeight: FontWeight.w400,
-    color: AppColors.textColor,
-  );
-  static const TextStyle navBarTextStyle = TextStyle(
-    fontSize: 40,
-    fontFamily: 'Montserrat',
-    fontWeight: FontWeight.w400,
-    color: AppColors.textColor,
-  );
+  static const kOnBackgroundColor = Color(0XFFEFF0EB);
+  static const kOnSurfaceColor = Color(0XFF484848);
+  static const kOnPrimaryColor = Color(0xFFEFF0EB);
+  static const kOnSecondaryColor = Color(0XFFEFF0EB);
+
+  static const kWarningColor = Color(0xFFF3BB1C);
+  static const kErrorColor = Color(0xFFF03738);
 }
 
-class AppDecorators {
-  static const double defaultPadding = 16.0;
-  static const double defaultBorderRadius = 16.0;
-}
+const kDefaultPadding = 16.0;
