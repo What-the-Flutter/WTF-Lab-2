@@ -1,3 +1,4 @@
+import 'package:diploma/homePage/settings_screen/settings_cubit.dart';
 import 'package:diploma/homePage/settings_screen/settings_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,6 +21,7 @@ class _EventHolderViewState extends State<EventHolderView> {
   void initState() {
     super.initState();
     BlocProvider.of<EventHolderCubit>(context).init();
+    BlocProvider.of<SettingsCubit>(context).loadTheme();
   }
 
   @override
@@ -33,6 +35,7 @@ class _EventHolderViewState extends State<EventHolderView> {
 
   AppBar _appBar() {
     return AppBar(
+      backgroundColor: Theme.of(context).primaryColor,
       leading: const IconButton(
         onPressed: null,
         icon: Icon(Icons.menu),
@@ -159,6 +162,7 @@ class _EventHolderViewState extends State<EventHolderView> {
                       context
                           .read<EventHolderCubit>()
                           .editEventHolder(result as EventHolder);
+                      Navigator.pop(context);
                     }
                   },
                   leading: const Icon(
@@ -170,8 +174,10 @@ class _EventHolderViewState extends State<EventHolderView> {
               ),
               Expanded(
                 child: ListTile(
-                  onTap: () =>
-                      context.read<EventHolderCubit>().deleteEventHolder(id),
+                  onTap: () {
+                    context.read<EventHolderCubit>().deleteEventHolder(id);
+                    Navigator.pop(context);
+                  },
                   leading: const Icon(
                     Icons.delete,
                     color: Colors.red,

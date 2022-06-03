@@ -14,7 +14,7 @@ class EventHolderCubit extends Cubit<EventHolderState> {
     _db = FireBaseProvider(_user);
   }
 
-  void init() async{
+  void init() async {
     emit(EventHolderState(await _db.getAllEventHolders()));
   }
 

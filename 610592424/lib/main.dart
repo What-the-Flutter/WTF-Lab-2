@@ -8,6 +8,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'homePage/eventHolderScreen/eventholder_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'homePage/settings_screen/settings_cubit.dart';
+import 'homePage/settings_screen/settings_state.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,13 +33,20 @@ class DiplomaApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => ThemeCubit(SharedPreferencesProvider()),
-      child: BlocBuilder<ThemeCubit, ThemeState>(
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) => SettingsCubit(),
+        ),
+        BlocProvider(
+          create: (_) => ThemeCubit(SharedPreferencesProvider()),
+        ),
+      ],
+      child: BlocBuilder<SettingsCubit, SettingsState>(
         builder: (context, state) {
           return MaterialApp(
             title: "Diploma project",
-            theme: state.theme,
+            theme: state.currentTheme,
             home: EventHolderPage(_user),
           );
         },

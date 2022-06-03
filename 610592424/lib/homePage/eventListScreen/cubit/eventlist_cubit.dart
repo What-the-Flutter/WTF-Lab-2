@@ -3,10 +3,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:diploma/data_base/firebase_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hashtagable/hashtagable.dart';
 
 import 'package:diploma/homePage/models/event_holder.dart';
 import 'package:diploma/homePage/models/event.dart';
-import 'package:diploma/data_base/db_context.dart';
 import 'package:image_picker/image_picker.dart';
 import 'eventlist_state.dart';
 
@@ -15,12 +15,31 @@ class EventListCubit extends Cubit<EventListState> {
   final User _user;
   late final FireBaseProvider _db;
 
-  EventListCubit(this._eventHolderId, this._user) : super(EventListState([])) {
+  EventListCubit(this._eventHolderId, this._user) : super(EventListState([], false)) {
     _db = FireBaseProvider(_user);
   }
 
   void init() async {
-    emit(EventListState(await _db.getAllEventsForEventHolder(_eventHolderId)));
+    emit(state.copyWith(await _db.getAllEventsForEventHolder(_eventHolderId)));
+    await checkHashTags();
+  }
+
+  checkHashTags() async {
+    for(var event in await _db.getAllEventsForEventHolder(_eventHolderId)){
+      if(hasHashTags(event.text)){
+        emit(state.copyWith(null, true));
+        return;
+      }
+    }
+    emit(state.copyWith(null, false));
+  }
+  
+  Future<List<String>> getAllHashTags() async {
+    List<String> _hashTags = [];
+    for(var event in await _db.getAllEventsForEventHolder(_eventHolderId)){
+      _hashTags.addAll(extractHashTags(event.text));
+    }
+    return _hashTags;
   }
 
   int get eventsSelected =>
@@ -124,7 +143,7 @@ class EventListCubit extends Cubit<EventListState> {
     await _db.addEvent(event);
   }
 
-  Future<Image> fetchImage(int id) async{
+  Future<Image> fetchImage(int id) async {
     return Image.memory(await _db.fetchImage(id));
   }
 }
