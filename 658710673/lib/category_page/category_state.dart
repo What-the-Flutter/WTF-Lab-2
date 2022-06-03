@@ -1,8 +1,10 @@
+import 'package:equatable/equatable.dart';
+
 import '../models/category.dart';
 import '../models/event.dart';
 import '../models/section.dart';
 
-class CategoryState {
+class CategoryState extends Equatable {
   final List<Event> events;
   final List<Event> searchedEvents;
   final List<Event> filteredEvents;
@@ -64,4 +66,21 @@ class CategoryState {
       selectedSection: selectedSection ?? this.selectedSection,
     );
   }
+
+  @override
+  List<Object?> get props => [
+        events,
+        searchedEvents,
+        filteredEvents,
+        category,
+        isSearchMode,
+        isEditingMode,
+        isFavoriteMode,
+        isWritingMode,
+        isMessageEdit,
+        isAttachment,
+        replyCategory,
+        replyCategoryIndex,
+        selectedSection,
+      ];
 }

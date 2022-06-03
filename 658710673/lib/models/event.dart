@@ -1,3 +1,5 @@
+import 'package:equatable/equatable.dart';
+
 class EventFields {
   static final String description = 'description';
   static final String id = 'id';
@@ -9,7 +11,7 @@ class EventFields {
   static final String category = 'category';
 }
 
-class Event {
+class Event extends Equatable {
   int? id;
   DateTime timeOfCreation;
   String description;
@@ -104,4 +106,16 @@ class Event {
   String toString() {
     return description;
   }
+
+  @override
+  List<Object?> get props => [
+        description,
+        category,
+        timeOfCreation,
+        isBookmarked,
+        sectionIcon,
+        sectionTitle,
+        isSelected,
+        attachment
+      ];
 }

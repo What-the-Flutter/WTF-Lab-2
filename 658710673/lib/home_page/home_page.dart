@@ -104,7 +104,7 @@ class _HomePageState extends State<HomePage> {
               value: BlocProvider.of<SettingsCubit>(context),
             ),
           ],
-          child: CreateCategoryPage(),
+          child: const CreateCategoryPage(),
         ),
       ),
     );

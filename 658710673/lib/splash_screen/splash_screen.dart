@@ -8,6 +8,7 @@ import '../filters_page/filters_cubit.dart';
 import '../home_page/home_cubit.dart';
 import '../home_page/home_page.dart';
 import '../settings_page/settings_cubit.dart';
+import '../statistics/summary_statistics_page/summary_statistics_cubit.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({
@@ -65,6 +66,9 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                         BlocProvider<SettingsCubit>(create: (context) => SettingsCubit()),
                         BlocProvider<FiltersPageCubit>(
                           create: (context) => FiltersPageCubit(user: widget._user),
+                        ),
+                        BlocProvider<StatisticsCubit>(
+                          create: (context) => StatisticsCubit(user: widget._user),
                         ),
                       ],
                       child: HomePage(),

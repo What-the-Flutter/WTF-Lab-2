@@ -60,12 +60,6 @@ class SettingsCubit extends Cubit<SettingsState> {
   }
 
   void resetSettings() {
-    _prefs.changeFontSize(FontSizes.fontSizes[FontSizeKeys.medium]!);
-    _prefs.changeBubbleAlignment(true);
-    _prefs.changeCenterDateBubble(false);
-    _prefs.changeLocalAuth(false);
-    _prefs.changeBgImage('');
-
     emit(
       state.copyWith(
         fontSize: FontSizes.fontSizes[FontSizeKeys.medium],
@@ -75,6 +69,12 @@ class SettingsCubit extends Cubit<SettingsState> {
         backgroundImagePath: '',
       ),
     );
+
+    _prefs.changeFontSize(FontSizes.fontSizes[FontSizeKeys.medium]!);
+    _prefs.changeBubbleAlignment(true);
+    _prefs.changeCenterDateBubble(false);
+    _prefs.changeLocalAuth(false);
+    _prefs.changeBgImage('');
   }
 
   void changeBubbleAlignment(bool isLeft) {

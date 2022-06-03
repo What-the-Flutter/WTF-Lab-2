@@ -13,12 +13,12 @@ import '../models/section.dart';
 import 'category_state.dart';
 
 class CategoryCubit extends Cubit<CategoryState> {
+  final User? _user;
+  late final FirebaseProvider _db = FirebaseProvider(user: _user);
+
   CategoryCubit({required User? user})
       : _user = user,
         super(CategoryState(events: [], searchedEvents: [], filteredEvents: []));
-
-  final User? _user;
-  late final FirebaseProvider _db = FirebaseProvider(user: _user);
 
   final defaultSection = Section(title: '', iconData: Icons.bubble_chart);
 
