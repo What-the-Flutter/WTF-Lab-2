@@ -7,42 +7,42 @@ enum FontSizeKeys { small, medium, large }
 
 class AppTheme {
   static final ThemeData lightTheme = ThemeData(
-    scaffoldBackgroundColor: Constants.lSecondaryColor,
+    scaffoldBackgroundColor: MColors.lSecondaryColor,
     colorScheme: const ColorScheme.light(
-      primary: Constants.lPrimaryColor,
-      secondary: Constants.lSecondaryColor,
+      primary: MColors.lPrimaryColor,
+      secondary: MColors.lSecondaryColor,
       brightness: Brightness.light,
     ),
     appBarTheme: const AppBarTheme(
-      backgroundColor: Constants.lPrimaryColor,
-      foregroundColor: Constants.lIconColor,
+      backgroundColor: MColors.lPrimaryColor,
+      foregroundColor: MColors.lIconColor,
     ),
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
-      backgroundColor: Constants.lPrimaryColor,
+      backgroundColor: MColors.lPrimaryColor,
     ),
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      selectedItemColor: Constants.lPrimaryColor,
-      unselectedItemColor: Constants.lIconColor,
+      selectedItemColor: MColors.lPrimaryColor,
+      unselectedItemColor: MColors.lIconColor,
     ),
   );
 
   static final ThemeData darkTheme = ThemeData(
-    scaffoldBackgroundColor: Constants.dSecondaryColor,
+    scaffoldBackgroundColor: MColors.dSecondaryColor,
     colorScheme: const ColorScheme.dark(
-      primary: Constants.dPrimaryColor,
-      secondary: Constants.dSecondaryColor,
+      primary: MColors.dPrimaryColor,
+      secondary: MColors.dSecondaryColor,
       brightness: Brightness.dark,
     ),
     appBarTheme: const AppBarTheme(
-      backgroundColor: Constants.dPrimaryColor,
-      foregroundColor: Constants.dIconColor,
+      backgroundColor: MColors.dPrimaryColor,
+      foregroundColor: MColors.dIconColor,
     ),
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
-      backgroundColor: Constants.dPrimaryColor,
+      backgroundColor: MColors.dPrimaryColor,
     ),
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      selectedItemColor: Constants.dPrimaryColor,
-      unselectedItemColor: Constants.dIconColor,
+      selectedItemColor: MColors.dPrimaryColor,
+      unselectedItemColor: MColors.dIconColor,
     ),
   );
 }

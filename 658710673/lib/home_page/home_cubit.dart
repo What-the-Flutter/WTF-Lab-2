@@ -6,12 +6,12 @@ import '../models/category.dart';
 import 'home_state.dart';
 
 class HomeCubit extends Cubit<HomeState> {
+  final User? _user;
+  late final FirebaseProvider _db = FirebaseProvider(user: _user);
+
   HomeCubit({required User? user})
       : _user = user,
         super(HomeState());
-
-  final User? _user;
-  late final FirebaseProvider _db = FirebaseProvider(user: _user);
 
   void init() async {
     emit(state.copyWith(categories: await _db.getAllCategories()));

@@ -7,6 +7,9 @@ import '../data/firebase_provider.dart';
 import 'filters_state.dart';
 
 class FiltersPageCubit extends Cubit<FiltersPageState> {
+  final User? _user;
+  late final FirebaseProvider _db = FirebaseProvider(user: _user);
+
   FiltersPageCubit({required User? user})
       : _user = user,
         super(
@@ -18,9 +21,6 @@ class FiltersPageCubit extends Cubit<FiltersPageState> {
             ),
           ),
         );
-
-  final User? _user;
-  late final FirebaseProvider _db = FirebaseProvider(user: _user);
 
   void init() {
     showCategories();

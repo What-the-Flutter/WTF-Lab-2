@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 
 import '../../settings_page/settings_cubit.dart';
 import '../../settings_page/settings_page.dart';
+import '../../statistics/summary_statistics_page/summary_statistics_cubit.dart';
+import '../../statistics/summary_statistics_page/summary_statistics_page.dart';
 import '../../utils/theme/theme_cubit.dart';
 
 class MainDrawer extends StatelessWidget {
@@ -59,6 +61,22 @@ class MainDrawer extends StatelessWidget {
               ),
             ),
             leading: const Icon(Icons.timeline),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => MultiBlocProvider(
+                  providers: [
+                    BlocProvider.value(
+                      value: BlocProvider.of<StatisticsCubit>(context),
+                    ),
+                    BlocProvider.value(
+                      value: BlocProvider.of<ThemeCubit>(context),
+                    ),
+                  ],
+                  child: StatisticsPage(),
+                ),
+              ),
+            ),
           ),
           ListTile(
             title: Text(

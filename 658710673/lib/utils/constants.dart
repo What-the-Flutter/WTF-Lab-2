@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'theme/app_theme.dart';
 
-class Constants {
+class MColors {
   static const lSecondaryColor = Color(0xFFedf0f7);
   static const lPrimaryColor = Color(0xFF747DF2);
   static const lIconColor = Colors.black;
@@ -10,6 +10,16 @@ class Constants {
   static const dSecondaryColor = Color(0xFF172f3c);
   static const dPrimaryColor = Color(0xFF5f9095);
   static const dIconColor = Colors.white;
+}
+
+class StatisticsConst{
+  static const String today = 'Today';
+  static const String pastSevenDays = 'Past 7 days';
+  static const String pastThirtyDays = 'Past 30 days';
+  static const String thisYear = 'This Year';
+  static const int daysInMonth = 30;
+  static const int daysInWeek = 7;
+  static const int daysInYear = 365;
 }
 
 class FontSizes {

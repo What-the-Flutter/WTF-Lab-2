@@ -11,7 +11,7 @@ import 'create_category_state.dart';
 class CreateCategoryPage extends StatefulWidget {
   final Category? editCategory;
 
-  CreateCategoryPage({
+  const CreateCategoryPage({
     Key? key,
     this.editCategory,
   }) : super(key: key);

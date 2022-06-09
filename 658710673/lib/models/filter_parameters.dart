@@ -1,4 +1,6 @@
-class FilterParameters {
+import 'package:equatable/equatable.dart';
+
+class FilterParameters extends Equatable {
   final List<int> selectedPagesId;
   final String searchText;
 
@@ -16,4 +18,7 @@ class FilterParameters {
       searchText: searchText ?? this.searchText,
     );
   }
+
+  @override
+  List<Object?> get props => [selectedPagesId, searchText];
 }
