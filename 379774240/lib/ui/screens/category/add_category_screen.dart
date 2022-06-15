@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../constants.dart';
+import '../../../data/models/category.dart';
+import '../../constants/constants.dart';
 
 class AddCategoryScreen extends StatefulWidget {
   final String title;
@@ -58,14 +59,14 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(
-          vertical: kDefaultPadding,
-          horizontal: kDefaultPadding * 2,
+          vertical: AppPadding.kDefaultPadding,
+          horizontal: AppPadding.kDefaultPadding * 2,
         ),
         child: Column(
           children: [
             Container(
               padding: const EdgeInsets.symmetric(
-                horizontal: kDefaultPadding,
+                horizontal: AppPadding.kDefaultPadding,
               ),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surface,
@@ -81,14 +82,14 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
               ),
             ),
             const SizedBox(
-              height: kDefaultPadding,
+              height: AppPadding.kDefaultPadding,
             ),
             Expanded(
               child: GridView.builder(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 4,
-                  mainAxisSpacing: kDefaultPadding,
-                  crossAxisSpacing: kDefaultPadding,
+                  mainAxisSpacing: AppPadding.kDefaultPadding,
+                  crossAxisSpacing: AppPadding.kDefaultPadding,
                 ),
                 itemCount: categoryIocns.length,
                 itemBuilder: (context, index) {
@@ -142,12 +143,10 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
     );
   }
 
-  List? takeData() {
+  Category? takeData() {
     if (selectedIconIndex != null && _controller.text != '') {
-      return [
-        _controller.text,
-        categoryIocns[selectedIconIndex!],
-      ];
+      return Category(
+          title: _controller.text, iconData: categoryIocns[selectedIconIndex!]);
     }
     return null;
   }

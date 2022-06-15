@@ -30,4 +30,10 @@ class DarkColors {
   static const kErrorColor = Color(0xFFF03738);
 }
 
-const kDefaultPadding = 16.0;
+class AppPadding {
+  static const kSmallPadding = 8.0;
+  static const kMediumPadding = 12.0;
+  static const kDefaultPadding = 16.0;
+  static const kBigPadding = 20.0;
+  static const kLargePadding = 24.0;
+}
