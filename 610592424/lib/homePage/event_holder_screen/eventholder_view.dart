@@ -1,13 +1,15 @@
+import 'package:diploma/animation_page/animation_rive_view.dart';
 import 'package:diploma/homePage/settings_screen/settings_cubit.dart';
 import 'package:diploma/homePage/settings_screen/settings_view.dart';
+import 'package:diploma/timeline_page/timeline_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:diploma/homePage/models/event_holder.dart';
-import 'package:diploma/homePage/eventListScreen/eventList_page.dart';
+import 'package:diploma/homePage/event_list_screen/eventList_page.dart';
 import 'add_eventholder_view.dart';
-import './cubit/eventholder_cubit.dart';
-import './cubit/eventholder_state.dart';
+import 'eventholder_cubit.dart';
+import 'eventholder_state.dart';
 
 class EventHolderView extends StatefulWidget {
   const EventHolderView({Key? key}) : super(key: key);
@@ -17,11 +19,14 @@ class EventHolderView extends StatefulWidget {
 }
 
 class _EventHolderViewState extends State<EventHolderView> {
+  late final EventHolderCubit _cubit;
+
   @override
   void initState() {
     super.initState();
-    BlocProvider.of<EventHolderCubit>(context).init();
     BlocProvider.of<SettingsCubit>(context).loadTheme();
+    _cubit = BlocProvider.of<EventHolderCubit>(context);
+    _cubit.init();
   }
 
   @override
@@ -30,6 +35,7 @@ class _EventHolderViewState extends State<EventHolderView> {
       appBar: _appBar(),
       body: _body(context),
       floatingActionButton: _floatingActionButton(context),
+      bottomNavigationBar: _bottomNavBar(),
     );
   }
 
@@ -69,8 +75,8 @@ class _EventHolderViewState extends State<EventHolderView> {
                 leading: element.picture,
                 title: Text(element.title),
                 subtitle: FutureBuilder(
-                  future: BlocProvider.of<EventHolderCubit>(context)
-                      .getEventHolderLastEventText(element.eventholderId),
+                  future:
+                      _cubit.getEventHolderLastEventText(element.eventholderId),
                   builder:
                       (BuildContext context, AsyncSnapshot<String> snapshot) {
                     if (snapshot.hasData) {
@@ -81,7 +87,6 @@ class _EventHolderViewState extends State<EventHolderView> {
                   },
                 ),
                 onTap: () async {
-                  var user = BlocProvider.of<EventHolderCubit>(context).getUser;
                   await Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -89,7 +94,6 @@ class _EventHolderViewState extends State<EventHolderView> {
                         return EventListPage(
                           element.eventholderId,
                           element.title,
-                          user,
                         );
                       },
                     ),
@@ -214,6 +218,48 @@ class _EventHolderViewState extends State<EventHolderView> {
         );
       },
       child: const Icon(Icons.add, color: Colors.black),
+    );
+  }
+
+  BottomNavigationBar _bottomNavBar() {
+    return BottomNavigationBar(
+      items: const <BottomNavigationBarItem>[
+        BottomNavigationBarItem(
+          icon: Icon(Icons.home),
+          label: 'Home',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.business),
+          label: 'Timeline',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.handyman),
+          label: 'Animation',
+        ),
+      ],
+      currentIndex: 0,
+      selectedItemColor: Colors.amber[800],
+      onTap: (index) {
+        if (index == 1) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) {
+                return const TimelinePage();
+              },
+            ),
+          );
+        } else if (index == 2) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) {
+                return const MyRiveAnimation();
+              },
+            ),
+          );
+        }
+      },
     );
   }
 }

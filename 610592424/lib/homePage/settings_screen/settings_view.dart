@@ -38,9 +38,7 @@ class _SettingsViewState extends State<SettingsView> {
     );
   }
 
-  Widget _body(
-    SettingsCubit cubit,
-  ) {
+  Widget _body(SettingsCubit cubit) {
     return ListView(
       children: [
         ListTile(
@@ -102,40 +100,37 @@ class _SettingsViewState extends State<SettingsView> {
 
   void _showDialog(SettingsCubit cubit) {
     showDialog(
-        context: context,
-        builder: (context) {
-          return Dialog(
-            child: SizedBox(
-              width: 150,
-              height: 250,
-              child: Column(
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.only(top: 10),
-                    child: Text(
-                      'Font Size',
-                      style: TextStyle(fontSize: 20),
-                    ),
+      context: context,
+      builder: (context) {
+        return Dialog(
+          child: SizedBox(
+            width: 150,
+            height: 250,
+            child: Column(
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(top: 10),
+                  child: Text(
+                    'Font Size',
+                    style: TextStyle(fontSize: 20),
                   ),
-                  _sizeTile('Small', 0, cubit),
-                  _sizeTile('Medium', 1, cubit),
-                  _sizeTile('Large', 2, cubit),
-                  ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Ok'),
-                  )
-                ],
-              ),
+                ),
+                _sizeTile('Small', 0, cubit),
+                _sizeTile('Medium', 1, cubit),
+                _sizeTile('Large', 2, cubit),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Ok'),
+                )
+              ],
             ),
-          );
-        });
+          ),
+        );
+      },
+    );
   }
 
-  ListTile _sizeTile(
-    String size,
-    int index,
-    SettingsCubit cubit,
-  ) {
+  ListTile _sizeTile(String size, int index, SettingsCubit cubit) {
     return ListTile(
       title: Text(size),
       onTap: () {

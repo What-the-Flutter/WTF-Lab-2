@@ -1,5 +1,4 @@
 import 'package:bloc/bloc.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:diploma/homePage/models/event.dart';
 import 'package:diploma/homePage/models/event_holder.dart';
@@ -7,18 +6,13 @@ import 'package:diploma/data_base/firebase_provider.dart';
 import 'eventholder_state.dart';
 
 class EventHolderCubit extends Cubit<EventHolderState> {
-  final User _user;
   late final FireBaseProvider _db;
 
-  EventHolderCubit(this._user) : super(EventHolderState([])){
-    _db = FireBaseProvider(_user);
+  EventHolderCubit() : super(EventHolderState([])){
+    _db = FireBaseProvider();
   }
 
-  void init() async {
-    emit(EventHolderState(await _db.getAllEventHolders()));
-  }
-
-  User get getUser => _user;
+  void init() async => emit(EventHolderState(await _db.getAllEventHolders()));
 
   Future<EventHolder> getEventHolder(int id) async {
     return await _db.getEventHolder(id);

@@ -6,14 +6,12 @@ import 'settings_state.dart';
 
 class SettingsCubit extends Cubit<SettingsState> {
   SettingsCubit()
-      : super(
-    SettingsState(
-      currentTheme: ThemeData(),
-      textTheme: SettingsState.medium,
-      bubbleAlignment: false,
-      centerDate: false,
-    ),
-  );
+      : super(SettingsState(
+          currentTheme: ThemeData(),
+          textTheme: SettingsState.medium,
+          bubbleAlignment: false,
+          centerDate: false,
+        ));
 
   void initTextTheme(int fontSizeIndex) async {
     switch (fontSizeIndex) {

@@ -1,11 +1,10 @@
 import 'package:diploma/theme/theme_cubit.dart';
-import 'package:diploma/theme/theme_state.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:diploma/data_base/shared_preferences_provider.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'homePage/eventHolderScreen/eventholder_page.dart';
+import 'homePage/event_holder_screen/eventholder_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'homePage/settings_screen/settings_cubit.dart';
@@ -47,7 +46,7 @@ class DiplomaApp extends StatelessWidget {
           return MaterialApp(
             title: "Diploma project",
             theme: state.currentTheme,
-            home: EventHolderPage(_user),
+            home: const EventHolderPage(),
           );
         },
       ),

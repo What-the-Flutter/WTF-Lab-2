@@ -3,11 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hashtagable/hashtagable.dart';
 import 'package:intl/intl.dart';
 
-import 'package:diploma/homePage/assets/event_icons_set.dart';
+import 'package:diploma/homePage/constant_icons/event_icons_set.dart';
 import 'package:diploma/homePage/models/event.dart';
 import '../settings_screen/settings_cubit.dart';
-import './cubit/eventlist_cubit.dart';
-import './cubit/eventlist_state.dart';
+import 'eventlist_cubit.dart';
+import 'eventlist_state.dart';
 
 enum States { normal, singleSelected, multiSelected, editing, searching }
 
@@ -21,17 +21,19 @@ class EventListView extends StatefulWidget {
 }
 
 class _EventListViewState extends State<EventListView> {
-  var _currentState = States.normal;
-  int? _tempEventId;
-  var _showImageList = false;
+  late final EventListCubit _cubit;
   final _keyForTextField = GlobalKey<FormFieldState<String>>();
-  var _chosenIconIndex = 0;
+  int? _tempEventId;
+  var _currentState = States.normal;
+  var _showImageList = false;
   var _allowImagePick = true;
+  var _chosenIconIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    BlocProvider.of<EventListCubit>(context).init();
+    _cubit = _cubit;
+    _cubit.init();
   }
 
   @override
@@ -67,7 +69,7 @@ class _EventListViewState extends State<EventListView> {
       _chosenIconIndex = 0;
       context.read<EventListCubit>().deselectAllEvents();
     });
-    BlocProvider.of<EventListCubit>(context).init();
+    _cubit.init();
   }
 
   void _setEditingState() {
@@ -272,41 +274,41 @@ class _EventListViewState extends State<EventListView> {
   }
 
   PreferredSizeWidget? _getAppbarBottom() {
-    return BlocProvider.of<EventListCubit>(context).state.anyHashtags
+    return _cubit.state.anyHashtags
         ? PreferredSize(
             preferredSize: const Size.fromHeight(60.0),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxHeight: 60.0),
               child: FutureBuilder(
-                  future:
-                      BlocProvider.of<EventListCubit>(context).getAllHashTags(),
-                  builder: (BuildContext context,
-                      AsyncSnapshot<List<String>> snapshot) {
-                    if (snapshot.hasData) {
-                      return Padding(
-                        padding: const EdgeInsets.all(5.0),
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: snapshot.data!.length,
-                          itemBuilder: (context, index) => GestureDetector(
-                            onTap: () => _applySearch(snapshot.data![index]),
-                            child: Container(
-                              margin: const EdgeInsets.all(3),
-                              padding: const EdgeInsets.all(8),
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(15),
-                                color: Colors.blueGrey,
-                              ),
-                              child: Text(snapshot.data![index]),
+                future:
+                    _cubit.getAllHashTags(),
+                builder: (context, AsyncSnapshot<List<String>> snapshot) {
+                  if (snapshot.hasData) {
+                    return Padding(
+                      padding: const EdgeInsets.all(5.0),
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: snapshot.data!.length,
+                        itemBuilder: (context, index) => GestureDetector(
+                          onTap: () => _applySearch(snapshot.data![index]),
+                          child: Container(
+                            margin: const EdgeInsets.all(3),
+                            padding: const EdgeInsets.all(8),
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(15),
+                              color: Colors.blueGrey,
                             ),
+                            child: Text(snapshot.data![index]),
                           ),
                         ),
-                      );
-                    } else {
-                      return const SizedBox.shrink();
-                    }
-                  }),
+                      ),
+                    );
+                  } else {
+                    return const SizedBox.shrink();
+                  }
+                },
+              ),
             ),
           )
         : null;
@@ -314,9 +316,9 @@ class _EventListViewState extends State<EventListView> {
 
   BlocBuilder _eventsList() {
     var _eventAlignment =
-    BlocProvider.of<SettingsCubit>(context).state.bubbleAlignment
-        ? Alignment.bottomRight
-        : Alignment.bottomLeft;
+        BlocProvider.of<SettingsCubit>(context).state.bubbleAlignment
+            ? Alignment.bottomRight
+            : Alignment.bottomLeft;
     return BlocBuilder<EventListCubit, EventListState>(
       builder: (context, state) {
         return ListView.builder(
@@ -326,7 +328,8 @@ class _EventListViewState extends State<EventListView> {
             var _showDate = index != 0 &&
                 state.events[index].timeOfCreation!
                         .difference(state.events[index - 1].timeOfCreation!)
-                        .inDays >= 1;
+                        .inDays >=
+                    1;
             if (index == 0 || _showDate) {
               return Column(
                 children: [
@@ -367,7 +370,8 @@ class _EventListViewState extends State<EventListView> {
       child: GestureDetector(
         onTap: () => _onEventTapOrPress(state.events[index]),
         onLongPress: () => _onEventTapOrPress(state.events[index]),
-        child: Container(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 400),
           margin: const EdgeInsets.all(5),
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
@@ -407,10 +411,9 @@ class _EventListViewState extends State<EventListView> {
                   ],
                 )
               : FutureBuilder(
-                  future: BlocProvider.of<EventListCubit>(context)
+                  future: _cubit
                       .fetchImage(state.events[index].eventId),
-                  builder:
-                      (BuildContext context, AsyncSnapshot<Image> snapshot) {
+                  builder: (context, AsyncSnapshot<Image> snapshot) {
                     if (snapshot.hasData) {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -453,15 +456,19 @@ class _EventListViewState extends State<EventListView> {
       case States.normal:
         return Column(
           children: [
-            _showImageList
-                ? Container(
-                    height: 120,
-                    padding: const EdgeInsets.all(7),
-                    child: _imageList(),
-                  )
-                : Container(
-                    child: null,
-                  ),
+            AnimatedSwitcher(
+                duration: const Duration(milliseconds: 400),
+                transitionBuilder: (Widget child, Animation<double> animation) {
+                  return ScaleTransition(scale: animation, child: child);
+                },
+                child: _showImageList
+                    ? SizedBox(
+                        height: 120,
+                        child: _imageList(),
+                      )
+                    : Container(
+                        child: null,
+                      )),
             Container(
               padding: const EdgeInsets.fromLTRB(20, 5, 0, 5),
               child: Row(
@@ -487,9 +494,9 @@ class _EventListViewState extends State<EventListView> {
                   _allowImagePick
                       ? IconButton(
                           onPressed: () async {
-                            await BlocProvider.of<EventListCubit>(context)
+                            await _cubit
                                 .attachImage();
-                            BlocProvider.of<EventListCubit>(context).init();
+                            _cubit.init();
                           },
                           icon: const Icon(Icons.image),
                         )
