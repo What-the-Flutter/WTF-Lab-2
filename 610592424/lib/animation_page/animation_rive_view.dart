@@ -1,5 +1,3 @@
-import 'package:diploma/homePage/event_holder_screen/eventholder_page.dart';
-import 'package:diploma/timeline_page/timeline_page.dart';
 import 'package:flutter/material.dart';
 import 'package:rive/rive.dart';
 
@@ -44,46 +42,6 @@ class _MyRiveAnimationState extends State<MyRiveAnimation> {
         child: Icon(
           isPlaying ? Icons.pause : Icons.play_arrow,
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.business),
-            label: 'Timeline',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.handyman),
-            label: 'Animation',
-          ),
-        ],
-        currentIndex: 2,
-        selectedItemColor: Colors.amber[800],
-        onTap: (index) {
-          if(index == 0){
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) {
-                  return const EventHolderPage();
-                },
-              ),
-            );
-          }
-          else if(index == 1) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) {
-                  return const TimelinePage();
-                },
-              ),
-            );
-          }
-        },
       ),
     );
   }

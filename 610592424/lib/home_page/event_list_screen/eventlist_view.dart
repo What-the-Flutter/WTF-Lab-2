@@ -3,8 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hashtagable/hashtagable.dart';
 import 'package:intl/intl.dart';
 
-import 'package:diploma/homePage/constant_icons/event_icons_set.dart';
-import 'package:diploma/homePage/models/event.dart';
+import 'package:diploma/home_page/constant_icons/event_icons_set.dart';
+import 'package:diploma/home_page/models/event.dart';
 import '../settings_screen/settings_cubit.dart';
 import 'eventlist_cubit.dart';
 import 'eventlist_state.dart';
@@ -32,7 +32,7 @@ class _EventListViewState extends State<EventListView> {
   @override
   void initState() {
     super.initState();
-    _cubit = _cubit;
+    _cubit = BlocProvider.of<EventListCubit>(context);
     _cubit.init();
   }
 
@@ -53,14 +53,10 @@ class _EventListViewState extends State<EventListView> {
   }
 
   void _setAllowImagePick(String text) {
-    setState(() {
-      _allowImagePick = text.isEmpty;
-    });
+    setState(() => _allowImagePick = text.isEmpty);
   }
 
-  void _setState(States state) => setState(() {
-        _currentState = state;
-      });
+  void _setState(States state) => setState(() => _currentState = state);
 
   void _setNormalState() {
     setState(() {
@@ -174,9 +170,7 @@ class _EventListViewState extends State<EventListView> {
         return AppBar(
           backgroundColor: Theme.of(context).primaryColor,
           leading: IconButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
+            onPressed: () => Navigator.pop(context),
             icon: const Icon(Icons.arrow_back_outlined),
           ),
           title: Center(
@@ -280,8 +274,7 @@ class _EventListViewState extends State<EventListView> {
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxHeight: 60.0),
               child: FutureBuilder(
-                future:
-                    _cubit.getAllHashTags(),
+                future: _cubit.getAllHashTags(),
                 builder: (context, AsyncSnapshot<List<String>> snapshot) {
                   if (snapshot.hasData) {
                     return Padding(
@@ -411,8 +404,7 @@ class _EventListViewState extends State<EventListView> {
                   ],
                 )
               : FutureBuilder(
-                  future: _cubit
-                      .fetchImage(state.events[index].eventId),
+                  future: _cubit.fetchImage(state.events[index].eventId),
                   builder: (context, AsyncSnapshot<Image> snapshot) {
                     if (snapshot.hasData) {
                       return Column(
@@ -457,18 +449,17 @@ class _EventListViewState extends State<EventListView> {
         return Column(
           children: [
             AnimatedSwitcher(
-                duration: const Duration(milliseconds: 400),
-                transitionBuilder: (Widget child, Animation<double> animation) {
-                  return ScaleTransition(scale: animation, child: child);
-                },
-                child: _showImageList
-                    ? SizedBox(
-                        height: 120,
-                        child: _imageList(),
-                      )
-                    : Container(
-                        child: null,
-                      )),
+              duration: const Duration(milliseconds: 400),
+              transitionBuilder: (child, animation) {
+                return ScaleTransition(scale: animation, child: child);
+              },
+              child: _showImageList
+                  ? SizedBox(
+                      height: 120,
+                      child: _imageList(),
+                    )
+                  : Container(),
+            ),
             Container(
               padding: const EdgeInsets.fromLTRB(20, 5, 0, 5),
               child: Row(
@@ -494,8 +485,7 @@ class _EventListViewState extends State<EventListView> {
                   _allowImagePick
                       ? IconButton(
                           onPressed: () async {
-                            await _cubit
-                                .attachImage();
+                            await _cubit.attachImage();
                             _cubit.init();
                           },
                           icon: const Icon(Icons.image),

@@ -1,7 +1,7 @@
-import 'package:diploma/homePage/models/event.dart';
+import 'package:diploma/home_page/models/event.dart';
 
 class TimelineState {
-  bool anyHashtags;
+  final bool anyHashtags;
   final List<Event> events;
   final List<int> eventHoldersFilter;
 

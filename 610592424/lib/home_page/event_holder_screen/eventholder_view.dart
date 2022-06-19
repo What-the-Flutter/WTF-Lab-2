@@ -1,12 +1,9 @@
-import 'package:diploma/animation_page/animation_rive_view.dart';
-import 'package:diploma/homePage/settings_screen/settings_cubit.dart';
-import 'package:diploma/homePage/settings_screen/settings_view.dart';
-import 'package:diploma/timeline_page/timeline_page.dart';
+import 'package:diploma/home_page/settings_screen/settings_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:diploma/homePage/models/event_holder.dart';
-import 'package:diploma/homePage/event_list_screen/eventList_page.dart';
+import 'package:diploma/home_page/models/event_holder.dart';
+import 'package:diploma/home_page/event_list_screen/eventList_page.dart';
 import 'add_eventholder_view.dart';
 import 'eventholder_cubit.dart';
 import 'eventholder_state.dart';
@@ -24,7 +21,6 @@ class _EventHolderViewState extends State<EventHolderView> {
   @override
   void initState() {
     super.initState();
-    BlocProvider.of<SettingsCubit>(context).loadTheme();
     _cubit = BlocProvider.of<EventHolderCubit>(context);
     _cubit.init();
   }
@@ -35,7 +31,6 @@ class _EventHolderViewState extends State<EventHolderView> {
       appBar: _appBar(),
       body: _body(context),
       floatingActionButton: _floatingActionButton(context),
-      bottomNavigationBar: _bottomNavBar(),
     );
   }
 
@@ -54,9 +49,7 @@ class _EventHolderViewState extends State<EventHolderView> {
           onPressed: () => Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) {
-                return const SettingsView();
-              },
+              builder: (context) => const SettingsView(),
             ),
           ),
           icon: const Icon(Icons.settings),
@@ -90,12 +83,10 @@ class _EventHolderViewState extends State<EventHolderView> {
                   await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) {
-                        return EventListPage(
+                      builder: (context) => EventListPage(
                           element.eventholderId,
                           element.title,
-                        );
-                      },
+                        ),
                     ),
                   );
                   setState(() {});
@@ -218,48 +209,6 @@ class _EventHolderViewState extends State<EventHolderView> {
         );
       },
       child: const Icon(Icons.add, color: Colors.black),
-    );
-  }
-
-  BottomNavigationBar _bottomNavBar() {
-    return BottomNavigationBar(
-      items: const <BottomNavigationBarItem>[
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: 'Home',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.business),
-          label: 'Timeline',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.handyman),
-          label: 'Animation',
-        ),
-      ],
-      currentIndex: 0,
-      selectedItemColor: Colors.amber[800],
-      onTap: (index) {
-        if (index == 1) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) {
-                return const TimelinePage();
-              },
-            ),
-          );
-        } else if (index == 2) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) {
-                return const MyRiveAnimation();
-              },
-            ),
-          );
-        }
-      },
     );
   }
 }

@@ -1,4 +1,4 @@
-import 'package:diploma/homePage/models/event.dart';
+import 'package:diploma/home_page/models/event.dart';
 
 class EventListState {
   bool anyHashtags;

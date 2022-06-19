@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hashtagable/hashtagable.dart';
 
-import 'package:diploma/homePage/models/event_holder.dart';
-import 'package:diploma/homePage/models/event.dart';
+import 'package:diploma/home_page/models/event_holder.dart';
+import 'package:diploma/home_page/models/event.dart';
 import 'package:image_picker/image_picker.dart';
 import 'eventlist_state.dart';
 

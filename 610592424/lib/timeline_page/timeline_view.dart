@@ -1,6 +1,4 @@
-import 'package:diploma/animation_page/animation_rive_view.dart';
-import 'package:diploma/homePage/event_holder_screen/eventholder_page.dart';
-import 'package:diploma/homePage/settings_screen/settings_cubit.dart';
+import 'package:diploma/home_page/settings_screen/settings_cubit.dart';
 import 'package:diploma/timeline_page/timeline_filter_view.dart';
 import 'package:diploma/timeline_page/timeline_state.dart';
 import 'package:flutter/material.dart';
@@ -44,7 +42,6 @@ class _TimelineViewState extends State<TimelineView> {
               ? FloatingActionButtonLocation.startFloat
               : FloatingActionButtonLocation.endFloat,
       floatingActionButton: _floatingActionButton(),
-      bottomNavigationBar: _bottomNavigationBar(),
     );
   }
 
@@ -363,48 +360,6 @@ class _TimelineViewState extends State<TimelineView> {
         ).then((value) => _cubit.applyFilter());
       },
       child: const Icon(Icons.settings, color: Colors.black),
-    );
-  }
-
-  BottomNavigationBar _bottomNavigationBar(){
-    return BottomNavigationBar(
-      items: const <BottomNavigationBarItem>[
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: 'Home',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.business),
-          label: 'Timeline',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.handyman),
-          label: 'Animation',
-        ),
-      ],
-      currentIndex: 1,
-      selectedItemColor: Colors.amber[800],
-      onTap: (index) {
-        if (index == 0) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) {
-                return const EventHolderPage();
-              },
-            ),
-          );
-        } else if (index == 2) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) {
-                return const MyRiveAnimation();
-              },
-            ),
-          );
-        }
-      },
     );
   }
 }

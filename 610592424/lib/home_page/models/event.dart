@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:diploma/homePage/constant_icons/event_icons_set.dart';
+import 'package:diploma/home_page/constant_icons/event_icons_set.dart';
 
 class Event {
   final int eventId;

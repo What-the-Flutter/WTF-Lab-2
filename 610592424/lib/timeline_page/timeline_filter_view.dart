@@ -1,7 +1,7 @@
 import 'package:diploma/timeline_page/timeline_cubit.dart';
 import 'package:flutter/material.dart';
 
-import 'package:diploma/homePage/models/event_holder.dart';
+import 'package:diploma/home_page/models/event_holder.dart';
 
 class TimelineFilterView extends StatefulWidget {
   final TimelineCubit _cubit;

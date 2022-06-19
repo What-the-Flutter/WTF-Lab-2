@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:diploma/homePage/models/event_holder.dart';
-import 'package:diploma/homePage/constant_icons/eventholder_icons_set.dart';
+import 'package:diploma/home_page/models/event_holder.dart';
+import 'package:diploma/home_page/constant_icons/eventholder_icons_set.dart';
 
 enum EventHolderViewStates {
   adding,

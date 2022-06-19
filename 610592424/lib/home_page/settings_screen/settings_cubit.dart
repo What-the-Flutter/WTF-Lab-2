@@ -49,11 +49,11 @@ class SettingsCubit extends Cubit<SettingsState> {
     );
     emit(
       state.copyWith(
-        currentTheme: state.darkTheme,
+        currentTheme: state.lightTheme,
       ),
     );
     final prefs = await SharedPreferences.getInstance();
-    prefs.setString('theme', 'dark');
+    prefs.setString('theme', 'light');
   }
 
   void changeTheme() async {

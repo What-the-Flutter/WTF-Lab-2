@@ -1,7 +1,7 @@
 import 'package:bloc/bloc.dart';
 
-import 'package:diploma/homePage/models/event.dart';
-import 'package:diploma/homePage/models/event_holder.dart';
+import 'package:diploma/home_page/models/event.dart';
+import 'package:diploma/home_page/models/event_holder.dart';
 import 'package:diploma/data_base/firebase_provider.dart';
 import 'eventholder_state.dart';
 

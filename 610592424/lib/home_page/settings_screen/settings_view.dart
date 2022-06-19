@@ -20,7 +20,6 @@ class _SettingsViewState extends State<SettingsView> {
   void initState() {
     super.initState();
     _cubit = BlocProvider.of<SettingsCubit>(context);
-    _cubit.loadTheme();
   }
 
   @override

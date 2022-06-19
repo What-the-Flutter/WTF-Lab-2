@@ -6,8 +6,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
-import 'package:diploma/homePage/models/event.dart';
-import 'package:diploma/homePage/models/event_holder.dart';
+import 'package:diploma/home_page/models/event.dart';
+import 'package:diploma/home_page/models/event_holder.dart';
 
 class FireBaseProvider {
   final _ref = FirebaseDatabase.instanceFor(

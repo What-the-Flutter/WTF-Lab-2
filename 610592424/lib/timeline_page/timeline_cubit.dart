@@ -1,22 +1,18 @@
 import 'package:bloc/bloc.dart';
-import 'package:diploma/homePage/models/event_holder.dart';
+import 'package:diploma/home_page/models/event_holder.dart';
 import 'package:diploma/data_base/firebase_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hashtagable/hashtagable.dart';
 
-import 'package:diploma/homePage/models/event.dart';
+import 'package:diploma/home_page/models/event.dart';
 import 'timeline_state.dart';
 
 class TimelineCubit extends Cubit<TimelineState> {
   late final FireBaseProvider _db;
 
   TimelineCubit()
-      : super(TimelineState(
-          [],
-          false,
-          [],
-        )) {
+      : super(TimelineState([], false, [])) {
     _db = FireBaseProvider();
   }
 
@@ -31,16 +27,16 @@ class TimelineCubit extends Cubit<TimelineState> {
   }
 
   void onEventholderFilterTap(int id){
-    if(isEventholderSelected(id)){
+    if(isEventholderSelected(id)) {
       state.eventHoldersFilter.removeWhere((element) => element == id);
     }
-    else{
+    else {
       state.eventHoldersFilter.add(id);
     }
     emit(state.copyWith());
   }
 
-  bool isEventholderSelected(int id){
+  bool isEventholderSelected(int id) {
     return state.eventHoldersFilter.any((element) => element == id);
   }
 
@@ -51,7 +47,7 @@ class TimelineCubit extends Cubit<TimelineState> {
 
   void applyFilter() async {
     if (state.eventHoldersFilter.isNotEmpty) {
-      List<Event> _events = [];
+      final List<Event> _events = [];
       for (var id in state.eventHoldersFilter) {
         _events.addAll(await _db.getAllEventsForEventHolder(id));
       }
@@ -73,7 +69,7 @@ class TimelineCubit extends Cubit<TimelineState> {
   }
 
   Future<List<String>> getAllHashTags() async {
-    List<String> _hashTags = [];
+    final List<String> _hashTags = [];
     for (var event in await _db.getAllEvents()) {
       _hashTags.addAll(extractHashTags(event.text));
     }
