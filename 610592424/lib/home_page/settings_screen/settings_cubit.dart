@@ -6,14 +6,12 @@ import 'settings_state.dart';
 
 class SettingsCubit extends Cubit<SettingsState> {
   SettingsCubit()
-      : super(
-    SettingsState(
-      currentTheme: ThemeData(),
-      textTheme: SettingsState.medium,
-      bubbleAlignment: false,
-      centerDate: false,
-    ),
-  );
+      : super(SettingsState(
+          currentTheme: ThemeData(),
+          textTheme: SettingsState.medium,
+          bubbleAlignment: false,
+          centerDate: false,
+        ));
 
   void initTextTheme(int fontSizeIndex) async {
     switch (fontSizeIndex) {
@@ -51,11 +49,11 @@ class SettingsCubit extends Cubit<SettingsState> {
     );
     emit(
       state.copyWith(
-        currentTheme: state.darkTheme,
+        currentTheme: state.lightTheme,
       ),
     );
     final prefs = await SharedPreferences.getInstance();
-    prefs.setString('theme', 'dark');
+    prefs.setString('theme', 'light');
   }
 
   void changeTheme() async {

@@ -1,13 +1,12 @@
-import 'package:diploma/homePage/settings_screen/settings_cubit.dart';
-import 'package:diploma/homePage/settings_screen/settings_view.dart';
+import 'package:diploma/home_page/settings_screen/settings_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:diploma/homePage/models/event_holder.dart';
-import 'package:diploma/homePage/eventListScreen/eventList_page.dart';
+import 'package:diploma/home_page/models/event_holder.dart';
+import 'package:diploma/home_page/event_list_screen/eventList_page.dart';
 import 'add_eventholder_view.dart';
-import './cubit/eventholder_cubit.dart';
-import './cubit/eventholder_state.dart';
+import 'eventholder_cubit.dart';
+import 'eventholder_state.dart';
 
 class EventHolderView extends StatefulWidget {
   const EventHolderView({Key? key}) : super(key: key);
@@ -17,11 +16,13 @@ class EventHolderView extends StatefulWidget {
 }
 
 class _EventHolderViewState extends State<EventHolderView> {
+  late final EventHolderCubit _cubit;
+
   @override
   void initState() {
     super.initState();
-    BlocProvider.of<EventHolderCubit>(context).init();
-    BlocProvider.of<SettingsCubit>(context).loadTheme();
+    _cubit = BlocProvider.of<EventHolderCubit>(context);
+    _cubit.init();
   }
 
   @override
@@ -48,9 +49,7 @@ class _EventHolderViewState extends State<EventHolderView> {
           onPressed: () => Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) {
-                return const SettingsView();
-              },
+              builder: (context) => const SettingsView(),
             ),
           ),
           icon: const Icon(Icons.settings),
@@ -69,8 +68,8 @@ class _EventHolderViewState extends State<EventHolderView> {
                 leading: element.picture,
                 title: Text(element.title),
                 subtitle: FutureBuilder(
-                  future: BlocProvider.of<EventHolderCubit>(context)
-                      .getEventHolderLastEventText(element.eventholderId),
+                  future:
+                      _cubit.getEventHolderLastEventText(element.eventholderId),
                   builder:
                       (BuildContext context, AsyncSnapshot<String> snapshot) {
                     if (snapshot.hasData) {
@@ -81,17 +80,13 @@ class _EventHolderViewState extends State<EventHolderView> {
                   },
                 ),
                 onTap: () async {
-                  var user = BlocProvider.of<EventHolderCubit>(context).getUser;
                   await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) {
-                        return EventListPage(
+                      builder: (context) => EventListPage(
                           element.eventholderId,
                           element.title,
-                          user,
-                        );
-                      },
+                        ),
                     ),
                   );
                   setState(() {});

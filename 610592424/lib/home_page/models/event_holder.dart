@@ -1,4 +1,4 @@
-import '../assets/eventholder_icons_set.dart';
+import '../constant_icons/eventholder_icons_set.dart';
 import 'package:flutter/material.dart';
 
 class EventHolder {

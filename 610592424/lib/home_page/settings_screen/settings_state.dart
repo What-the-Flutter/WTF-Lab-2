@@ -18,7 +18,9 @@ class SettingsState {
       highlightColor: Colors.white,
       primaryIconTheme: const IconThemeData(color: Colors.white),
       colorScheme: ColorScheme.light(
-          secondary: Colors.teal, primary: Colors.green[100]!),
+        secondary: Colors.teal,
+        primary: Colors.green[100]!,
+      ),
       textTheme: textTheme,
     );
   }

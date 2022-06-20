@@ -3,12 +3,11 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
-import 'package:diploma/homePage/models/event.dart';
-import 'package:diploma/homePage/models/event_holder.dart';
+import 'package:diploma/home_page/models/event.dart';
+import 'package:diploma/home_page/models/event_holder.dart';
 
 class FireBaseProvider {
   final _ref = FirebaseDatabase.instanceFor(
@@ -18,9 +17,8 @@ class FireBaseProvider {
   ).ref();
 
   final _storage = FirebaseStorage.instance;
-  final User _user;
 
-  FireBaseProvider(this._user);
+  FireBaseProvider();
 
   ///CRUD operations with Entities:
 
@@ -102,6 +100,21 @@ class FireBaseProvider {
   }
 
   //Events:
+  Future<List<Event>> getAllEvents() async {
+    final events = <Event>[];
+    final databaseEvent = await _ref
+        .child('events')
+        .orderByChild('eventholder_id')
+        .once();
+
+    for (final child in databaseEvent.snapshot.children) {
+      final map = child.value as Map<dynamic, dynamic>;
+      final event = Event.fromMap(map);
+      events.add(event);
+    }
+    return events;
+  }
+
   Future<List<Event>> getAllEventsForEventHolder(int eventHolderId) async {
     final events = <Event>[];
     final databaseEvent = await _ref
