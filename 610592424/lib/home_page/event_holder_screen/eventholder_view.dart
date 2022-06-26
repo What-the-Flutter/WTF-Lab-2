@@ -1,8 +1,8 @@
-import 'package:diploma/home_page/settings_screen/settings_view.dart';
+import 'package:diploma/settings_page/settings_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:diploma/home_page/models/event_holder.dart';
+import 'package:diploma/models/event_holder.dart';
 import 'package:diploma/home_page/event_list_screen/eventList_page.dart';
 import 'add_eventholder_view.dart';
 import 'eventholder_cubit.dart';
@@ -22,7 +22,6 @@ class _EventHolderViewState extends State<EventHolderView> {
   void initState() {
     super.initState();
     _cubit = BlocProvider.of<EventHolderCubit>(context);
-    _cubit.init();
   }
 
   @override
@@ -68,8 +67,8 @@ class _EventHolderViewState extends State<EventHolderView> {
                 leading: element.picture,
                 title: Text(element.title),
                 subtitle: FutureBuilder(
-                  future:
-                      _cubit.getEventHolderLastEventText(element.eventholderId),
+                  future: _cubit
+                      .fetchEventHolderLastEventText(element.eventholderId),
                   builder:
                       (BuildContext context, AsyncSnapshot<String> snapshot) {
                     if (snapshot.hasData) {
@@ -84,9 +83,9 @@ class _EventHolderViewState extends State<EventHolderView> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => EventListPage(
-                          element.eventholderId,
-                          element.title,
-                        ),
+                        element.eventholderId,
+                        element.title,
+                      ),
                     ),
                   );
                   setState(() {});
@@ -139,10 +138,10 @@ class _EventHolderViewState extends State<EventHolderView> {
               Expanded(
                 child: ListTile(
                   onTap: () async {
-                    EventHolder tempHolder = await context
+                    final tempHolder = await context
                         .read<EventHolderCubit>()
-                        .getEventHolder(id);
-                    var result = await Navigator.push(
+                        .fetchEventHolder(id);
+                    final result = await Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) {

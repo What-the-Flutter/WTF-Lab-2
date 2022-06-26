@@ -1,6 +1,6 @@
 import 'package:diploma/animation_page/animation_rive_view.dart';
 import 'package:diploma/home_page/event_holder_screen/eventholder_page.dart';
-import 'package:diploma/home_page/settings_screen/settings_cubit.dart';
+import 'package:diploma/settings_page/settings_cubit.dart';
 import 'package:diploma/timeline_page/timeline_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -28,7 +28,7 @@ class _LeadingPageState extends State<LeadingPage> {
     assert(newIndex >= 0);
     _currentIndex = newIndex;
     setState(() {
-      switch(_currentIndex){
+      switch (_currentIndex) {
         case 0:
           _body = const EventHolderPage();
           break;

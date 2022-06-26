@@ -6,8 +6,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
-import 'package:diploma/home_page/models/event.dart';
-import 'package:diploma/home_page/models/event_holder.dart';
+import 'package:diploma/models/event.dart';
+import 'package:diploma/models/event_holder.dart';
 
 class FireBaseProvider {
   final _ref = FirebaseDatabase.instanceFor(
@@ -23,12 +23,10 @@ class FireBaseProvider {
   ///CRUD operations with Entities:
 
   //EventHolder:
-  Future<List<EventHolder>> getAllEventHolders([int exceptId = -1]) async {
+  Future<List<EventHolder>> fetchAllEventHolders([int exceptId = -1]) async {
     final eventHolders = <EventHolder>[];
-    final databaseEventHolder = await _ref
-        .child('eventHolders')
-        .orderByChild('eventholder_id')
-        .once();
+    final databaseEventHolder =
+        await _ref.child('eventHolders').orderByChild('eventholder_id').once();
     if (exceptId == -1) {
       for (final child in databaseEventHolder.snapshot.children) {
         final map = child.value as Map<dynamic, dynamic>;
@@ -48,7 +46,7 @@ class FireBaseProvider {
     return eventHolders;
   }
 
-  Future<EventHolder> getEventHolder(int id) async {
+  Future<EventHolder> fetchEventHolder(int id) async {
     final databaseEventHolder = await _ref
         .child('eventHolders')
         .orderByChild('eventholder_id')
@@ -61,9 +59,7 @@ class FireBaseProvider {
 
   Future<void> addEventHolder(EventHolder eventHolder) async {
     try {
-      await _ref
-          .child('eventHolders/${eventHolder.eventholderId}')
-          .set(
+      await _ref.child('eventHolders/${eventHolder.eventholderId}').set(
             eventHolder.toMap(),
           );
     } catch (e) {
@@ -73,9 +69,7 @@ class FireBaseProvider {
 
   Future<void> updateEventHolder(EventHolder eventHolder) async {
     try {
-      await _ref
-          .child('eventHolders/${eventHolder.eventholderId}')
-          .update(
+      await _ref.child('eventHolders/${eventHolder.eventholderId}').update(
             eventHolder.toMap(),
           );
     } catch (e) {
@@ -100,12 +94,10 @@ class FireBaseProvider {
   }
 
   //Events:
-  Future<List<Event>> getAllEvents() async {
+  Future<List<Event>> fetchAllEvents() async {
     final events = <Event>[];
-    final databaseEvent = await _ref
-        .child('events')
-        .orderByChild('eventholder_id')
-        .once();
+    final databaseEvent =
+        await _ref.child('events').orderByChild('event_id').once();
 
     for (final child in databaseEvent.snapshot.children) {
       final map = child.value as Map<dynamic, dynamic>;
@@ -115,7 +107,7 @@ class FireBaseProvider {
     return events;
   }
 
-  Future<List<Event>> getAllEventsForEventHolder(int eventHolderId) async {
+  Future<List<Event>> fetchAllEventsForEventHolder(int eventHolderId) async {
     final events = <Event>[];
     final databaseEvent = await _ref
         .child('events')
@@ -159,9 +151,8 @@ class FireBaseProvider {
   Future<void> deleteEvent(int id, {bool hasImage = true}) async {
     try {
       await _ref.child('events/$id').remove();
-      if(hasImage){
-        await _storage
-            .ref('images/$id').delete();
+      if (hasImage) {
+        await _storage.ref('images/$id').delete();
       }
     } catch (e) {
       print(e);
@@ -169,9 +160,7 @@ class FireBaseProvider {
   }
 
   Future<Uint8List> fetchImage(int id) async {
-    var photo = await _storage
-        .ref('images/$id')
-        .getData();
+    final photo = await _storage.ref('images/$id').getData();
     assert(photo != null, 'incorrect id');
     return photo!;
   }

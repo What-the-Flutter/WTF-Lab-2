@@ -1,36 +1,65 @@
 import 'package:bloc/bloc.dart';
-import 'package:diploma/home_page/models/event_holder.dart';
-import 'package:diploma/data_base/firebase_provider.dart';
+import 'package:diploma/data_base/repositories/eventholders_repository.dart';
+import 'package:diploma/models/event_holder.dart';
+import 'package:diploma/data_base/repositories/events_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hashtagable/hashtagable.dart';
+import 'package:diploma/widgets/events_app_bar.dart';
 
-import 'package:diploma/home_page/models/event.dart';
+import 'package:diploma/models/event.dart';
 import 'timeline_state.dart';
 
 class TimelineCubit extends Cubit<TimelineState> {
-  late final FireBaseProvider _db;
+  late final EventsRepository _eventsRepo;
+  late final EventHoldersRepository _eventHoldersRepo;
 
-  TimelineCubit()
-      : super(TimelineState([], false, [])) {
-    _db = FireBaseProvider();
+  TimelineCubit() : super(TimelineState([], false, [], AppbarStates.normal)) {
+    _eventsRepo = EventsRepository();
+    _eventHoldersRepo = EventHoldersRepository();
+    loadAllEvents();
   }
 
-  Future<String> getEventHolderName(int id) async {
-   var eventholder = await _db.getEventHolder(id);
+  void setAppbarState(AppbarStates newAppbarState) =>
+      emit(state.copyWith(appbarState: newAppbarState));
 
-   return eventholder.title;
+  void setNormalAppbarState() {
+    emit(state.copyWith(appbarState: AppbarStates.normal));
+    loadAllEvents();
+  }
+
+  void setSearchingAppbarState() {
+    emit(state.copyWith(appbarState: AppbarStates.searching));
+    applySearch('');
+  }
+
+  void onEventTapOrPress(int eventId) {
+    if (state.appbarState != AppbarStates.editing) {
+      changeEventSelection(eventId);
+      final itemsSelected = getEventsSelectedNumber;
+      if (itemsSelected == 0) {
+        setNormalAppbarState();
+      } else if (itemsSelected == 1) {
+        setAppbarState(AppbarStates.singleSelected);
+      } else {
+        setAppbarState(AppbarStates.multiSelected);
+      }
+    }
+  }
+
+  Future<String> fetchEventHolderName(int id) async {
+    final eventholder = await _eventHoldersRepo.fetchEventHolder(id);
+    return eventholder.title;
   }
 
   Future<List<EventHolder>> getEventHoldersFiltersList() async {
-    return await _db.getAllEventHolders();
+    return await _eventHoldersRepo.loadAllEventHolders();
   }
 
-  void onEventholderFilterTap(int id){
-    if(isEventholderSelected(id)) {
+  void onEventholderFilterTap(int id) {
+    if (isEventholderSelected(id)) {
       state.eventHoldersFilter.removeWhere((element) => element == id);
-    }
-    else {
+    } else {
       state.eventHoldersFilter.add(id);
     }
     emit(state.copyWith());
@@ -41,7 +70,9 @@ class TimelineCubit extends Cubit<TimelineState> {
   }
 
   void loadAllEvents() async {
-    emit(state.copyWith(events: await _db.getAllEvents()));
+    final _events = await _eventsRepo.loadAllEvents();
+    //_events.sort((a, b) => a.eventId.compareTo(b.eventId));
+    emit(state.copyWith(events: _events));
     await checkHashTags();
   }
 
@@ -49,7 +80,7 @@ class TimelineCubit extends Cubit<TimelineState> {
     if (state.eventHoldersFilter.isNotEmpty) {
       final List<Event> _events = [];
       for (var id in state.eventHoldersFilter) {
-        _events.addAll(await _db.getAllEventsForEventHolder(id));
+        _events.addAll(await _eventsRepo.getAllEventsForEventHolder(id));
       }
       _events.sort((a, b) => a.eventId.compareTo(b.eventId));
       emit(state.copyWith(events: _events));
@@ -59,7 +90,7 @@ class TimelineCubit extends Cubit<TimelineState> {
   }
 
   checkHashTags() async {
-    for (var event in await _db.getAllEvents()) {
+    for (var event in await _eventsRepo.loadAllEvents()) {
       if (hasHashTags(event.text)) {
         emit(state.copyWith(anyHashtags: true));
         return;
@@ -68,27 +99,26 @@ class TimelineCubit extends Cubit<TimelineState> {
     emit(state.copyWith(anyHashtags: false));
   }
 
-  Future<List<String>> getAllHashTags() async {
+  Future<List<String>> fetchAllHashTags() async {
     final List<String> _hashTags = [];
-    for (var event in await _db.getAllEvents()) {
+    for (var event in await _eventsRepo.loadAllEvents()) {
       _hashTags.addAll(extractHashTags(event.text));
     }
     return _hashTags;
   }
 
-  int get eventsSelected =>
+  int get getEventsSelectedNumber =>
       state.events.where((element) => element.isSelected == true).length;
 
-  Event getSingleSelected() {
-    return state.events.singleWhere((element) => element.isSelected);
-  }
+  Event get getSingleSelected =>
+      state.events.singleWhere((element) => element.isSelected);
 
-  Event getEvent(int id) {
+  Event fetchEvent(int id) {
     return state.events.singleWhere((element) => element.eventId == id);
   }
 
   void changeEventSelection(int id) {
-    var event = state.events.singleWhere((element) => element.eventId == id);
+    final event = state.events.singleWhere((element) => element.eventId == id);
     event.isSelected = !event.isSelected;
 
     emit(state.copyWith(events: state.events));
@@ -104,11 +134,13 @@ class TimelineCubit extends Cubit<TimelineState> {
     emit(state.copyWith(events: state.events));
   }
 
-  void deleteAllSelected() {
-    state.events.where((element) => element.isSelected).forEach((element) {
-      _db.deleteEvent(element.eventId, hasImage: element.imagePath != null);
+  void deleteAllSelected() async {
+    state.events
+        .where((element) => element.isSelected)
+        .forEach((element) async {
+      await _eventsRepo.deleteEvent(element);
     });
-    loadAllEvents();
+    setNormalAppbarState();
   }
 
   void copyAllSelected() {
@@ -120,18 +152,16 @@ class TimelineCubit extends Cubit<TimelineState> {
 
     Clipboard.setData(ClipboardData(text: text));
 
-    deselectAllEvents();
+    setNormalAppbarState();
   }
 
   void applySearch(String enteredString) async {
-    var exp = RegExp(enteredString);
-    var tempList = await _db.getAllEvents();
+    final exp = RegExp(enteredString);
+    final tempList = await _eventsRepo.loadAllEvents();
     emit(state.copyWith(
       events: tempList.where((element) => exp.hasMatch(element.text)).toList(),
     ));
   }
 
-  Future<Image> fetchImage(int id) async {
-    return Image.memory(await _db.fetchImage(id));
-  }
+  Future<Image> fetchImage(int id) async => await _eventsRepo.fetchImage(id);
 }

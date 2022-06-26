@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:diploma/home_page/models/event_holder.dart';
-import 'package:diploma/home_page/constant_icons/eventholder_icons_set.dart';
+import 'package:diploma/models/event_holder.dart';
+import 'package:diploma/eventholder_icons_set.dart';
 
 enum EventHolderViewStates {
   adding,
@@ -24,8 +24,8 @@ class AddEventHolderView extends StatefulWidget {
 
 class _AddEventHolderViewState extends State<AddEventHolderView> {
   late int _selectedIconIndex;
-  late final TextEditingController _textController;
   late bool _emptyText;
+  late final TextEditingController _textController;
 
   @override
   void initState() {
@@ -88,7 +88,9 @@ class _AddEventHolderViewState extends State<AddEventHolderView> {
                 onChanged: (string) => _checkText(string),
               ),
             ),
-            Expanded(child: _iconsGrid(),),
+            Expanded(
+              child: _iconsGrid(),
+            ),
           ],
         ),
       ),
@@ -143,11 +145,12 @@ class _AddEventHolderViewState extends State<AddEventHolderView> {
                   );
                   break;
                 case EventHolderViewStates.editing:
-                  widget.eventHolder!.title = _textController.text;
-                  widget.eventHolder!.iconIndex = _selectedIconIndex;
                   Navigator.pop(
                     context,
-                    widget.eventHolder!,
+                    widget.eventHolder!.copyWith(
+                      title: _textController.text,
+                      iconIndex: _selectedIconIndex,
+                    ),
                   );
                   break;
                 default:

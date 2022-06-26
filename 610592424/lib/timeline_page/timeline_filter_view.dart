@@ -1,7 +1,7 @@
 import 'package:diploma/timeline_page/timeline_cubit.dart';
 import 'package:flutter/material.dart';
 
-import 'package:diploma/home_page/models/event_holder.dart';
+import 'package:diploma/models/event_holder.dart';
 
 class TimelineFilterView extends StatefulWidget {
   final TimelineCubit _cubit;
@@ -48,7 +48,8 @@ class _TimelineFilterViewState extends State<TimelineFilterView> {
               for (var eventHolder in snapshot.data!)
                 GestureDetector(
                   onTap: () {
-                    widget._cubit.onEventholderFilterTap(eventHolder.eventholderId);
+                    widget._cubit
+                        .onEventholderFilterTap(eventHolder.eventholderId);
                     setState(() {});
                   },
                   child: Container(
@@ -61,7 +62,8 @@ class _TimelineFilterViewState extends State<TimelineFilterView> {
                     ),
                     child: AnimatedSwitcher(
                       duration: const Duration(milliseconds: 400),
-                      transitionBuilder: (Widget child, Animation<double> animation) {
+                      transitionBuilder:
+                          (Widget child, Animation<double> animation) {
                         return ScaleTransition(scale: animation, child: child);
                       },
                       child: widget._cubit
