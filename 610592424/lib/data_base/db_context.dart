@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
-import 'package:diploma/home_page/models/event.dart';
-import 'package:diploma/home_page/models/event_holder.dart';
+import 'package:diploma/models/event.dart';
+import 'package:diploma/models/event_holder.dart';
 
 class DBContext {
   static const String _eventsTable = 'events';

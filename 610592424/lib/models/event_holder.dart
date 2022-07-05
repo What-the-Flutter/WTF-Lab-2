@@ -1,20 +1,25 @@
-import '../constant_icons/eventholder_icons_set.dart';
+import '../eventholder_icons_set.dart';
 import 'package:flutter/material.dart';
 
 class EventHolder {
-  int eventholderId;
-
-  int iconIndex;
-
+  final String title;
+  final int eventholderId;
+  final int iconIndex;
   Icon get picture => setOfEventholderIcons[iconIndex];
-
-  String title;
 
   EventHolder({
     required this.title,
     required this.iconIndex,
     this.eventholderId = -1,
   });
+
+  EventHolder copyWith({int? iconIndex, String? title}) {
+    return EventHolder(
+      title: title ?? this.title,
+      iconIndex: iconIndex ?? this.iconIndex,
+      eventholderId: eventholderId,
+    );
+  }
 
   factory EventHolder.withoutId(String title, int iconIndex) {
     return EventHolder(

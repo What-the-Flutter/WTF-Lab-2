@@ -4,10 +4,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 class SharedPreferencesProvider {
   static late SharedPreferences _prefs;
 
-  static Future<void> init() async => _prefs = await SharedPreferences.getInstance();
+  static Future<void> init() async =>
+      _prefs = await SharedPreferences.getInstance();
 
-  ThemeData getTheme(){
-    switch(_prefs.getString('theme')){
+  ThemeData getTheme() {
+    switch (_prefs.getString('theme')) {
       case 'dark':
         return ThemeData.dark();
       default:
@@ -15,8 +16,8 @@ class SharedPreferencesProvider {
     }
   }
 
-  void changeTheme(){
-    switch(_prefs.getString('theme')){
+  void changeTheme() {
+    switch (_prefs.getString('theme')) {
       case 'dark':
         _prefs.setString('theme', 'light');
         break;

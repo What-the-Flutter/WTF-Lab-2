@@ -1,8 +1,9 @@
-import 'package:diploma/home_page/settings_screen/settings_view.dart';
+import 'package:diploma/settings_page/settings_view.dart';
+import 'package:diploma/statistics_page/summary_stats_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:diploma/home_page/models/event_holder.dart';
+import 'package:diploma/models/event_holder.dart';
 import 'package:diploma/home_page/event_list_screen/eventList_page.dart';
 import 'add_eventholder_view.dart';
 import 'eventholder_cubit.dart';
@@ -22,7 +23,6 @@ class _EventHolderViewState extends State<EventHolderView> {
   void initState() {
     super.initState();
     _cubit = BlocProvider.of<EventHolderCubit>(context);
-    _cubit.init();
   }
 
   @override
@@ -37,9 +37,14 @@ class _EventHolderViewState extends State<EventHolderView> {
   AppBar _appBar() {
     return AppBar(
       backgroundColor: Theme.of(context).primaryColor,
-      leading: const IconButton(
-        onPressed: null,
-        icon: Icon(Icons.menu),
+      leading: IconButton(
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const SummaryStatsPage(),
+          ),
+        ),
+        icon: const Icon(Icons.stacked_bar_chart),
       ),
       title: const Center(
         child: Text("Home"),
@@ -68,8 +73,8 @@ class _EventHolderViewState extends State<EventHolderView> {
                 leading: element.picture,
                 title: Text(element.title),
                 subtitle: FutureBuilder(
-                  future:
-                      _cubit.getEventHolderLastEventText(element.eventholderId),
+                  future: _cubit
+                      .fetchEventHolderLastEventText(element.eventholderId),
                   builder:
                       (BuildContext context, AsyncSnapshot<String> snapshot) {
                     if (snapshot.hasData) {
@@ -84,9 +89,9 @@ class _EventHolderViewState extends State<EventHolderView> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => EventListPage(
-                          element.eventholderId,
-                          element.title,
-                        ),
+                        element.eventholderId,
+                        element.title,
+                      ),
                     ),
                   );
                   setState(() {});
@@ -139,10 +144,8 @@ class _EventHolderViewState extends State<EventHolderView> {
               Expanded(
                 child: ListTile(
                   onTap: () async {
-                    EventHolder tempHolder = await context
-                        .read<EventHolderCubit>()
-                        .getEventHolder(id);
-                    var result = await Navigator.push(
+                    final tempHolder = await _cubit.fetchEventHolder(id);
+                    final result = await Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) {
@@ -154,9 +157,7 @@ class _EventHolderViewState extends State<EventHolderView> {
                       ),
                     );
                     if (result != null) {
-                      context
-                          .read<EventHolderCubit>()
-                          .editEventHolder(result as EventHolder);
+                      _cubit.editEventHolder(result as EventHolder);
                       Navigator.pop(context);
                     }
                   },
@@ -170,7 +171,7 @@ class _EventHolderViewState extends State<EventHolderView> {
               Expanded(
                 child: ListTile(
                   onTap: () {
-                    context.read<EventHolderCubit>().deleteEventHolder(id);
+                    _cubit.deleteEventHolder(id);
                     Navigator.pop(context);
                   },
                   leading: const Icon(
@@ -202,9 +203,7 @@ class _EventHolderViewState extends State<EventHolderView> {
         ).then(
           (value) => {
             if (value != null)
-              context
-                  .read<EventHolderCubit>()
-                  .addEventHolder(value as EventHolder)
+              _cubit.addEventHolder(value as EventHolder)
           },
         );
       },

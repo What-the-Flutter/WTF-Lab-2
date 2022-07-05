@@ -1,16 +1,17 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
-import 'package:diploma/home_page/constant_icons/event_icons_set.dart';
+import 'package:diploma/event_icons_set.dart';
 
-class Event {
+class Event extends Equatable {
   final int eventId;
-  String text;
-  bool isSelected = false;
-  int eventholderId;
-  String? imagePath;
-  int? iconIndex;
+  final String text;
+  final int eventholderId;
+  final String? imagePath;
+  final DateTime? timeOfCreation;
+  final int? iconIndex;
   Icon? get icon => iconIndex == null ? null : setOfEventIcons[iconIndex!];
-  DateTime? timeOfCreation;
+  bool isSelected = false;
 
   Event(
     this.eventId,
@@ -20,6 +21,23 @@ class Event {
     this.imagePath,
     this.timeOfCreation,
   ]);
+
+  Event copyWith({
+    String? text,
+    int? eventholderId,
+    String? imagePath,
+    int? iconIndex,
+    DateTime? timeOfCreation,
+  }) {
+    return Event(
+      eventId,
+      text ?? this.text,
+      eventholderId ?? this.eventholderId,
+      iconIndex ?? this.iconIndex,
+      imagePath ?? this.imagePath,
+      timeOfCreation ?? this.timeOfCreation,
+    );
+  }
 
   factory Event.withoutId({
     required String text,
@@ -43,7 +61,9 @@ class Event {
       'text': text,
       'eventholder_id': eventholderId,
       'image_path': imagePath,
-      'time_of_creation' : leavePrevDate ? timeOfCreation!.toIso8601String() : DateTime.now().toIso8601String(),
+      'time_of_creation': leavePrevDate
+          ? timeOfCreation!.toIso8601String()
+          : DateTime.now().toIso8601String(),
     };
   }
 
@@ -54,4 +74,15 @@ class Event {
         eventholderId = data['eventholder_id'],
         imagePath = data['image_path'],
         timeOfCreation = DateTime.parse(data['time_of_creation']);
+
+  @override
+  List<Object?> get props => [
+  eventId,
+  text,
+  eventholderId,
+  imagePath,
+  timeOfCreation,
+  iconIndex,
+  isSelected,
+  ];
 }

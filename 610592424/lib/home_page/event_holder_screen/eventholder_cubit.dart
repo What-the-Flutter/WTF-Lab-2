@@ -1,48 +1,38 @@
 import 'package:bloc/bloc.dart';
 
-import 'package:diploma/home_page/models/event.dart';
-import 'package:diploma/home_page/models/event_holder.dart';
-import 'package:diploma/data_base/firebase_provider.dart';
+import 'package:diploma/models/event_holder.dart';
+import 'package:diploma/data_base/repositories/eventholders_repository.dart';
 import 'eventholder_state.dart';
 
 class EventHolderCubit extends Cubit<EventHolderState> {
-  late final FireBaseProvider _db;
+  late final EventHoldersRepository _repo;
 
-  EventHolderCubit() : super(EventHolderState([])){
-    _db = FireBaseProvider();
+  EventHolderCubit() : super(EventHolderState([])) {
+    _repo = EventHoldersRepository();
+    loadEventHolders();
   }
 
-  void init() async => emit(EventHolderState(await _db.getAllEventHolders()));
+  void loadEventHolders() async =>
+      emit(EventHolderState(await _repo.loadAllEventHolders()));
 
-  Future<EventHolder> getEventHolder(int id) async {
-    return await _db.getEventHolder(id);
-  }
+  Future<EventHolder> fetchEventHolder(int id) async =>
+      await _repo.fetchEventHolder(id);
 
-  Future<String> getEventHolderLastEventText(int id) async {
-    List<Event> events = await _db.getAllEventsForEventHolder(id);
-    return events.last.text;
-  }
+  Future<String> fetchEventHolderLastEventText(int id) async =>
+      await _repo.fetchEventHolderLastEventText(id);
 
   void addEventHolder(EventHolder tempEventHolder) async {
-    await _db.addEventHolder(
-      EventHolder.withoutId(
-        tempEventHolder.title,
-        tempEventHolder.iconIndex,
-      ),
-    );
-
-    init();
+    await _repo.addEventHolder(tempEventHolder);
+    loadEventHolders();
   }
 
-  void editEventHolder(EventHolder newEventHolder){
-    _db.updateEventHolder(newEventHolder);
-
-    init();
+  void editEventHolder(EventHolder newEventHolder) async {
+    await _repo.updateEventHolder(newEventHolder);
+    loadEventHolders();
   }
 
-  void deleteEventHolder(int id){
-    _db.deleteEventHolder(id);
-
-    init();
+  void deleteEventHolder(int id) async {
+    await _repo.deleteEventHolder(id);
+    loadEventHolders();
   }
 }
