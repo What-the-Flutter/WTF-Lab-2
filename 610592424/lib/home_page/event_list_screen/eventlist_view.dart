@@ -82,7 +82,7 @@ class _EventListViewState extends State<EventListView> {
           shrinkWrap: true,
           itemCount: state.events.length,
           itemBuilder: (context, index) {
-            var _showDate = index != 0 &&
+            final _showDate = index != 0 &&
                 state.events[index].timeOfCreation!
                         .difference(state.events[index - 1].timeOfCreation!)
                         .inDays >= 1;

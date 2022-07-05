@@ -1,18 +1,18 @@
-import 'package:diploma/timeline_page/timeline_cubit.dart';
 import 'package:flutter/material.dart';
 
 import 'package:diploma/models/event_holder.dart';
+import 'summary_stats_cubit.dart';
 
-class TimelineFilterView extends StatefulWidget {
-  final TimelineCubit _cubit;
+class SummaryStatsFilterView extends StatefulWidget {
+  final SummaryStatsCubit _cubit;
 
-  const TimelineFilterView(this._cubit, {Key? key}) : super(key: key);
+  const SummaryStatsFilterView(this._cubit, {Key? key}) : super(key: key);
 
   @override
-  State<TimelineFilterView> createState() => _TimelineFilterViewState();
+  State<SummaryStatsFilterView> createState() => _SummaryStatsFilterViewState();
 }
 
-class _TimelineFilterViewState extends State<TimelineFilterView> {
+class _SummaryStatsFilterViewState extends State<SummaryStatsFilterView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,7 +28,9 @@ class _TimelineFilterViewState extends State<TimelineFilterView> {
       ),
       body: _body(),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.pop(context),
+        onPressed: () {
+          Navigator.pop(context);
+        },
         child: const Icon(Icons.check),
       ),
     );

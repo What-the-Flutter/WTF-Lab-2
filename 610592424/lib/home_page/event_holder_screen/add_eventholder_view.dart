@@ -126,39 +126,41 @@ class _AddEventHolderViewState extends State<AddEventHolderView> {
   }
 
   FloatingActionButton _floatingActionButton() {
-    return _emptyText
-        ? FloatingActionButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Icon(Icons.cancel, color: Colors.black87),
-            backgroundColor: Colors.yellow,
-          )
-        : FloatingActionButton(
-            onPressed: () {
-              switch (widget.state) {
-                case EventHolderViewStates.adding:
-                  Navigator.pop(
-                    context,
-                    EventHolder(
-                      title: _textController.text,
-                      iconIndex: _selectedIconIndex,
-                    ),
-                  );
-                  break;
-                case EventHolderViewStates.editing:
-                  Navigator.pop(
-                    context,
-                    widget.eventHolder!.copyWith(
-                      title: _textController.text,
-                      iconIndex: _selectedIconIndex,
-                    ),
-                  );
-                  break;
-                default:
-                  throw Exception("wrong state");
-              }
-            },
-            child: const Icon(Icons.send, color: Colors.black87),
-            backgroundColor: Colors.yellow,
-          );
+    if (_emptyText) {
+      return FloatingActionButton(
+        onPressed: () => Navigator.pop(context),
+        child: const Icon(Icons.cancel, color: Colors.black87),
+        backgroundColor: Colors.yellow,
+      );
+    } else {
+      return FloatingActionButton(
+        onPressed: () {
+          switch (widget.state) {
+            case EventHolderViewStates.adding:
+              Navigator.pop(
+                context,
+                EventHolder(
+                  title: _textController.text,
+                  iconIndex: _selectedIconIndex,
+                ),
+              );
+              break;
+            case EventHolderViewStates.editing:
+              Navigator.pop(
+                context,
+                widget.eventHolder!.copyWith(
+                  title: _textController.text,
+                  iconIndex: _selectedIconIndex,
+                ),
+              );
+              break;
+            default:
+              throw Exception("wrong state");
+          }
+        },
+        child: const Icon(Icons.send, color: Colors.black87),
+        backgroundColor: Colors.yellow,
+      );
+    }
   }
 }

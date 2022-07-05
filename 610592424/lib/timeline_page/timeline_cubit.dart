@@ -52,9 +52,8 @@ class TimelineCubit extends Cubit<TimelineState> {
     return eventholder.title;
   }
 
-  Future<List<EventHolder>> getEventHoldersFiltersList() async {
-    return await _eventHoldersRepo.loadAllEventHolders();
-  }
+  Future<List<EventHolder>> get getEventHoldersFiltersList async =>
+      await _eventHoldersRepo.loadAllEventHolders();
 
   void onEventholderFilterTap(int id) {
     if (isEventholderSelected(id)) {
@@ -65,9 +64,8 @@ class TimelineCubit extends Cubit<TimelineState> {
     emit(state.copyWith());
   }
 
-  bool isEventholderSelected(int id) {
-    return state.eventHoldersFilter.any((element) => element == id);
-  }
+  bool isEventholderSelected(int id) =>
+      state.eventHoldersFilter.any((element) => element == id);
 
   void loadAllEvents() async {
     final _events = await _eventsRepo.loadAllEvents();
@@ -113,9 +111,8 @@ class TimelineCubit extends Cubit<TimelineState> {
   Event get getSingleSelected =>
       state.events.singleWhere((element) => element.isSelected);
 
-  Event fetchEvent(int id) {
-    return state.events.singleWhere((element) => element.eventId == id);
-  }
+  Event fetchEvent(int id) =>
+      state.events.singleWhere((element) => element.eventId == id);
 
   void changeEventSelection(int id) {
     final event = state.events.singleWhere((element) => element.eventId == id);

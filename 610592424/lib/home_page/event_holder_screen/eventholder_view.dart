@@ -1,4 +1,5 @@
 import 'package:diploma/settings_page/settings_view.dart';
+import 'package:diploma/statistics_page/summary_stats_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -36,9 +37,14 @@ class _EventHolderViewState extends State<EventHolderView> {
   AppBar _appBar() {
     return AppBar(
       backgroundColor: Theme.of(context).primaryColor,
-      leading: const IconButton(
-        onPressed: null,
-        icon: Icon(Icons.menu),
+      leading: IconButton(
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const SummaryStatsPage(),
+          ),
+        ),
+        icon: const Icon(Icons.stacked_bar_chart),
       ),
       title: const Center(
         child: Text("Home"),
@@ -138,9 +144,7 @@ class _EventHolderViewState extends State<EventHolderView> {
               Expanded(
                 child: ListTile(
                   onTap: () async {
-                    final tempHolder = await context
-                        .read<EventHolderCubit>()
-                        .fetchEventHolder(id);
+                    final tempHolder = await _cubit.fetchEventHolder(id);
                     final result = await Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -153,9 +157,7 @@ class _EventHolderViewState extends State<EventHolderView> {
                       ),
                     );
                     if (result != null) {
-                      context
-                          .read<EventHolderCubit>()
-                          .editEventHolder(result as EventHolder);
+                      _cubit.editEventHolder(result as EventHolder);
                       Navigator.pop(context);
                     }
                   },
@@ -169,7 +171,7 @@ class _EventHolderViewState extends State<EventHolderView> {
               Expanded(
                 child: ListTile(
                   onTap: () {
-                    context.read<EventHolderCubit>().deleteEventHolder(id);
+                    _cubit.deleteEventHolder(id);
                     Navigator.pop(context);
                   },
                   leading: const Icon(
@@ -201,9 +203,7 @@ class _EventHolderViewState extends State<EventHolderView> {
         ).then(
           (value) => {
             if (value != null)
-              context
-                  .read<EventHolderCubit>()
-                  .addEventHolder(value as EventHolder)
+              _cubit.addEventHolder(value as EventHolder)
           },
         );
       },

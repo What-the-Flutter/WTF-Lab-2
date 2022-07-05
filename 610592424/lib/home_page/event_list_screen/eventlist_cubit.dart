@@ -98,9 +98,8 @@ class EventListCubit extends Cubit<EventListState> {
     await checkHashTags();
   }
 
-  Event fetchEvent(int id) {
-    return state.events.singleWhere((element) => element.eventId == id);
-  }
+  Event fetchEvent(int id) =>
+      state.events.singleWhere((element) => element.eventId == id);
 
   void changeEventSelection(int id) {
     final event = state.events.singleWhere((element) => element.eventId == id);
@@ -128,7 +127,7 @@ class EventListCubit extends Cubit<EventListState> {
       iconIndex: state.chosenIconIndex == 0 ? null : state.chosenIconIndex,
     );
 
-    loadEvents();
+    setNormalAppbarState();
   }
 
   void editEvent(String newText) async {
