@@ -2,336 +2,361 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
-import '../../../cubit/home/home_cubit.dart';
-import '../../../data/categories_repository.dart';
-import '../../../data/models/category.dart';
 import '../../../inherited/app_theme.dart';
 import '../../constants/constants.dart';
-import '../category/add_category_screen.dart';
+import '../addEvent/event_screen.dart';
 import '../chat/chat_screen.dart';
+import 'home_cubit.dart';
 
 class HomeScreen extends StatefulWidget {
-  HomeScreen({super.key});
+  const HomeScreen({
+    super.key,
+  });
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int currentPage = 0;
-  EmulatorCategoriesRepository emulatorCategoriesRepository =
-      EmulatorCategoriesRepository();
-
-  List<Widget> pages = const [
-    Text('Home'),
-    Text('Daily'),
-    Text('Timeline'),
-    Text('Explore'),
-  ];
+  PageController pageController = PageController(initialPage: 0);
 
   @override
   Widget build(BuildContext context) {
+    final isLightTheme = AppThemeInheritedWidget.of(context).isLightTheme;
     return BlocProvider<HomeCubit>(
-      create: (context) => HomeCubit(emulatorCategoriesRepository),
+      create: (context) => HomeCubit(),
       child: Builder(builder: (context) {
+        context.read<HomeCubit>().init();
         return Scaffold(
-          appBar: _buildAppBar(),
-          body:
-              _Body(emulatorCategoriesRepository: emulatorCategoriesRepository),
-          floatingActionButton: _buildFloatingActionButton(context),
-          bottomNavigationBar: _buildNavBar(),
+          appBar: _buildAppBar(context, isLightTheme),
+          body: _Body(pageController: pageController),
+          bottomNavigationBar: _BottomNavBar(pageController: pageController),
+          floatingActionButton: _buildFAB(),
         );
       }),
     );
   }
 
-  FloatingActionButton _buildFloatingActionButton(BuildContext context) {
+  FloatingActionButton _buildFAB() {
     return FloatingActionButton(
       onPressed: () {
-        _createCategoryWithFetchedData(context, 'Create a new category');
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => EventScreen(),
+          ),
+        );
       },
-      child: Icon(
-        Icons.add,
-        color: Theme.of(context).colorScheme.onSecondary,
-      ),
+      child: const Icon(Icons.add),
     );
   }
 
-  AppBar _buildAppBar() {
+  AppBar _buildAppBar(BuildContext context, bool isLightTheme) {
     return AppBar(
       leading: IconButton(
-        onPressed: () {},
-        icon: Icon(
+        onPressed: () {
+          //TODO: write a button handle
+        },
+        icon: const Icon(
           Icons.menu,
-          color: Theme.of(context).colorScheme.onPrimary,
         ),
       ),
-      title: pages[currentPage],
+      title: BlocBuilder<HomeCubit, HomeState>(
+        buildWhen: ((previous, current) =>
+            previous.pageController.currentPage !=
+            current.pageController.currentPage),
+        builder: (context, state) {
+          return Text(
+            state.pageController.pages[state.pageController.currentPage],
+          );
+        },
+      ),
       actions: [
         IconButton(
           onPressed: () => AppThemeInheritedWidget.of(context).swichTheme(),
           icon: Icon(
-            Icons.invert_colors,
-            color: Theme.of(context).colorScheme.onPrimary,
+            isLightTheme ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
           ),
-        ),
+        )
       ],
     );
   }
-
-  NavigationBar _buildNavBar() {
-    return NavigationBar(
-      selectedIndex: currentPage,
-      animationDuration: const Duration(milliseconds: 400),
-      labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
-      onDestinationSelected: (newIndex) {
-        setState(() {
-          currentPage = newIndex;
-        });
-      },
-      destinations: [
-        NavigationDestination(
-          icon: Icon(
-            Icons.home,
-            color: Theme.of(context).colorScheme.onBackground,
-          ),
-          selectedIcon: Icon(
-            Icons.home,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-          label: 'Home',
-        ),
-        NavigationDestination(
-          icon: Icon(
-            Icons.event,
-            color: Theme.of(context).colorScheme.onBackground,
-          ),
-          selectedIcon: Icon(
-            Icons.event,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-          label: 'Daily',
-        ),
-        NavigationDestination(
-          icon: Icon(
-            Icons.timeline,
-            color: Theme.of(context).colorScheme.onBackground,
-          ),
-          selectedIcon: Icon(
-            Icons.timeline,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-          label: 'Timeline',
-        ),
-        NavigationDestination(
-          icon: Icon(
-            Icons.explore,
-            color: Theme.of(context).colorScheme.onBackground,
-          ),
-          selectedIcon: Icon(
-            Icons.explore,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-          label: 'Explore',
-        ),
-      ],
-    );
-  }
-
-  Future<void> _createCategoryWithFetchedData(
-      BuildContext context, String title) async {
-    final Category category = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => AddCategoryScreen(title: title),
-      ),
-    );
-
-    context.read<HomeCubit>().addCategory(category);
-  }
 }
 
-class _Body extends StatefulWidget {
-  final EmulatorCategoriesRepository emulatorCategoriesRepository;
-  const _Body({super.key, required this.emulatorCategoriesRepository});
+class _Body extends StatelessWidget {
+  final PageController pageController;
+  const _Body({
+    super.key,
+    required this.pageController,
+  });
 
-  @override
-  State<_Body> createState() => _BodyState();
-}
-
-class _BodyState extends State<_Body> {
   @override
   Widget build(BuildContext context) {
-    context.read<HomeCubit>().fetchCategories();
-    return BlocConsumer<HomeCubit, HomeState>(
-      listener: (context, state) {
-        if (state is HomeError) {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text(state.errorMessage)));
-        }
-      },
+    return BlocBuilder<HomeCubit, HomeState>(
+      buildWhen: ((previous, current) {
+        return previous.pageController.currentPage !=
+            current.pageController.currentPage;
+      }),
       builder: (context, state) {
-        if (state is HomeLoadedData) {
-          return _buildListView(state);
-        } else if (state is HomeError) {
-          return _buildErrorScreen(state);
-        } else if (state is HomeInitial) {
-          return Center(child: Text(state.title));
-        } else {
-          return const Center(child: Text('loading data'));
-        }
-      },
-    );
-  }
-
-  Widget _buildErrorScreen(HomeError state) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text(
-            state.errorMessage,
-            textAlign: TextAlign.center,
-          ),
-          IconButton(
-            onPressed: () {
-              context.read<HomeCubit>().fetchCategories();
-            },
-            icon: const Icon(
-              Icons.refresh_outlined,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildListView(HomeLoadedData state) {
-    return RefreshIndicator(
-      onRefresh: _refresh,
-      child: ListView.builder(
-        itemCount: state.categories.length,
-        itemBuilder: (context, index) {
-          return _buildListTile(context, state.categories[index], index,
-              state.categories[index].title);
-        },
-      ),
-    );
-  }
-
-  Widget _buildListTile(
-      BuildContext context, Category category, int index, String stitie) {
-    return Padding(
-      key: UniqueKey(),
-      padding: const EdgeInsets.only(
-        bottom: AppPadding.kMediumPadding,
-      ),
-      child: Slidable(
-        startActionPane: ActionPane(
-          extentRatio: 0.35,
-          motion: const DrawerMotion(),
+        return PageView(
+          controller: pageController,
+          onPageChanged: (newIndex) {
+            context.read<HomeCubit>().changePage(newIndex);
+          },
           children: [
-            SlidableAction(
-              onPressed: (context) {
-                context.read<HomeCubit>().likeCategory(index);
-              },
-              backgroundColor: Theme.of(context).colorScheme.secondary,
-              foregroundColor: Theme.of(context).colorScheme.onSecondary,
-              icon: Icons.favorite_outline,
-            ),
-            SlidableAction(
-              onPressed: (_) {},
-              backgroundColor: Theme.of(context).colorScheme.surface,
-              foregroundColor: Theme.of(context).colorScheme.onSurface,
-              icon: Icons.archive,
-            ),
-          ],
-        ),
-        endActionPane: ActionPane(
-          extentRatio: 0.35,
-          motion: const DrawerMotion(),
-          children: [
-            SlidableAction(
-              onPressed: (context) {},
-              backgroundColor: Theme.of(context).colorScheme.surface,
-              foregroundColor: Theme.of(context).colorScheme.onSurface,
-              icon: Icons.edit,
-            ),
-            SlidableAction(
-              onPressed: (_) {
-                context.read<HomeCubit>().removeCategory(index);
-              },
-              backgroundColor: Theme.of(context).colorScheme.error,
-              foregroundColor: Theme.of(context).colorScheme.onPrimary,
-              icon: Icons.delete,
-            ),
-          ],
-        ),
-        child: ListTile(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ChatScreen(
-                  title: stitie,
-                  categoryIndex: index,
-                  eventList: category.events,
+            const _HomeListView(key: ValueKey('Home')),
+            Container(
+              key: const ValueKey('Daily'),
+              color: Colors.cyan,
+              child: Center(
+                child: Text(
+                  state.pageController.pages[1],
                 ),
               ),
+            ),
+            Container(
+              key: const ValueKey('Timeline'),
+              color: Colors.amber,
+              child: Center(
+                child: Text(
+                  state.pageController.pages[2],
+                ),
+              ),
+            ),
+            Container(
+              key: const ValueKey('Explore'),
+              color: Colors.yellow,
+              child: Center(
+                child: Text(
+                  state.pageController.pages[3],
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _BottomNavBar extends StatelessWidget {
+  final PageController pageController;
+
+  const _BottomNavBar({
+    super.key,
+    required this.pageController,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<HomeCubit, HomeState>(
+      builder: (context, state) {
+        return NavigationBar(
+          selectedIndex: state.pageController.currentPage,
+          animationDuration: const Duration(milliseconds: 400),
+          labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
+          onDestinationSelected: (selectedIndex) {
+            context.read<HomeCubit>().changePage(selectedIndex);
+            pageController.animateToPage(
+              state.pageController.currentPage,
+              duration: const Duration(milliseconds: 400),
+              curve: Curves.easeIn,
             );
           },
-          leading: Container(
-            height: 50,
-            width: 50,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary,
-              borderRadius: BorderRadius.circular(25),
+          destinations: [
+            NavigationDestination(
+              icon: Icon(
+                Icons.home,
+                color: Theme.of(context).colorScheme.onBackground,
+              ),
+              selectedIcon: Icon(
+                Icons.home,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+              label: 'Home',
             ),
-            child: Icon(
-              category.iconData,
-              color: Theme.of(context).colorScheme.onPrimary,
+            NavigationDestination(
+              icon: Icon(
+                Icons.event,
+                color: Theme.of(context).colorScheme.onBackground,
+              ),
+              selectedIcon: Icon(
+                Icons.event,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+              label: 'Daily',
             ),
+            NavigationDestination(
+              icon: Icon(
+                Icons.timeline,
+                color: Theme.of(context).colorScheme.onBackground,
+              ),
+              selectedIcon: Icon(
+                Icons.timeline,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+              label: 'Timeline',
+            ),
+            NavigationDestination(
+              icon: Icon(
+                Icons.explore,
+                color: Theme.of(context).colorScheme.onBackground,
+              ),
+              selectedIcon: Icon(
+                Icons.explore,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+              label: 'Explore',
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _HomeListView extends StatelessWidget {
+  const _HomeListView({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<HomeCubit, HomeState>(
+      buildWhen: (previous, current) => previous.events != current.events,
+      builder: (context, state) {
+        return RefreshIndicator(
+          onRefresh: () {
+            return _refresh(context);
+          },
+          child: ListView.builder(
+            itemCount: state.events.length,
+            itemBuilder: (context, index) {
+              return Padding(
+                key: ValueKey(state.events[index].title),
+                padding: const EdgeInsets.only(
+                  bottom: AppPadding.kMediumPadding,
+                ),
+                child: Slidable(
+                  startActionPane: ActionPane(
+                    extentRatio: 0.35,
+                    motion: const DrawerMotion(),
+                    children: [
+                      SlidableAction(
+                        onPressed: (context) {
+                          context.read<HomeCubit>().likeEvent(index);
+                        },
+                        backgroundColor:
+                            Theme.of(context).colorScheme.secondary,
+                        foregroundColor:
+                            Theme.of(context).colorScheme.onSecondary,
+                        icon: state.events[index].isFavorite
+                            ? Icons.favorite
+                            : Icons.favorite_outline,
+                      ),
+                      SlidableAction(
+                        onPressed: (_) {
+                          //TODO complete
+                        },
+                        backgroundColor: Theme.of(context).colorScheme.surface,
+                        foregroundColor:
+                            Theme.of(context).colorScheme.onSurface,
+                        icon: Icons.done,
+                      ),
+                    ],
+                  ),
+                  endActionPane: ActionPane(
+                    extentRatio: 0.35,
+                    motion: const DrawerMotion(),
+                    children: [
+                      SlidableAction(
+                        onPressed: (_) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EventScreen(
+                                eventIndex: index,
+                                title: 'Edit ${state.events[index].title}',
+                                eventTitle: state.events[index].title,
+                              ),
+                            ),
+                          );
+                        },
+                        backgroundColor: Theme.of(context).colorScheme.surface,
+                        foregroundColor:
+                            Theme.of(context).colorScheme.onSurface,
+                        icon: Icons.edit,
+                      ),
+                      SlidableAction(
+                        onPressed: (context) {
+                          context.read<HomeCubit>().removeEvent(index);
+                        },
+                        backgroundColor: Theme.of(context).colorScheme.error,
+                        foregroundColor:
+                            Theme.of(context).colorScheme.onPrimary,
+                        icon: Icons.delete,
+                      ),
+                    ],
+                  ),
+                  child: ListTile(
+                    onTap: () {
+                      context
+                          .read<HomeCubit>()
+                          .setAppState(state.events[index]);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ChatScreen(
+                            eventIndex: index,
+                          ),
+                        ),
+                      );
+                    },
+                    leading: Container(
+                      height: 50,
+                      width: 50,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary,
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      child: Icon(
+                        state.events[index].iconData,
+                        color: Theme.of(context).colorScheme.onPrimary,
+                      ),
+                    ),
+                    title: Text(
+                      state.events[index].title,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onBackground,
+                        fontFamily: 'Quicksand',
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    subtitle: Text(
+                      state.events[index].subtitle,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onBackground,
+                        fontFamily: 'Quicksand',
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    trailing: state.events[index].isFavorite
+                        ? Icon(
+                            Icons.favorite,
+                            color: Theme.of(context).colorScheme.secondary,
+                          )
+                        : const SizedBox(width: 0),
+                  ),
+                ),
+              );
+            },
           ),
-          title: Text(
-            category.title,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onBackground,
-            ),
-          ),
-          subtitle: Text(
-            category.subtitle,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onBackground,
-            ),
-          ),
-          trailing: category.isFavorive
-              ? Icon(
-                  Icons.favorite,
-                  color: Theme.of(context).colorScheme.error,
-                )
-              : const SizedBox(width: 1),
-        ),
-      ),
+        );
+      },
     );
   }
 
-  Future<void> _refresh() async {
-    await context.read<HomeCubit>().fetchCategories();
-  }
-
-  Future<void> _editCategoryWithFetchedData(BuildContext context, String title,
-      String hintTetx, int categoryInedx) async {
-    final Category category = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => AddCategoryScreen(
-          title: title,
-          hintTetx: hintTetx,
-        ),
-      ),
-    );
-
-    context.read<HomeCubit>().editCategory(categoryInedx, category);
+  Future<void> _refresh(BuildContext context) async {
+    await context.read<HomeCubit>().init();
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AppThemeState extends StatefulWidget {
   final Widget child;
@@ -13,12 +14,33 @@ class AppThemeState extends StatefulWidget {
 }
 
 class _AppThemeStateState extends State<AppThemeState> {
-  bool isLightTheme = true;
+  late bool isLightTheme = true;
+
+  @override
+  void initState() {
+    _setTheme();
+    super.initState();
+  }
 
   void swichTheme() {
     final isLightTheme = this.isLightTheme == true ? false : true;
-
+    _saveTheme(isLightTheme);
     setState(() => this.isLightTheme = isLightTheme);
+  }
+
+  Future<void> _setTheme() async {
+    final pref = await SharedPreferences.getInstance();
+    var theme = await pref.getBool('appTheme');
+    setState(() {
+      isLightTheme = theme ?? true;
+    });
+    print('Theme initilaized');
+  }
+
+  Future<void> _saveTheme(bool isLightTheme) async {
+    final pref = await SharedPreferences.getInstance();
+    pref.setBool('appTheme', isLightTheme);
+    print('Theme saved');
   }
 
   @override

@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 
-import 'UI/screens/home/home_screen.dart';
-import 'UI/themes/dark_theme.dart';
-import 'UI/themes/light_theme.dart';
 import 'inherited/app_theme.dart';
+import 'ui/screens/home/home_screen.dart';
+import 'ui/themes/dark_theme.dart';
+import 'ui/themes/light_theme.dart';
 
-class ChatJournal extends StatelessWidget {
+class ChatJournalApp extends StatelessWidget {
   final String _appTitle = 'Chat Journal';
-
-  ChatJournal({super.key});
+  const ChatJournalApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -20,8 +19,8 @@ class ChatJournal extends StatelessWidget {
           return MaterialApp(
             debugShowCheckedModeBanner: false,
             title: _appTitle,
-            theme: isLightTheme ? lightThemeData() : darkThemeData(),
-            home: HomeScreen(),
+            theme: isLightTheme ? lightThemeData : darkThemeData,
+            home: const HomeScreen(),
           );
         },
       ),

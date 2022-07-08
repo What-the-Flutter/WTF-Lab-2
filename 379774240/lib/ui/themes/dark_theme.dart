@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../constants/constants.dart';
 
-ThemeData darkThemeData() {
+ThemeData get darkThemeData {
   return ThemeData.light().copyWith(
     backgroundColor: DarkColors.kBackgroundColor,
     colorScheme: ColorScheme.fromSwatch().copyWith(
@@ -59,5 +59,7 @@ TextStyle get _darkAppBarTextStyle {
   return const TextStyle().copyWith(
     color: LightColors.kOnPrimaryColor,
     fontSize: 22,
+    fontFamily: 'Quicksand',
+    fontWeight: FontWeight.w500,
   );
 }

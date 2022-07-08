@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../constants/constants.dart';
 
-ThemeData lightThemeData() {
+ThemeData get lightThemeData {
   return ThemeData.light().copyWith(
     backgroundColor: LightColors.kBackgroundColor,
     appBarTheme: const AppBarTheme().copyWith(
@@ -53,5 +53,7 @@ TextStyle get _lightAppBarTextStyle {
   return const TextStyle().copyWith(
     color: LightColors.kOnPrimaryColor,
     fontSize: 22,
+    fontFamily: 'Quicksand',
+    fontWeight: FontWeight.w500,
   );
 }
