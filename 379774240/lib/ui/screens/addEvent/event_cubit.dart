@@ -1,8 +1,8 @@
 import 'package:bloc/bloc.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
-import '../../../domain/database_provider.dart';
 import '../../../domain/models/event.dart';
 
 part 'event_state.dart';
@@ -16,6 +16,8 @@ class EventCubit extends Cubit<EventState> {
   }
 
   Future<void> createEvent(Event event) async {
-    await DatabaseProvider.instance.createEvent(event);
+    final docEvent = FirebaseFirestore.instance.collection('events').doc();
+    var newEvent = event.copyWith(id: docEvent.id);
+    await docEvent.set(newEvent.toMap());
   }
 }

@@ -1,3 +1,4 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 part of 'chat_cubit.dart';
 
 class ChatState extends Equatable {
@@ -5,10 +6,12 @@ class ChatState extends Equatable {
   final bool isSearchBarOpen;
   final bool isEventBarOpen;
   final bool isForward;
+  final bool isImagePicked;
 
   final int editingMessageIndex;
   final int selectedItemInEventBar;
 
+  final XFile? imageFile;
   final Event event;
 
   final Set<int> forwardMessagesIndex;
@@ -21,8 +24,10 @@ class ChatState extends Equatable {
     this.isSearchBarOpen = false,
     this.isEventBarOpen = false,
     this.isForward = false,
+    this.isImagePicked = false,
     this.editingMessageIndex = -1,
     this.selectedItemInEventBar = -1,
+    this.imageFile,
     required this.event,
     this.forwardMessagesIndex = const {},
     this.events = const [],
@@ -36,8 +41,10 @@ class ChatState extends Equatable {
         isSearchBarOpen,
         isEventBarOpen,
         isForward,
+        isImagePicked,
         editingMessageIndex,
         selectedItemInEventBar,
+        imageFile,
         event,
         forwardMessagesIndex,
         events,
@@ -50,22 +57,26 @@ class ChatState extends Equatable {
     bool? isSearchBarOpen,
     bool? isEventBarOpen,
     bool? isForward,
+    bool? isImagePicked,
     int? editingMessageIndex,
     int? selectedItemInEventBar,
+    XFile? imageFile,
     Event? event,
     Set<int>? forwardMessagesIndex,
     List<Event>? events,
     List<Message>? searchingMessages,
-    final List<Message>? messages,
+    List<Message>? messages,
   }) {
     return ChatState(
       isEditing: isEditing ?? this.isEditing,
       isSearchBarOpen: isSearchBarOpen ?? this.isSearchBarOpen,
       isEventBarOpen: isEventBarOpen ?? this.isEventBarOpen,
       isForward: isForward ?? this.isForward,
+      isImagePicked: isImagePicked ?? this.isImagePicked,
       editingMessageIndex: editingMessageIndex ?? this.editingMessageIndex,
       selectedItemInEventBar:
           selectedItemInEventBar ?? this.selectedItemInEventBar,
+      imageFile: imageFile ?? this.imageFile,
       event: event ?? this.event,
       forwardMessagesIndex: forwardMessagesIndex ?? this.forwardMessagesIndex,
       events: events ?? this.events,

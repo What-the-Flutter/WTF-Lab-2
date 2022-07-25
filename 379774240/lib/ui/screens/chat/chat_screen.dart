@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../domain/models/event.dart';
 import '../../../domain/models/message.dart';
@@ -20,12 +21,11 @@ class ChatScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => ChatCubit(const ChatState(
-          event: Event(title: 'Loading...', iconData: Icons.local_dining))),
+          event: Event(
+              id: '', title: 'Loading...', iconData: Icons.local_dining))),
       child: Builder(
         builder: (context) {
-          if (context.read<ChatCubit>().isInited == false) {
-            context.read<ChatCubit>().init();
-          }
+          context.read<ChatCubit>().init();
 
           return Scaffold(
             appBar: _AppBar(
@@ -316,7 +316,9 @@ class _MessageList extends StatelessWidget {
                   ),
                 );
               } else {
-                context.read<ChatCubit>().deleteMessage(index);
+                context
+                    .read<ChatCubit>()
+                    .deleteMessage(index, state.messages[index].id!);
               }
             },
           ),
@@ -332,7 +334,9 @@ class _MessageList extends StatelessWidget {
                     ),
                   );
                 } else {
-                  context.read<ChatCubit>().deleteMessage(index);
+                  context
+                      .read<ChatCubit>()
+                      .deleteMessage(index, state.messages[index].id!);
                 }
               },
               spacing: 0,
@@ -438,9 +442,7 @@ class _BottomBar extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             IconButton(
-              onPressed: () {
-                //TODO attach files
-              },
+              onPressed: _attachImage,
               icon: Icon(
                 Icons.attachment,
                 color: Theme.of(context).colorScheme.onBackground,
@@ -536,12 +538,8 @@ class _BottomBar extends StatelessWidget {
       if (context.read<ChatCubit>().state.selectedItemInEventBar == -1) {
         context.read<ChatCubit>().closeEventBar();
       } else {
-        var event = context
-            .read<ChatCubit>()
-            .state
-            .events[context.read<ChatCubit>().state.selectedItemInEventBar];
         var message = Message(
-          eventId: event.id!,
+          eventId: 'id',
           text: controller.text,
           date: DateTime.now(),
         );
@@ -565,7 +563,7 @@ class _BottomBar extends StatelessWidget {
       } else {
         if (controller.text.isNotEmpty) {
           var message = Message(
-            eventId: context.read<ChatCubit>().state.event.id!,
+            eventId: context.read<ChatCubit>().state.event.id,
             text: controller.text,
             date: DateTime.now(),
           );
@@ -597,5 +595,16 @@ class _BottomBar extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _attachImage() async {
+    final _picker = ImagePicker();
+    final pickedFile = await _picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 2000,
+      maxHeight: 2000,
+      imageQuality: 50,
+    );
+    if (pickedFile == null) return;
   }
 }

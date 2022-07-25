@@ -1,41 +1,41 @@
 import 'package:equatable/equatable.dart';
 
 class AppState extends Equatable {
-  final int? id;
-  final int chatEventId;
+  final String chatEventId;
+  final bool isLightTheme;
 
   AppState({
-    this.id,
     required this.chatEventId,
+    this.isLightTheme = false,
   });
 
   @override
   List<Object?> get props => [
-        id,
         chatEventId,
+        isLightTheme,
       ];
 
   AppState copyWith({
-    int? id,
-    int? chatEventId,
+    String? chatEventId,
+    bool? isLightTheme,
   }) {
     return AppState(
-      id: id ?? this.id,
       chatEventId: chatEventId ?? this.chatEventId,
+      isLightTheme: isLightTheme ?? this.isLightTheme,
     );
   }
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'id': id,
       'chatEventId': chatEventId,
+      'isLightTheme': isLightTheme,
     };
   }
 
   factory AppState.fromMap(Map<String, dynamic> map) {
     return AppState(
-      id: map['id'] != null ? map['id'] as int : null,
-      chatEventId: map['chatEventId'] as int,
+      chatEventId: map['chatEventId'] as String,
+      isLightTheme: map['isLightTheme'] as bool,
     );
   }
 }

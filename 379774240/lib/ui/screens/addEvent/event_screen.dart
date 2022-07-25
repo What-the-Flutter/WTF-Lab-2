@@ -50,11 +50,14 @@ class EventScreen extends StatelessWidget {
             _buildSnackBar(context, 'Select the icon'),
           );
         } else {
-          context.read<EventCubit>().createEvent(Event(
-                title: _controller.text,
-                iconData: context.read<EventCubit>().state.categoryIocns[
-                    context.read<EventCubit>().state.selectedIcon!],
-              ));
+          context.read<EventCubit>().createEvent(
+                Event(
+                  id: '',
+                  title: _controller.text,
+                  iconData: context.read<EventCubit>().state.categoryIocns[
+                      context.read<EventCubit>().state.selectedIcon!],
+                ),
+              );
           Navigator.pop(context);
         }
       },

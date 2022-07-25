@@ -1,35 +1,22 @@
 import 'package:bloc/bloc.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 
-import '../../../domain/database_provider.dart';
 import '../../../domain/models/app_state.dart';
 import '../../../domain/models/event.dart';
+import '../../../domain/models/message.dart';
 import '../../../domain/models/page_controller.dart' as models;
 
 part 'home_state.dart';
 
 class HomeCubit extends Cubit<HomeState> {
+  final FirebaseFirestore _instance = FirebaseFirestore.instance;
+
   HomeCubit()
       : super(HomeState(
           pageController: models.PageController(),
+          appState: AppState(chatEventId: ''),
         ));
-
-  Future<void> init() async {
-    var events = await DatabaseProvider.instance.readEvents();
-    DatabaseProvider.instance.createAppState(AppState(chatEventId: -1));
-
-    var likedEvents = <Event>[];
-    var unlikedEvents = <Event>[];
-    for (var i = 0; i < events.length; i++) {
-      if (events[i].isFavorite) {
-        likedEvents.add(events[i]);
-      } else {
-        unlikedEvents.add(events[i]);
-      }
-    }
-    events = likedEvents + unlikedEvents;
-    emit(state.copyWith(events: events));
-  }
 
   void changePage(int currentPage) {
     emit(state.copyWith(
@@ -39,57 +26,63 @@ class HomeCubit extends Cubit<HomeState> {
     ));
   }
 
-  Future<void> removeEvent(int index) async {
-    var event = state.events[index];
-    await DatabaseProvider.instance.deleteEvent(event.id!);
-    var events = await DatabaseProvider.instance.readEvents();
+  Future<void> init() async {
+    _readEvents().listen((events) {
+      emit(state.copyWith(events: events));
+    });
+    var docAppState = _instance.collection('appState').doc('appState');
+    var appState = await _readAppState(docAppState);
 
-    var likedEvents = <Event>[];
-    var unlikedEvents = <Event>[];
-    for (var i = 0; i < events.length; i++) {
-      if (events[i].isFavorite) {
-        likedEvents.add(events[i]);
-      } else {
-        unlikedEvents.add(events[i]);
+    emit(state.copyWith(appState: appState));
+  }
+
+  Future<void> removeEvent(String id) async {
+    var docEvent = _instance.collection('events').doc(id);
+    docEvent.delete();
+
+    var messagesSubscription = _readMessages().listen((messages) {
+      for (var message in messages) {
+        if (message.eventId == id) {
+          _instance.collection('messages').doc(message.id).delete();
+        }
       }
-    }
-    events = likedEvents + unlikedEvents;
-    emit(state.copyWith(events: events));
+    });
+
+    messagesSubscription.cancel();
   }
 
-  Future<void> likeEvent(int index) async {
-    var event = state.events[index];
-    event.isFavorite == true
-        ? event = event.copyWith(isFavorite: false)
-        : event = event.copyWith(isFavorite: true);
-    await DatabaseProvider.instance.updateEvent(event);
-    var events = await DatabaseProvider.instance.readEvents();
-
-    var likedEvents = <Event>[];
-    var unlikedEvents = <Event>[];
-    for (var i = 0; i < events.length; i++) {
-      if (events[i].isFavorite) {
-        likedEvents.add(events[i]);
-      } else {
-        unlikedEvents.add(events[i]);
-      }
-    }
-    events = likedEvents + unlikedEvents;
-    emit(state.copyWith(events: events));
+  Future<void> likeEvent(int index, String id) async {
+    var docEvent = _instance.collection('events').doc(id);
+    var isFavorive = state.events[index].isFavorite ? false : true;
+    docEvent
+        .update(state.events[index].copyWith(isFavorite: isFavorive).toMap());
   }
 
-  Future<void> setAppState(Event event) async {
-    var appState = await DatabaseProvider.instance.readAppState();
-    DatabaseProvider.instance.updateAppState(
-      appState.copyWith(
-        chatEventId: event.id,
-      ),
-    );
+  Future<void> setAppState(String eventId) async {
+    var docAppState = _instance.collection('appState').doc('appState');
+    var appState = await _readAppState(docAppState);
+    docAppState.update(appState.copyWith(chatEventId: eventId).toMap());
   }
 
-  // void updateFromChatScreen(int index, Event event) {
-  //   var events = List<Event>.from(state.events);
-  //   events[index].copyWith(messages: event.messages);
-  //   emit(state.copyWith(events: events));
-  // }
+  Stream<List<Event>> _readEvents() => _instance
+      .collection('events')
+      .orderBy('isFavorite', descending: true)
+      .snapshots()
+      .map((event) =>
+          event.docs.map((doc) => Event.fromMap(doc.data())).toList());
+
+  Stream<List<Message>> _readMessages() => _instance
+      .collection('messages')
+      .orderBy('date', descending: true)
+      .snapshots()
+      .map((messages) =>
+          messages.docs.map((doc) => Message.fromMap(doc.data())).toList());
+
+  Future<AppState> _readAppState(
+      DocumentReference<Map<String, dynamic>> docAppState) async {
+    var appStateSnapshot = await docAppState.snapshots().first;
+    var appStateMap = appStateSnapshot.data();
+    var appState = AppState.fromMap(appStateMap!);
+    return appState;
+  }
 }

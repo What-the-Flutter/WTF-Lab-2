@@ -1,50 +1,54 @@
 import 'package:bloc/bloc.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
 
-import '../../../domain/database_provider.dart';
+import '../../../domain/models/app_state.dart';
 import '../../../domain/models/event.dart';
 import '../../../domain/models/message.dart';
 
 part 'chat_state.dart';
 
 class ChatCubit extends Cubit<ChatState> {
-  bool isInited = false;
+  final FirebaseFirestore _instance = FirebaseFirestore.instance;
 
   ChatCubit(super._chatEmpty);
 
+  //TODO fix exception (Unhandled Exception: Bad state: Cannot emit new states after calling close)
   Future<void> init() async {
-    var dbProvider = DatabaseProvider.instance;
-    var appState = await dbProvider.readAppState();
-    var event = await dbProvider.readEvent(appState.chatEventId);
-    var events = await dbProvider.readEvents();
-    var messages = await dbProvider.readMessages(appState.chatEventId);
+    var docAppState = _instance.collection('appState').doc('appState');
+    var appState = await _fetchAppState(docAppState);
 
-    emit(state.copyWith(
-      event: event,
-      events: events,
-      messages: messages,
-    ));
-
-    isInited = true;
+    _readEvents().listen((events) {
+      late Event event;
+      for (var element in events) {
+        if (element.id == appState.chatEventId) {
+          event = element;
+        }
+      }
+      emit(state.copyWith(event: event, events: events));
+    });
+    _readMessages().listen((messages) {
+      var eventMessages = <Message>[];
+      for (var element in messages) {
+        if (element.eventId == appState.chatEventId) {
+          eventMessages.add(element);
+        }
+      }
+      emit(state.copyWith(messages: eventMessages));
+    });
   }
 
   Future<void> addMessage(Message message) async {
-    var dbProvider = DatabaseProvider.instance;
-    await dbProvider.createMessage(message);
-
-    var messages = await dbProvider.readMessages(state.event.id!);
-
-    emit(state.copyWith(messages: messages));
+    final docMessage = _instance.collection('messages').doc();
+    var newMessage = message.copyWith(id: docMessage.id);
+    await docMessage.set(newMessage.toMap());
   }
 
-  Future<void> deleteMessage(int index) async {
-    var dbProvider = DatabaseProvider.instance;
-    var message = state.messages[index];
-    await dbProvider.deleteMessage(message.id!);
-
-    var messages = await dbProvider.readMessages(state.event.id!);
-
-    emit(state.copyWith(messages: messages));
+  Future<void> deleteMessage(int index, String id) async {
+    var docMessage = _instance.collection('messages').doc(id);
+    docMessage.delete();
   }
 
   void setEditingState(int editingMessageIndex) {
@@ -55,30 +59,23 @@ class ChatCubit extends Cubit<ChatState> {
   }
 
   Future<void> editMessage(Message msg, String text) async {
-    var dbProvider = DatabaseProvider.instance;
-    var message = Message(
-      id: msg.id,
-      eventId: state.event.id!,
-      text: text,
-      date: DateTime.now(),
-    );
-    await dbProvider.updateMessage(message);
-
-    var messages = await dbProvider.readMessages(state.event.id!);
-
-    emit(state.copyWith(messages: messages));
+    var docMessage = _instance.collection('messages').doc(msg.id);
+    var message = msg.copyWith(text: text);
+    docMessage.update(message.toMap());
+    emit(state.copyWith(
+      isEditing: false,
+      editingMessageIndex: -1,
+    ));
   }
 
   Future<void> likeEvent() async {
+    var docEvent = _instance.collection('events').doc(state.event.id);
     var event = state.event;
-    event.isFavorite == true
-        ? event = event.copyWith(isFavorite: false)
-        : event = event.copyWith(isFavorite: true);
-
-    await DatabaseProvider.instance.updateEvent(event);
-    event = await DatabaseProvider.instance.readEvent(state.event.id!);
-
-    emit(state.copyWith(event: event));
+    docEvent.update(event
+        .copyWith(
+          isFavorite: event.isFavorite ? false : true,
+        )
+        .toMap());
   }
 
   void openSearchBar() {
@@ -119,16 +116,14 @@ class ChatCubit extends Cubit<ChatState> {
   }
 
   Future<void> sendMessageToEvent(Message message) async {
-    var dbProvider = DatabaseProvider.instance;
-
+    var eventId = state.events[state.selectedItemInEventBar].id;
     var msg = Message(
-      eventId: state.selectedItemInEventBar,
+      eventId: eventId,
       text: message.text,
       date: message.date,
     );
-
-    await dbProvider.createMessage(message);
-    emit(state.copyWith(selectedItemInEventBar: -1));
+    var docMessages = _instance.collection('messages').doc();
+    docMessages.set(msg.toMap());
   }
 
   void addToForward(int index) {
@@ -161,22 +156,30 @@ class ChatCubit extends Cubit<ChatState> {
   }
 
   Future<void> forwardMessage() async {
-    var dbProvider = DatabaseProvider.instance;
     var event = state.events[state.selectedItemInEventBar];
+    var forwwardMsgs = <Message>[];
 
     for (var i = 0; i < state.messages.length; i++) {
       if (state.forwardMessagesIndex.contains(i)) {
-        await dbProvider.updateMessage(
-          state.messages[i].copyWith(
-            eventId: event.id!,
-          ),
-        );
+        forwwardMsgs.add(state.messages[i]);
       }
     }
 
-    var messages = await dbProvider.readMessages(state.event.id!);
+    _readMessages().listen((messages) {
+      for (var element in messages) {
+        if (forwwardMsgs.contains(element)) {
+          var docMessages = _instance.collection('messages').doc(element.id);
+          docMessages.update(element
+              .copyWith(
+                eventId: event.id,
+                date: DateTime.now(),
+              )
+              .toMap());
+        }
+      }
+    });
+
     emit(state.copyWith(
-      messages: messages,
       isForward: false,
       isEventBarOpen: false,
       selectedItemInEventBar: -1,
@@ -185,8 +188,64 @@ class ChatCubit extends Cubit<ChatState> {
   }
 
   Future<void> editAppState() async {
-    var appState = await DatabaseProvider.instance.readAppState();
-    await DatabaseProvider.instance
-        .updateAppState(appState.copyWith(chatEventId: -1));
+    var docAppState = _instance.collection('appState').doc('appState');
+    var appState = await _fetchAppState(docAppState);
+    docAppState.update(appState.copyWith(chatEventId: '').toMap());
+  }
+
+  Stream<List<Event>> _readEvents() =>
+      _instance.collection('events').snapshots().map((event) =>
+          event.docs.map((doc) => Event.fromMap(doc.data())).toList());
+
+  Stream<List<Message>> _readMessages() => _instance
+      .collection('messages')
+      .orderBy('date', descending: true)
+      .snapshots()
+      .map((messages) =>
+          messages.docs.map((doc) => Message.fromMap(doc.data())).toList());
+
+  Future<AppState> _fetchAppState(
+      DocumentReference<Map<String, dynamic>> docAppState) async {
+    var appStateSnapshot = await docAppState.snapshots().first;
+    var appStateMap = appStateSnapshot.data();
+    var appState = AppState.fromMap(appStateMap!);
+    return appState;
+  }
+
+  //TODO: make this function work
+  Future<void> _setEventSubtitle() async {
+    var docAppState = _instance.collection('appState').doc('appState');
+    var appState = await _fetchAppState(docAppState);
+
+    var lastMessageSnapshot = await _instance
+        .collection('messages')
+        .orderBy('date', descending: true)
+        .snapshots()
+        .last;
+    var lastMessage = Message.fromMap(lastMessageSnapshot.docs.last.data());
+
+    final docEvent = FirebaseFirestore.instance
+        .collection('events')
+        .doc(appState.chatEventId);
+    docEvent.update(state.event.copyWith(subtitle: lastMessage.text).toMap());
+  }
+
+  void addImageState(XFile imageFile) {
+    emit(state.copyWith(
+      isImagePicked: true,
+      imageFile: imageFile,
+    ));
+  }
+
+  //TODO upload file
+  void _uploadImage() {
+    if (!state.isImagePicked) return;
+    var file = state.imageFile!;
+    var storage = FirebaseStorage.instance;
+    try {
+      storage.ref('images/${file.name}');
+    } catch (e) {
+      print(e);
+    }
   }
 }

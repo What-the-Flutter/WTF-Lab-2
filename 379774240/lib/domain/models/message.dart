@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
 
 class Message extends Equatable {
-  final int? id;
-  final int eventId;
+  final String? id;
+  final String eventId;
   final String text;
   final DateTime date;
 
@@ -22,8 +22,8 @@ class Message extends Equatable {
       ];
 
   Message copyWith({
-    int? id,
-    int? eventId,
+    String? id,
+    String? eventId,
     String? text,
     DateTime? date,
   }) {
@@ -46,8 +46,8 @@ class Message extends Equatable {
 
   factory Message.fromMap(Map<String, dynamic> map) {
     return Message(
-      id: map['id'] != null ? map['id'] as int : null,
-      eventId: map['eventId'] as int,
+      id: map['id'] as String?,
+      eventId: map['eventId'] as String,
       text: map['text'] as String,
       date: DateTime.fromMillisecondsSinceEpoch(map['date'] as int),
     );

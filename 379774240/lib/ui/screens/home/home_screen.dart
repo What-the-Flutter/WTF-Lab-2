@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
-import '../../../inherited/app_theme.dart';
 import '../../constants/constants.dart';
+import '../../themes/theme_controller_cubit.dart';
 import '../addEvent/event_screen.dart';
 import '../chat/chat_screen.dart';
+import '../settings/settings_screen.dart';
 import 'home_cubit.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -22,16 +23,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isLightTheme = AppThemeInheritedWidget.of(context).isLightTheme;
     return BlocProvider<HomeCubit>(
       create: (context) => HomeCubit(),
       child: Builder(builder: (context) {
         context.read<HomeCubit>().init();
         return Scaffold(
-          appBar: _buildAppBar(context, isLightTheme),
+          appBar: _buildAppBar(context),
           body: _Body(pageController: pageController),
           bottomNavigationBar: _BottomNavBar(pageController: pageController),
           floatingActionButton: _buildFAB(),
+          drawer: const _NavigationDrawer(),
         );
       }),
     );
@@ -51,16 +52,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  AppBar _buildAppBar(BuildContext context, bool isLightTheme) {
+  AppBar _buildAppBar(BuildContext context) {
     return AppBar(
-      leading: IconButton(
-        onPressed: () {
-          //TODO: write a button handle
-        },
-        icon: const Icon(
-          Icons.menu,
-        ),
-      ),
       title: BlocBuilder<HomeCubit, HomeState>(
         buildWhen: ((previous, current) =>
             previous.pageController.currentPage !=
@@ -73,12 +66,67 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       actions: [
         IconButton(
-          onPressed: () => AppThemeInheritedWidget.of(context).swichTheme(),
-          icon: Icon(
-            isLightTheme ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
-          ),
+          onPressed: () {
+            context.read<ThemeControllerCubit>().swithTheme();
+          },
+          icon: const Icon(Icons.invert_colors),
         )
       ],
+    );
+  }
+}
+
+class _NavigationDrawer extends StatelessWidget {
+  const _NavigationDrawer({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Drawer(
+      backgroundColor: Theme.of(context).colorScheme.background,
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppPadding.kBigPadding,
+            AppPadding.kBigPadding,
+            0,
+            0,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: ((context) => const SettingsScreen())),
+                  );
+                },
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.settings,
+                      color: Theme.of(context).colorScheme.onBackground,
+                      size: 26,
+                    ),
+                    const SizedBox(width: AppPadding.kDefaultPadding),
+                    Text(
+                      'Settings',
+                      style: TextStyle(
+                        fontFamily: 'Quicksand',
+                        fontSize: 20,
+                        color: Theme.of(context).colorScheme.onBackground,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -158,7 +206,7 @@ class _BottomNavBar extends StatelessWidget {
           onDestinationSelected: (selectedIndex) {
             context.read<HomeCubit>().changePage(selectedIndex);
             pageController.animateToPage(
-              state.pageController.currentPage,
+              selectedIndex,
               duration: const Duration(milliseconds: 400),
               curve: Curves.easeIn,
             );
@@ -244,7 +292,10 @@ class _HomeListView extends StatelessWidget {
                     children: [
                       SlidableAction(
                         onPressed: (context) {
-                          context.read<HomeCubit>().likeEvent(index);
+                          context.read<HomeCubit>().likeEvent(
+                                index,
+                                state.events[index].id,
+                              );
                         },
                         backgroundColor:
                             Theme.of(context).colorScheme.secondary,
@@ -289,7 +340,9 @@ class _HomeListView extends StatelessWidget {
                       ),
                       SlidableAction(
                         onPressed: (context) {
-                          context.read<HomeCubit>().removeEvent(index);
+                          context
+                              .read<HomeCubit>()
+                              .removeEvent(state.events[index].id);
                         },
                         backgroundColor: Theme.of(context).colorScheme.error,
                         foregroundColor:
@@ -302,7 +355,7 @@ class _HomeListView extends StatelessWidget {
                     onTap: () {
                       context
                           .read<HomeCubit>()
-                          .setAppState(state.events[index]);
+                          .setAppState(state.events[index].id);
                       Navigator.push(
                         context,
                         MaterialPageRoute(

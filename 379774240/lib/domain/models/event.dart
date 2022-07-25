@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
 class Event extends Equatable {
-  final int? id;
+  final String id;
   final String title;
   final String subtitle;
   final bool isFavorite;
@@ -10,7 +10,7 @@ class Event extends Equatable {
   final IconData iconData;
 
   const Event({
-    this.id,
+    required this.id,
     required this.title,
     this.subtitle = 'Tap to add details',
     this.isFavorite = false,
@@ -29,7 +29,7 @@ class Event extends Equatable {
       ];
 
   Event copyWith({
-    int? id,
+    String? id,
     String? title,
     String? subtitle,
     bool? isFavorite,
@@ -51,19 +51,19 @@ class Event extends Equatable {
       'id': id,
       'title': title,
       'subtitle': subtitle,
-      'isFavorite': isFavorite ? 1 : 0,
-      'isComplete': isComplete ? 1 : 0,
+      'isFavorite': isFavorite,
+      'isComplete': isComplete,
       'iconData': iconData.codePoint,
     };
   }
 
   factory Event.fromMap(Map<String, dynamic> map) {
     return Event(
-      id: map['id'] != null ? map['id'] as int : null,
+      id: map['id'] as String,
       title: map['title'] as String,
       subtitle: map['subtitle'] as String,
-      isFavorite: map['isFavorite'] == 1,
-      isComplete: map['isComplete'] == 1,
+      isFavorite: map['isFavorite'] as bool,
+      isComplete: map['isComplete'] as bool,
       iconData: IconData(map['iconData'] as int, fontFamily: 'MaterialIcons'),
     );
   }
