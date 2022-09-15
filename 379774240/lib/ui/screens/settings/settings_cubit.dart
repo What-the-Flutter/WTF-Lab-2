@@ -1,40 +1,112 @@
 import 'package:bloc/bloc.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../domain/models/app_state.dart';
+import '../../themes/themeData/dark_theme.dart';
+import '../../themes/themeData/light_theme.dart';
 
 part 'settings_state.dart';
 
 class SettingsCubit extends Cubit<SettingsState> {
-  final FirebaseFirestore _instance = FirebaseFirestore.instance;
+  final _prefs = SharedPreferences.getInstance();
 
-  SettingsCubit() : super(SettingsState(appState: AppState(chatEventId: '')));
+  SettingsCubit(super.settingsState);
 
-  void init() async {
-    var docAppState = _instance.collection('appState').doc('appState');
-    var appState = await _readAppState(docAppState);
-
-    emit(state.copyWith(appState: appState));
+  Future swithTheme() async {
+    var prefs = await _prefs;
+    var isDarkTheme = state.isDarkTheme ? false : true;
+    await prefs.setBool('isDarkTheme', isDarkTheme);
+    emit(state.copyWith(isDarkTheme: isDarkTheme));
   }
 
-  void swithTheme() async {
-    var docAppState = _instance.collection('appState').doc('appState');
-    var appState = await _readAppState(docAppState);
+  Future alignMessageLeft() async {
+    var prefs = await _prefs;
+    var isMessageLeftAlign = state.isMessageLeftAlign ? false : true;
+    await prefs.setBool('isMessageLeftAlign', isMessageLeftAlign);
+    emit(state.copyWith(isMessageLeftAlign: isMessageLeftAlign));
+  }
 
-    var isLightTheme = appState.isLightTheme ? false : true;
+  Future hideDateBublle() async {
+    var prefs = await _prefs;
+    var isDateBubbleHiden = state.isDateBubbleHiden ? false : true;
+    await prefs.setBool('isDateBubbleHiden', isDateBubbleHiden);
+    emit(state.copyWith(isDateBubbleHiden: isDateBubbleHiden));
+  }
 
-    docAppState.update(appState.copyWith(isLightTheme: isLightTheme).toMap());
+  Future setDefaultSettings() async {
+    var prefs = await _prefs;
+
+    await prefs.setBool('isDarkTheme', defaultSettings['isDarkTheme']);
+    await prefs.setBool(
+        'isMessageLeftAlign', defaultSettings['isMessageLeftAlign']);
+    await prefs.setBool(
+        'isDateBubbleHiden', defaultSettings['isDateBubbleHiden']);
+    await prefs.setDouble('fontSize', defaultSettings['fontSize']);
+
     emit(state.copyWith(
-      appState: appState.copyWith(isLightTheme: isLightTheme),
+      isDarkTheme: defaultSettings['isDarkTheme'],
+      isMessageLeftAlign: defaultSettings['isMessageLeftAlign'],
+      isDateBubbleHiden: defaultSettings['isDateBubbleHiden'],
+      fontSize: defaultSettings['fontSize'],
     ));
   }
 
-  Future<AppState> _readAppState(
-      DocumentReference<Map<String, dynamic>> docAppState) async {
-    var appStateSnapshot = await docAppState.snapshots().first;
-    var appStateMap = appStateSnapshot.data();
-    var appState = AppState.fromMap(appStateMap!);
-    return appState;
+  Future setFontSize(int value) async {
+    var prefs = await _prefs;
+    var fontSizes = [16.0, 18.0, 20.0];
+
+    switch (value) {
+      case 0:
+        await prefs.setDouble('fontSize', fontSizes[value]);
+        emit(state.copyWith(fontSize: fontSizes[value]));
+        break;
+      case 1:
+        await prefs.setDouble('fontSize', fontSizes[value]);
+        emit(state.copyWith(fontSize: fontSizes[value]));
+        break;
+      case 2:
+        await prefs.setDouble('fontSize', fontSizes[value]);
+        emit(state.copyWith(fontSize: fontSizes[value]));
+        break;
+      default:
+        await prefs.setDouble('fontSize', defaultSettings['fontSize']);
+        emit(state.copyWith(fontSize: defaultSettings['fontSize']));
+        break;
+    }
+  }
+
+  ThemeData fetchTheme() {
+    var dark = darkThemeData.copyWith(
+      textTheme: TextTheme(
+        bodyMedium: TextStyle(fontSize: state.fontSize),
+      ),
+    );
+    var light = lightThemeData.copyWith(
+      textTheme: TextTheme(
+        bodyMedium: TextStyle(fontSize: state.fontSize),
+      ),
+    );
+    return state.isDarkTheme ? dark : light;
+  }
+
+  int fetchSliderIndex() {
+    switch (state.fontSize.toInt()) {
+      case 16:
+        return 0;
+      case 18:
+        return 1;
+      case 20:
+        return 2;
+      default:
+        return 0;
+    }
   }
 }
+
+Map<String, dynamic> defaultSettings = {
+  'isDarkTheme': false,
+  'isMessageLeftAlign': false,
+  'isDateBubbleHiden': false,
+  'fontSize': 16.0,
+};

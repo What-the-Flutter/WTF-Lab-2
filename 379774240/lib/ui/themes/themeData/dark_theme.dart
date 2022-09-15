@@ -5,6 +5,15 @@ import '../../constants/constants.dart';
 ThemeData get darkThemeData {
   return ThemeData.light().copyWith(
     backgroundColor: DarkColors.kBackgroundColor,
+    appBarTheme: const AppBarTheme().copyWith(
+      centerTitle: true,
+      iconTheme: _darkIconThemeData,
+      actionsIconTheme: _darkIconThemeData,
+      shadowColor: Colors.transparent,
+      titleTextStyle: _darkAppBarTextStyle,
+      toolbarTextStyle: _darkAppBarTextStyle,
+      backgroundColor: DarkColors.kBackgroundColor,
+    ),
     colorScheme: ColorScheme.fromSwatch().copyWith(
       background: DarkColors.kBackgroundColor,
       surface: DarkColors.kSurfaceColor,
@@ -16,27 +25,18 @@ ThemeData get darkThemeData {
       onSecondary: DarkColors.kOnSecondaryColor,
       error: DarkColors.kErrorColor,
     ),
-    appBarTheme: const AppBarTheme().copyWith(
-      centerTitle: true,
-      iconTheme: _darkIconThemeData,
-      actionsIconTheme: _darkIconThemeData,
-      shadowColor: Colors.transparent,
-      titleTextStyle: _darkAppBarTextStyle,
-      toolbarTextStyle: _darkAppBarTextStyle,
-      backgroundColor: DarkColors.kPrimaryColor,
-    ),
     floatingActionButtonTheme: const FloatingActionButtonThemeData().copyWith(
-      backgroundColor: LightColors.kSecondaryColor,
+      backgroundColor: LightColors.kPrimaryColor,
       iconSize: 36,
       elevation: 0,
     ),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: DarkColors.kBackgroundColor,
       height: 65,
-      indicatorColor: DarkColors.kSurfaceColor,
+      indicatorColor: DarkColors.kSecondaryColor,
       labelTextStyle: MaterialStateProperty.all(
         const TextStyle(
-          color: DarkColors.kOnBackgroundColor,
+          color: DarkColors.kBackgroundColor,
           fontSize: 12,
         ),
       ),
@@ -50,16 +50,14 @@ ThemeData get darkThemeData {
 
 IconThemeData get _darkIconThemeData {
   return const IconThemeData().copyWith(
-    color: LightColors.kOnPrimaryColor,
-    size: 30,
+    color: DarkColors.kOnBackgroundColor,
+    size: 36,
   );
 }
 
 TextStyle get _darkAppBarTextStyle {
   return const TextStyle().copyWith(
-    color: LightColors.kOnPrimaryColor,
-    fontSize: 22,
-    fontFamily: 'Quicksand',
-    fontWeight: FontWeight.w500,
+    color: LightColors.kOnBackgroundColor,
+    fontSize: 26,
   );
 }

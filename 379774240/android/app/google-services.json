@@ -1,33 +1,34 @@
 {
   "project_info": {
-    "project_number": "727051482902",
-    "project_id": "chatjournal-a0218",
-    "storage_bucket": "chatjournal-a0218.appspot.com"
+    "project_number": "158095044754",
+    "firebase_url": "https://notik-265f9-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "notik-265f9",
+    "storage_bucket": "notik-265f9.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:727051482902:android:0b3bc24d8c2f60f4678237",
+        "mobilesdk_app_id": "1:158095044754:android:c154f0ef5dac689a69f64b",
         "android_client_info": {
-          "package_name": "com.example.chat_journal"
+          "package_name": "com.example.notik"
         }
       },
       "oauth_client": [
         {
-          "client_id": "727051482902-e6g9lsb4ue8bgrb7uqvrov9hprcu9rf1.apps.googleusercontent.com",
+          "client_id": "158095044754-5n6fq95nbpsj71401mjpt4n4n7o1nr1a.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCwHvd-ox-AT4-03ZQJx5X9AL8owXwCFNg"
+          "current_key": "AIzaSyAxXwWUhL1ro5f4Rl9kLR3fKw7XRk_8NNM"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "727051482902-e6g9lsb4ue8bgrb7uqvrov9hprcu9rf1.apps.googleusercontent.com",
+              "client_id": "158095044754-5n6fq95nbpsj71401mjpt4n4n7o1nr1a.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

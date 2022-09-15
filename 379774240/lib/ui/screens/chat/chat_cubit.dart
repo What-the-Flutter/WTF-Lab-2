@@ -1,251 +1,243 @@
+import 'dart:io';
+
 import 'package:bloc/bloc.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../../domain/models/app_state.dart';
-import '../../../domain/models/event.dart';
-import '../../../domain/models/message.dart';
+import '../../../data/models/event.dart';
+import '../../../data/models/note.dart';
+import '../../../domain/database/database_provider.dart';
 
 part 'chat_state.dart';
 
 class ChatCubit extends Cubit<ChatState> {
-  final FirebaseFirestore _instance = FirebaseFirestore.instance;
+  final _dbProvider = DatabaseProvider();
+  final _storage = FirebaseStorage.instance;
 
-  ChatCubit(super._chatEmpty);
+  ChatCubit() : super(const ChatState());
 
-  //TODO fix exception (Unhandled Exception: Bad state: Cannot emit new states after calling close)
-  Future<void> init() async {
-    var docAppState = _instance.collection('appState').doc('appState');
-    var appState = await _fetchAppState(docAppState);
+  Future init() async {
+    var appState = await _dbProvider.readAppState();
+    var event = await _dbProvider.readEvent(appState.selectedEventId!);
+    emit(state.copyWith(event: event));
+    _fetchNotesToState(event.id!);
+  }
 
-    _readEvents().listen((events) {
-      late Event event;
-      for (var element in events) {
-        if (element.id == appState.chatEventId) {
-          event = element;
-        }
+  void addNote(String text) async {
+    if (state.status == ChatStatus.noteWithImage) {
+      var imageFile = File(state.image!.path);
+
+      try {
+        await _storage.ref('images/${state.image!.name}').putFile(imageFile);
+      } catch (e) {
+        print(e);
       }
-      emit(state.copyWith(event: event, events: events));
-    });
-    _readMessages().listen((messages) {
-      var eventMessages = <Message>[];
-      for (var element in messages) {
-        if (element.eventId == appState.chatEventId) {
-          eventMessages.add(element);
-        }
-      }
-      emit(state.copyWith(messages: eventMessages));
-    });
-  }
+    }
 
-  Future<void> addMessage(Message message) async {
-    final docMessage = _instance.collection('messages').doc();
-    var newMessage = message.copyWith(id: docMessage.id);
-    await docMessage.set(newMessage.toMap());
-  }
-
-  Future<void> deleteMessage(int index, String id) async {
-    var docMessage = _instance.collection('messages').doc(id);
-    docMessage.delete();
-  }
-
-  void setEditingState(int editingMessageIndex) {
-    emit(state.copyWith(
-      isEditing: state.isEditing ? false : true,
-      editingMessageIndex: editingMessageIndex,
-    ));
-  }
-
-  Future<void> editMessage(Message msg, String text) async {
-    var docMessage = _instance.collection('messages').doc(msg.id);
-    var message = msg.copyWith(text: text);
-    docMessage.update(message.toMap());
-    emit(state.copyWith(
-      isEditing: false,
-      editingMessageIndex: -1,
-    ));
-  }
-
-  Future<void> likeEvent() async {
-    var docEvent = _instance.collection('events').doc(state.event.id);
-    var event = state.event;
-    docEvent.update(event
-        .copyWith(
-          isFavorite: event.isFavorite ? false : true,
-        )
-        .toMap());
-  }
-
-  void openSearchBar() {
-    emit(state.copyWith(
-      isSearchBarOpen: true,
-      searchingMessages: state.messages,
-    ));
-  }
-
-  void closeSearchBar() {
-    emit(state.copyWith(
-      isSearchBarOpen: false,
-      searchingMessages: [],
-    ));
-  }
-
-  void searchMessages(String value) {
-    var searchingMessages = state.messages
-        .where((element) =>
-            element.text.toLowerCase().contains(value.toLowerCase()))
-        .toList();
-    emit(state.copyWith(searchingMessages: searchingMessages));
-  }
-
-  void openEventBar() {
-    emit(state.copyWith(isEventBarOpen: true));
-  }
-
-  void closeEventBar() {
-    emit(state.copyWith(isEventBarOpen: false));
-  }
-
-  void selectItemInEventBar(int itemIndex) {
-    emit(state.copyWith(
-      selectedItemInEventBar:
-          state.selectedItemInEventBar == itemIndex ? -1 : itemIndex,
-    ));
-  }
-
-  Future<void> sendMessageToEvent(Message message) async {
-    var eventId = state.events[state.selectedItemInEventBar].id;
-    var msg = Message(
-      eventId: eventId,
-      text: message.text,
-      date: message.date,
+    var note = Note(
+      eventId: state.event!.id!,
+      text: text,
+      imageName:
+          state.status == ChatStatus.noteWithImage ? state.image!.name : '',
+      date: DateTime.now(),
     );
-    var docMessages = _instance.collection('messages').doc();
-    docMessages.set(msg.toMap());
+    await _dbProvider.createNote(note);
+
+    var lastActivity =
+        '${note.date.day < 10 ? '0${note.date.day}' : note.date.day}.${note.date.month < 10 ? '0${note.date.month}' : note.date.month}';
+
+    if (note.text.length >= 20) {
+      var cutedMessage = '${note.text.substring(0, 17)}...';
+      _dbProvider.updateEvent(
+        state.event!.id!,
+        state.event!.copyWith(
+          lastMessage: cutedMessage,
+          lastActivity: lastActivity,
+        ),
+      );
+    } else {
+      _dbProvider.updateEvent(
+        state.event!.id!,
+        state.event!.copyWith(
+          lastMessage: note.text,
+          lastActivity: lastActivity,
+        ),
+      );
+    }
+
+    emit(state.copyWith(status: ChatStatus.primary));
   }
 
-  void addToForward(int index) {
-    var selectedMessages = Set<int>.from(state.forwardMessagesIndex);
+  void setImage(XFile image) {
+    emit(state.copyWith(
+      image: image,
+      status: ChatStatus.noteWithImage,
+    ));
+  }
+
+  void _fetchNotesToState(String eventId) async {
+    _dbProvider.listenNotes(eventId).listen((event) {
+      var notes = <Note>[];
+      var data = (event.snapshot.value ?? {}) as Map;
+      data.forEach(((key, value) {
+        notes.add(Note.fromMap({'id': key, ...value}));
+      }));
+      notes.sort(((a, b) => b.date.compareTo(a.date)));
+
+      emit(state.copyWith(notes: notes));
+    });
+  }
+
+  void deleteNote(Note note) {
+    _dbProvider.deleteNote(note.eventId, note.id!);
+  }
+
+  void setEditingStatus(Note note) {
+    emit(state.copyWith(
+      status: ChatStatus.editingMessage,
+      editingNote: note,
+    ));
+  }
+
+  void setSendToStatus() async {
+    var events = await _dbProvider.fetchEvents();
+    emit(state.copyWith(
+      events: events,
+      status: ChatStatus.sendTo,
+    ));
+  }
+
+  void setSearchingStatus() {
+    emit(state.copyWith(
+      status: ChatStatus.searchingNotes,
+      searchingNotes: state.notes,
+    ));
+  }
+
+  void cancelSendTo() {
+    emit(state.copyWith(
+      selectedEvent: null,
+      events: [],
+      status: ChatStatus.primary,
+    ));
+  }
+
+  void cancelSearching() async {
+    await init();
+    emit(state.copyWith(
+      searchingNotes: [],
+      status: ChatStatus.primary,
+    ));
+  }
+
+  void editNote(String newText) {
+    _dbProvider.editNote(
+      state.editingNote!,
+      newText,
+    );
+    emit(state.copyWith(
+      status: ChatStatus.primary,
+      editingNote: null,
+    ));
+  }
+
+  void addNoteToSelectedEvent(String text) {
+    var note = Note(
+      eventId: state.selectedEvent!.id!,
+      text: text,
+      date: DateTime.now(),
+    );
+    _dbProvider.createNote(note);
+
+    var lastActivity =
+        '${note.date.day < 10 ? '0${note.date.day}' : note.date.day}.${note.date.month < 10 ? '0${note.date.month}' : note.date.month}';
+
+    if (note.text.length >= 20) {
+      var cutedMessage = '${note.text.substring(0, 17)}...';
+      _dbProvider.updateEvent(
+        state.selectedEvent!.id!,
+        state.selectedEvent!.copyWith(
+          lastMessage: cutedMessage,
+          lastActivity: lastActivity,
+        ),
+      );
+    } else {
+      _dbProvider.updateEvent(
+        state.selectedEvent!.id!,
+        state.selectedEvent!.copyWith(
+          lastMessage: note.text,
+          lastActivity: lastActivity,
+        ),
+      );
+    }
+    emit(state.copyWith(
+      status: ChatStatus.primary,
+      selectedEvent: null,
+      events: [],
+    ));
+  }
+
+  void selectItemInEventBar(Event event) {
+    emit(state.copyWith(selectedEvent: event));
+  }
+
+  void searchNote(String text) {
+    var searchingNotes =
+        state.notes.where((element) => element.text.contains(text)).toList();
+    searchingNotes.sort((a, b) => b.date.compareTo(a.date));
+    emit(state.copyWith(searchingNotes: searchingNotes));
+  }
+
+  void selectNote(String id) async {
+    var events = await _dbProvider.fetchEvents();
+    var selectedMessages = Set<String>.from(state.forwardNotes);
 
     if (selectedMessages.isEmpty) {
-      selectedMessages.add(index);
+      selectedMessages.add(id);
       emit(state.copyWith(
-        isForward: true,
-        forwardMessagesIndex: selectedMessages,
+        events: events,
+        status: ChatStatus.forwarding,
+        forwardNotes: selectedMessages,
       ));
     } else {
-      if (selectedMessages.contains(index)) {
-        selectedMessages.remove(index);
+      if (selectedMessages.contains(id)) {
+        selectedMessages.remove(id);
       } else {
-        selectedMessages.add(index);
+        selectedMessages.add(id);
       }
       if (selectedMessages.isEmpty) {
         emit(state.copyWith(
-          isForward: false,
-          forwardMessagesIndex: {},
-          selectedItemInEventBar: -1,
+          status: ChatStatus.primary,
+          forwardNotes: {},
+          selectedEvent: null,
         ));
       } else {
         emit(state.copyWith(
-          forwardMessagesIndex: selectedMessages,
+          forwardNotes: selectedMessages,
         ));
       }
     }
   }
 
-  Future<void> forwardMessage() async {
-    var event = state.events[state.selectedItemInEventBar];
-    var forwwardMsgs = <Message>[];
-
-    for (var i = 0; i < state.messages.length; i++) {
-      if (state.forwardMessagesIndex.contains(i)) {
-        forwwardMsgs.add(state.messages[i]);
-      }
-    }
-
-    _readMessages().listen((messages) {
-      for (var element in messages) {
-        if (forwwardMsgs.contains(element)) {
-          var docMessages = _instance.collection('messages').doc(element.id);
-          docMessages.update(element
-              .copyWith(
-                eventId: event.id,
-                date: DateTime.now(),
-              )
-              .toMap());
+  void forwardNotes() async {
+    for (var note in state.notes) {
+      for (var id in state.forwardNotes) {
+        if (id == note.id!) {
+          await _dbProvider.deleteNote(note.eventId, note.id!);
+          await _dbProvider
+              .createNote(note.copyWith(eventId: state.selectedEvent!.id));
         }
       }
-    });
-
-    emit(state.copyWith(
-      isForward: false,
-      isEventBarOpen: false,
-      selectedItemInEventBar: -1,
-      forwardMessagesIndex: {},
-    ));
-  }
-
-  Future<void> editAppState() async {
-    var docAppState = _instance.collection('appState').doc('appState');
-    var appState = await _fetchAppState(docAppState);
-    docAppState.update(appState.copyWith(chatEventId: '').toMap());
-  }
-
-  Stream<List<Event>> _readEvents() =>
-      _instance.collection('events').snapshots().map((event) =>
-          event.docs.map((doc) => Event.fromMap(doc.data())).toList());
-
-  Stream<List<Message>> _readMessages() => _instance
-      .collection('messages')
-      .orderBy('date', descending: true)
-      .snapshots()
-      .map((messages) =>
-          messages.docs.map((doc) => Message.fromMap(doc.data())).toList());
-
-  Future<AppState> _fetchAppState(
-      DocumentReference<Map<String, dynamic>> docAppState) async {
-    var appStateSnapshot = await docAppState.snapshots().first;
-    var appStateMap = appStateSnapshot.data();
-    var appState = AppState.fromMap(appStateMap!);
-    return appState;
-  }
-
-  //TODO: make this function work
-  Future<void> _setEventSubtitle() async {
-    var docAppState = _instance.collection('appState').doc('appState');
-    var appState = await _fetchAppState(docAppState);
-
-    var lastMessageSnapshot = await _instance
-        .collection('messages')
-        .orderBy('date', descending: true)
-        .snapshots()
-        .last;
-    var lastMessage = Message.fromMap(lastMessageSnapshot.docs.last.data());
-
-    final docEvent = FirebaseFirestore.instance
-        .collection('events')
-        .doc(appState.chatEventId);
-    docEvent.update(state.event.copyWith(subtitle: lastMessage.text).toMap());
-  }
-
-  void addImageState(XFile imageFile) {
-    emit(state.copyWith(
-      isImagePicked: true,
-      imageFile: imageFile,
-    ));
-  }
-
-  //TODO upload file
-  void _uploadImage() {
-    if (!state.isImagePicked) return;
-    var file = state.imageFile!;
-    var storage = FirebaseStorage.instance;
-    try {
-      storage.ref('images/${file.name}');
-    } catch (e) {
-      print(e);
     }
+    emit(state.copyWith(
+      status: ChatStatus.primary,
+      forwardNotes: {},
+      selectedEvent: null,
+    ));
+  }
+
+  Future<String> imageURL(String imageName) async {
+    return await _storage.ref('images/$imageName').getDownloadURL();
   }
 }

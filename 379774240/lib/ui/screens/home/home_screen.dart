@@ -1,85 +1,98 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:page_transition/page_transition.dart';
 
+import '../../components/widgets/event_card.dart';
+import '../../components/widgets/event_tile.dart';
 import '../../constants/constants.dart';
-import '../../themes/theme_controller_cubit.dart';
-import '../addEvent/event_screen.dart';
-import '../chat/chat_screen.dart';
+import '../addEvent/add_event_screen.dart';
+import '../settings/settings_cubit.dart';
 import '../settings/settings_screen.dart';
 import 'home_cubit.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
+  final SettingsCubit settingsCubit;
+
   const HomeScreen({
     super.key,
+    required this.settingsCubit,
   });
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  PageController pageController = PageController(initialPage: 0);
-
-  @override
   Widget build(BuildContext context) {
-    return BlocProvider<HomeCubit>(
-      create: (context) => HomeCubit(),
-      child: Builder(builder: (context) {
-        context.read<HomeCubit>().init();
-        return Scaffold(
-          appBar: _buildAppBar(context),
-          body: _Body(pageController: pageController),
-          bottomNavigationBar: _BottomNavBar(pageController: pageController),
-          floatingActionButton: _buildFAB(),
-          drawer: const _NavigationDrawer(),
-        );
-      }),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => HomeCubit(),
+        ),
+        BlocProvider(
+          create: (context) => settingsCubit,
+        ),
+      ],
+      child: Builder(
+        builder: (context) {
+          context.read<HomeCubit>().init();
+          return Scaffold(
+            appBar: _buildAppBar(context),
+            body: _Body(),
+            floatingActionButton: _buildFAB(context),
+            drawer: const _Drawer(),
+          );
+        },
+      ),
     );
   }
 
-  FloatingActionButton _buildFAB() {
-    return FloatingActionButton(
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => EventScreen(),
-          ),
-        );
-      },
-      child: const Icon(Icons.add),
+  Widget _buildFAB(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        0,
+        0,
+        8,
+        85,
+      ),
+      child: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            PageTransition(
+              type: PageTransitionType.rightToLeft,
+              child: const AddEventScreen(),
+              duration: const Duration(
+                milliseconds: 250,
+              ),
+            ),
+          );
+        },
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
+        ),
+      ),
     );
   }
 
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
-      title: BlocBuilder<HomeCubit, HomeState>(
-        buildWhen: ((previous, current) =>
-            previous.pageController.currentPage !=
-            current.pageController.currentPage),
-        builder: (context, state) {
-          return Text(
-            state.pageController.pages[state.pageController.currentPage],
-          );
-        },
-      ),
+      toolbarHeight: 84.0,
       actions: [
-        IconButton(
-          onPressed: () {
-            context.read<ThemeControllerCubit>().swithTheme();
-          },
-          icon: const Icon(Icons.invert_colors),
-        )
+        Center(
+          child: Text(
+            'Home',
+            style: TextStyle(
+              fontSize: 30,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+        ),
+        const SizedBox(width: AppPadding.kBigPadding)
       ],
     );
   }
 }
 
-class _NavigationDrawer extends StatelessWidget {
-  const _NavigationDrawer({
-    super.key,
-  });
+class _Drawer extends StatelessWidget {
+  const _Drawer({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -87,40 +100,40 @@ class _NavigationDrawer extends StatelessWidget {
       backgroundColor: Theme.of(context).colorScheme.background,
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppPadding.kBigPadding,
-            AppPadding.kBigPadding,
-            0,
-            0,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppPadding.kMediumPadding,
+            vertical: AppPadding.kDefaultPadding,
           ),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              GestureDetector(
-                onTap: () {
+              TextButton.icon(
+                onPressed: () {
+                  Navigator.pop(context);
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                        builder: ((context) => const SettingsScreen())),
-                  );
-                },
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.settings,
-                      color: Theme.of(context).colorScheme.onBackground,
-                      size: 26,
-                    ),
-                    const SizedBox(width: AppPadding.kDefaultPadding),
-                    Text(
-                      'Settings',
-                      style: TextStyle(
-                        fontFamily: 'Quicksand',
-                        fontSize: 20,
-                        color: Theme.of(context).colorScheme.onBackground,
+                    PageTransition(
+                      type: PageTransitionType.leftToRight,
+                      child: SettingsScreen(
+                        settingsCubit: context.read<SettingsCubit>(),
+                      ),
+                      duration: const Duration(
+                        milliseconds: 250,
                       ),
                     ),
-                  ],
+                  );
+                },
+                icon: const Icon(
+                  Icons.settings,
+                  size: 30,
+                ),
+                label: const Text(
+                  'Settings',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w400,
+                  ),
                 ),
               ),
             ],
@@ -132,284 +145,270 @@ class _NavigationDrawer extends StatelessWidget {
 }
 
 class _Body extends StatelessWidget {
-  final PageController pageController;
-  const _Body({
-    super.key,
-    required this.pageController,
-  });
+  final pageController = PageController();
+  _Body({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<HomeCubit, HomeState>(
-      buildWhen: ((previous, current) {
-        return previous.pageController.currentPage !=
-            current.pageController.currentPage;
-      }),
-      builder: (context, state) {
-        return PageView(
-          controller: pageController,
-          onPageChanged: (newIndex) {
-            context.read<HomeCubit>().changePage(newIndex);
-          },
-          children: [
-            const _HomeListView(key: ValueKey('Home')),
-            Container(
-              key: const ValueKey('Daily'),
-              color: Colors.cyan,
-              child: Center(
-                child: Text(
-                  state.pageController.pages[1],
-                ),
-              ),
-            ),
-            Container(
-              key: const ValueKey('Timeline'),
-              color: Colors.amber,
-              child: Center(
-                child: Text(
-                  state.pageController.pages[2],
-                ),
-              ),
-            ),
-            Container(
-              key: const ValueKey('Explore'),
-              color: Colors.yellow,
-              child: Center(
-                child: Text(
-                  state.pageController.pages[3],
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-class _BottomNavBar extends StatelessWidget {
-  final PageController pageController;
-
-  const _BottomNavBar({
-    super.key,
-    required this.pageController,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<HomeCubit, HomeState>(
-      builder: (context, state) {
-        return NavigationBar(
-          selectedIndex: state.pageController.currentPage,
-          animationDuration: const Duration(milliseconds: 400),
-          labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
-          onDestinationSelected: (selectedIndex) {
-            context.read<HomeCubit>().changePage(selectedIndex);
-            pageController.animateToPage(
-              selectedIndex,
-              duration: const Duration(milliseconds: 400),
-              curve: Curves.easeIn,
-            );
-          },
-          destinations: [
-            NavigationDestination(
-              icon: Icon(
-                Icons.home,
-                color: Theme.of(context).colorScheme.onBackground,
-              ),
-              selectedIcon: Icon(
-                Icons.home,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-              label: 'Home',
-            ),
-            NavigationDestination(
-              icon: Icon(
-                Icons.event,
-                color: Theme.of(context).colorScheme.onBackground,
-              ),
-              selectedIcon: Icon(
-                Icons.event,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-              label: 'Daily',
-            ),
-            NavigationDestination(
-              icon: Icon(
-                Icons.timeline,
-                color: Theme.of(context).colorScheme.onBackground,
-              ),
-              selectedIcon: Icon(
-                Icons.timeline,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-              label: 'Timeline',
-            ),
-            NavigationDestination(
-              icon: Icon(
-                Icons.explore,
-                color: Theme.of(context).colorScheme.onBackground,
-              ),
-              selectedIcon: Icon(
-                Icons.explore,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-              label: 'Explore',
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-class _HomeListView extends StatelessWidget {
-  const _HomeListView({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<HomeCubit, HomeState>(
-      buildWhen: (previous, current) => previous.events != current.events,
-      builder: (context, state) {
-        return RefreshIndicator(
-          onRefresh: () {
-            return _refresh(context);
-          },
-          child: ListView.builder(
-            itemCount: state.events.length,
-            itemBuilder: (context, index) {
-              return Padding(
-                key: ValueKey(state.events[index].title),
-                padding: const EdgeInsets.only(
-                  bottom: AppPadding.kMediumPadding,
-                ),
-                child: Slidable(
-                  startActionPane: ActionPane(
-                    extentRatio: 0.35,
-                    motion: const DrawerMotion(),
-                    children: [
-                      SlidableAction(
-                        onPressed: (context) {
-                          context.read<HomeCubit>().likeEvent(
-                                index,
-                                state.events[index].id,
-                              );
-                        },
-                        backgroundColor:
-                            Theme.of(context).colorScheme.secondary,
-                        foregroundColor:
-                            Theme.of(context).colorScheme.onSecondary,
-                        icon: state.events[index].isFavorite
-                            ? Icons.favorite
-                            : Icons.favorite_outline,
-                      ),
-                      SlidableAction(
-                        onPressed: (_) {
-                          //TODO complete
-                        },
-                        backgroundColor: Theme.of(context).colorScheme.surface,
-                        foregroundColor:
-                            Theme.of(context).colorScheme.onSurface,
-                        icon: Icons.done,
-                      ),
-                    ],
-                  ),
-                  endActionPane: ActionPane(
-                    extentRatio: 0.35,
-                    motion: const DrawerMotion(),
-                    children: [
-                      SlidableAction(
-                        onPressed: (_) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => EventScreen(
-                                eventIndex: index,
-                                title: 'Edit ${state.events[index].title}',
-                                eventTitle: state.events[index].title,
-                              ),
-                            ),
-                          );
-                        },
-                        backgroundColor: Theme.of(context).colorScheme.surface,
-                        foregroundColor:
-                            Theme.of(context).colorScheme.onSurface,
-                        icon: Icons.edit,
-                      ),
-                      SlidableAction(
-                        onPressed: (context) {
-                          context
-                              .read<HomeCubit>()
-                              .removeEvent(state.events[index].id);
-                        },
-                        backgroundColor: Theme.of(context).colorScheme.error,
-                        foregroundColor:
-                            Theme.of(context).colorScheme.onPrimary,
-                        icon: Icons.delete,
-                      ),
-                    ],
-                  ),
-                  child: ListTile(
-                    onTap: () {
-                      context
-                          .read<HomeCubit>()
-                          .setAppState(state.events[index].id);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ChatScreen(
-                            eventIndex: index,
-                          ),
-                        ),
-                      );
-                    },
-                    leading: Container(
-                      height: 50,
-                      width: 50,
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary,
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                      child: Icon(
-                        state.events[index].iconData,
-                        color: Theme.of(context).colorScheme.onPrimary,
-                      ),
-                    ),
-                    title: Text(
-                      state.events[index].title,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onBackground,
-                        fontFamily: 'Quicksand',
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    subtitle: Text(
-                      state.events[index].subtitle,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onBackground,
-                        fontFamily: 'Quicksand',
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                    trailing: state.events[index].isFavorite
-                        ? Icon(
-                            Icons.favorite,
-                            color: Theme.of(context).colorScheme.secondary,
-                          )
-                        : const SizedBox(width: 0),
-                  ),
-                ),
+    return Stack(
+      alignment: AlignmentDirectional.bottomCenter,
+      children: [
+        BlocListener<HomeCubit, HomeState>(
+          listenWhen: (prev, curr) {
+            if (prev.selectedItemInNavBar != curr.selectedItemInNavBar) {
+              pageController.animateToPage(
+                curr.selectedItemInNavBar,
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeInOut,
               );
-            },
+              return true;
+            } else {
+              return false;
+            }
+          },
+          listener: (context, state) {},
+          child: PageView(
+            controller: pageController,
+            onPageChanged: (value) =>
+                context.read<HomeCubit>().selectPage(value),
+            children: [
+              _HomePage(),
+              Container(
+                key: const ValueKey('Daily'),
+                color: Colors.cyan,
+                child: const Center(
+                  child: Text('Daily'),
+                ),
+              ),
+              Container(
+                key: const ValueKey('Timeline'),
+                color: Colors.amber,
+                child: const Center(
+                  child: Text('Timeline'),
+                ),
+              ),
+              Container(
+                key: const ValueKey('Explore'),
+                color: Colors.yellow,
+                child: const Center(
+                  child: Text('Explore'),
+                ),
+              ),
+            ],
+          ),
+        ),
+        _BottomNavBar()
+      ],
+    );
+  }
+
+  Future animateToPage(HomeState state) async {
+    await pageController.animateToPage(
+      state.selectedItemInNavBar,
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeIn,
+    );
+    print(state.selectedItemInNavBar);
+  }
+}
+
+class _HomePage extends StatelessWidget {
+  final EdgeInsets honestPadding = const EdgeInsets.fromLTRB(
+    AppPadding.kBigPadding,
+    AppPadding.kSmallPadding,
+    AppPadding.kSmallPadding,
+    AppPadding.kSmallPadding,
+  );
+  final EdgeInsets oddPadding = const EdgeInsets.fromLTRB(
+    AppPadding.kSmallPadding,
+    AppPadding.kSmallPadding,
+    AppPadding.kBigPadding,
+    AppPadding.kSmallPadding,
+  );
+  _HomePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<HomeCubit, HomeState>(
+      builder: (context, state) {
+        return SingleChildScrollView(
+          child: Column(
+            children: [
+              state.favoriteEvents.isEmpty
+                  ? const SizedBox()
+                  : _buildFavoriteBlock(context, state),
+              _buildLatestBlock(context, state),
+            ],
           ),
         );
       },
     );
   }
 
-  Future<void> _refresh(BuildContext context) async {
-    await context.read<HomeCubit>().init();
+  Widget _buildFavoriteBlock(BuildContext context, HomeState state) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: AppPadding.kBigPadding),
+          child: _buildHomePageTitle(
+            context,
+            text: 'Favorite',
+          ),
+        ),
+        const SizedBox(height: AppPadding.kSmallPadding),
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppPadding.kBigPadding,
+          ),
+          child: GridView.builder(
+            shrinkWrap: true,
+            primary: false,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisSpacing: AppPadding.kMediumPadding,
+              crossAxisSpacing: AppPadding.kMediumPadding,
+            ),
+            itemCount: state.favoriteEvents.length,
+            itemBuilder: (context, index) {
+              var event = state.favoriteEvents[index];
+              return EventCard(
+                event: event,
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: AppPadding.kBigPadding),
+      ],
+    );
+  }
+
+  Column _buildLatestBlock(BuildContext context, HomeState state) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: AppPadding.kBigPadding),
+          child: _buildHomePageTitle(
+            context,
+            text: 'Latest',
+          ),
+        ),
+        ListView.builder(
+          shrinkWrap: true,
+          primary: false,
+          itemCount: state.events.length,
+          itemBuilder: (context, index) {
+            return EventTile(
+              event: state.events[index],
+            );
+          },
+        ),
+        const SizedBox(height: 100),
+      ],
+    );
+  }
+
+  Text _buildHomePageTitle(
+    BuildContext context, {
+    required String text,
+  }) {
+    return Text(
+      text,
+      style: TextStyle(
+        color: Theme.of(context).colorScheme.onBackground,
+        fontSize: 24,
+      ),
+    );
+  }
+}
+
+class _BottomNavBar extends StatelessWidget {
+  _BottomNavBar({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.transparent,
+      height: 90,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppPadding.kBigPadding,
+          0,
+          AppPadding.kBigPadding,
+          AppPadding.kDefaultPadding,
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppPadding.kDefaultPadding),
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          child: BlocBuilder<HomeCubit, HomeState>(
+            builder: (context, state) {
+              return NavigationBar(
+                backgroundColor: Colors.transparent,
+                selectedIndex: state.selectedItemInNavBar,
+                animationDuration: const Duration(milliseconds: 400),
+                labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+                onDestinationSelected: (selectedIndex) {
+                  context.read<HomeCubit>().selectPage(selectedIndex);
+                },
+                destinations: [
+                  NavigationDestination(
+                    icon: Icon(
+                      Icons.home_outlined,
+                      color: Theme.of(context).colorScheme.onPrimary,
+                      size: 36.0,
+                    ),
+                    selectedIcon: Icon(
+                      Icons.home,
+                      color: Theme.of(context).colorScheme.onSecondary,
+                      size: 24.0,
+                    ),
+                    label: 'Home',
+                  ),
+                  NavigationDestination(
+                    icon: Icon(
+                      Icons.event_outlined,
+                      color: Theme.of(context).colorScheme.onPrimary,
+                      size: 36.0,
+                    ),
+                    selectedIcon: Icon(
+                      Icons.event,
+                      color: Theme.of(context).colorScheme.onSecondary,
+                    ),
+                    label: 'Daily',
+                  ),
+                  NavigationDestination(
+                    icon: Icon(
+                      Icons.timeline_outlined,
+                      color: Theme.of(context).colorScheme.onPrimary,
+                      size: 36.0,
+                    ),
+                    selectedIcon: Icon(
+                      Icons.timeline,
+                      color: Theme.of(context).colorScheme.onSecondary,
+                    ),
+                    label: 'Timeline',
+                  ),
+                  NavigationDestination(
+                    icon: Icon(
+                      Icons.explore_outlined,
+                      color: Theme.of(context).colorScheme.onPrimary,
+                      size: 36.0,
+                    ),
+                    selectedIcon: Icon(
+                      Icons.explore_outlined,
+                      color: Theme.of(context).colorScheme.onSecondary,
+                    ),
+                    label: 'Explore',
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
   }
 }

@@ -1,32 +1,38 @@
 part of 'home_cubit.dart';
 
+@immutable
 class HomeState extends Equatable {
-  final models.PageController pageController;
+  final List<Event> favoriteEvents;
   final List<Event> events;
   final AppState appState;
+  final int selectedItemInNavBar;
 
-  const HomeState({
-    required this.pageController,
+  HomeState({
+    this.favoriteEvents = const [],
     this.events = const [],
-    required this.appState,
+    this.appState = const AppState(),
+    this.selectedItemInNavBar = 0,
   });
 
   @override
   List<Object> get props => [
-        pageController,
+        favoriteEvents,
         events,
         appState,
+        selectedItemInNavBar,
       ];
 
   HomeState copyWith({
-    models.PageController? pageController,
+    List<Event>? favoriteEvents,
     List<Event>? events,
     AppState? appState,
+    int? selectedItemInNavBar,
   }) {
     return HomeState(
-      pageController: pageController ?? this.pageController,
+      favoriteEvents: favoriteEvents ?? this.favoriteEvents,
       events: events ?? this.events,
       appState: appState ?? this.appState,
+      selectedItemInNavBar: selectedItemInNavBar ?? this.selectedItemInNavBar,
     );
   }
 }

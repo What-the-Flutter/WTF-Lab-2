@@ -12,7 +12,7 @@ ThemeData get lightThemeData {
       shadowColor: Colors.transparent,
       titleTextStyle: _lightAppBarTextStyle,
       toolbarTextStyle: _lightAppBarTextStyle,
-      backgroundColor: LightColors.kPrimaryColor,
+      backgroundColor: LightColors.kBackgroundColor,
     ),
     colorScheme: ColorScheme.fromSwatch().copyWith(
       background: LightColors.kBackgroundColor,
@@ -26,14 +26,20 @@ ThemeData get lightThemeData {
       error: LightColors.kErrorColor,
     ),
     floatingActionButtonTheme: const FloatingActionButtonThemeData().copyWith(
-      backgroundColor: LightColors.kSecondaryColor,
+      backgroundColor: LightColors.kPrimaryColor,
       iconSize: 36,
       elevation: 0,
     ),
-    navigationBarTheme: const NavigationBarThemeData(
-      backgroundColor: LightColors.kSurfaceColor,
+    navigationBarTheme: NavigationBarThemeData(
+      backgroundColor: LightColors.kBackgroundColor,
       height: 65,
-      indicatorColor: LightColors.kBackgroundColor,
+      indicatorColor: LightColors.kSecondaryColor,
+      labelTextStyle: MaterialStateProperty.all(
+        const TextStyle(
+          color: LightColors.kBackgroundColor,
+          fontSize: 12,
+        ),
+      ),
     ),
     primaryColor: LightColors.kPrimaryColor,
     scaffoldBackgroundColor: LightColors.kBackgroundColor,
@@ -44,16 +50,14 @@ ThemeData get lightThemeData {
 
 IconThemeData get _lightIconThemeData {
   return const IconThemeData().copyWith(
-    color: LightColors.kOnPrimaryColor,
-    size: 30,
+    color: LightColors.kOnBackgroundColor,
+    size: 36,
   );
 }
 
 TextStyle get _lightAppBarTextStyle {
   return const TextStyle().copyWith(
-    color: LightColors.kOnPrimaryColor,
-    fontSize: 22,
-    fontFamily: 'Quicksand',
-    fontWeight: FontWeight.w500,
+    color: LightColors.kOnBackgroundColor,
+    fontSize: 26,
   );
 }

@@ -1,34 +1,37 @@
 part of 'settings_cubit.dart';
 
 class SettingsState extends Equatable {
-  final AppState appState;
+  final bool isDarkTheme;
+  final bool isMessageLeftAlign;
+  final bool isDateBubbleHiden;
+  final double fontSize;
 
   const SettingsState({
-    required this.appState,
+    required this.isDarkTheme,
+    required this.isMessageLeftAlign,
+    required this.isDateBubbleHiden,
+    required this.fontSize,
   });
 
   @override
   List<Object> get props => [
-        appState,
+        isDarkTheme,
+        isMessageLeftAlign,
+        isDateBubbleHiden,
+        fontSize,
       ];
 
   SettingsState copyWith({
-    AppState? appState,
+    bool? isDarkTheme,
+    bool? isMessageLeftAlign,
+    bool? isDateBubbleHiden,
+    double? fontSize,
   }) {
     return SettingsState(
-      appState: appState ?? this.appState,
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      'appState': appState.toMap(),
-    };
-  }
-
-  factory SettingsState.fromMap(Map<String, dynamic> map) {
-    return SettingsState(
-      appState: AppState.fromMap(map['appState'] as Map<String, dynamic>),
+      isDarkTheme: isDarkTheme ?? this.isDarkTheme,
+      isMessageLeftAlign: isMessageLeftAlign ?? this.isMessageLeftAlign,
+      isDateBubbleHiden: isDateBubbleHiden ?? this.isDateBubbleHiden,
+      fontSize: fontSize ?? this.fontSize,
     );
   }
 }
