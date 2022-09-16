@@ -1,192 +1,243 @@
+import 'dart:io';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
 
-import '../../../domain/database_provider.dart';
-import '../../../domain/models/event.dart';
-import '../../../domain/models/message.dart';
+import '../../../data/models/event.dart';
+import '../../../data/models/note.dart';
+import '../../../domain/database/database_provider.dart';
 
 part 'chat_state.dart';
 
 class ChatCubit extends Cubit<ChatState> {
-  bool isInited = false;
+  final _dbProvider = DatabaseProvider();
+  final _storage = FirebaseStorage.instance;
 
-  ChatCubit(super._chatEmpty);
+  ChatCubit() : super(const ChatState());
 
-  Future<void> init() async {
-    var dbProvider = DatabaseProvider.instance;
-    var appState = await dbProvider.readAppState();
-    var event = await dbProvider.readEvent(appState.chatEventId);
-    var events = await dbProvider.readEvents();
-    var messages = await dbProvider.readMessages(appState.chatEventId);
+  Future init() async {
+    var appState = await _dbProvider.readAppState();
+    var event = await _dbProvider.readEvent(appState.selectedEventId!);
+    emit(state.copyWith(event: event));
+    _fetchNotesToState(event.id!);
+  }
 
+  void addNote(String text) async {
+    if (state.status == ChatStatus.noteWithImage) {
+      var imageFile = File(state.image!.path);
+
+      try {
+        await _storage.ref('images/${state.image!.name}').putFile(imageFile);
+      } catch (e) {
+        print(e);
+      }
+    }
+
+    var note = Note(
+      eventId: state.event!.id!,
+      text: text,
+      imageName:
+          state.status == ChatStatus.noteWithImage ? state.image!.name : '',
+      date: DateTime.now(),
+    );
+    await _dbProvider.createNote(note);
+
+    var lastActivity =
+        '${note.date.day < 10 ? '0${note.date.day}' : note.date.day}.${note.date.month < 10 ? '0${note.date.month}' : note.date.month}';
+
+    if (note.text.length >= 20) {
+      var cutedMessage = '${note.text.substring(0, 17)}...';
+      _dbProvider.updateEvent(
+        state.event!.id!,
+        state.event!.copyWith(
+          lastMessage: cutedMessage,
+          lastActivity: lastActivity,
+        ),
+      );
+    } else {
+      _dbProvider.updateEvent(
+        state.event!.id!,
+        state.event!.copyWith(
+          lastMessage: note.text,
+          lastActivity: lastActivity,
+        ),
+      );
+    }
+
+    emit(state.copyWith(status: ChatStatus.primary));
+  }
+
+  void setImage(XFile image) {
     emit(state.copyWith(
-      event: event,
+      image: image,
+      status: ChatStatus.noteWithImage,
+    ));
+  }
+
+  void _fetchNotesToState(String eventId) async {
+    _dbProvider.listenNotes(eventId).listen((event) {
+      var notes = <Note>[];
+      var data = (event.snapshot.value ?? {}) as Map;
+      data.forEach(((key, value) {
+        notes.add(Note.fromMap({'id': key, ...value}));
+      }));
+      notes.sort(((a, b) => b.date.compareTo(a.date)));
+
+      emit(state.copyWith(notes: notes));
+    });
+  }
+
+  void deleteNote(Note note) {
+    _dbProvider.deleteNote(note.eventId, note.id!);
+  }
+
+  void setEditingStatus(Note note) {
+    emit(state.copyWith(
+      status: ChatStatus.editingMessage,
+      editingNote: note,
+    ));
+  }
+
+  void setSendToStatus() async {
+    var events = await _dbProvider.fetchEvents();
+    emit(state.copyWith(
       events: events,
-      messages: messages,
+      status: ChatStatus.sendTo,
     ));
-
-    isInited = true;
   }
 
-  Future<void> addMessage(Message message) async {
-    var dbProvider = DatabaseProvider.instance;
-    await dbProvider.createMessage(message);
-
-    var messages = await dbProvider.readMessages(state.event.id!);
-
-    emit(state.copyWith(messages: messages));
-  }
-
-  Future<void> deleteMessage(int index) async {
-    var dbProvider = DatabaseProvider.instance;
-    var message = state.messages[index];
-    await dbProvider.deleteMessage(message.id!);
-
-    var messages = await dbProvider.readMessages(state.event.id!);
-
-    emit(state.copyWith(messages: messages));
-  }
-
-  void setEditingState(int editingMessageIndex) {
+  void setSearchingStatus() {
     emit(state.copyWith(
-      isEditing: state.isEditing ? false : true,
-      editingMessageIndex: editingMessageIndex,
+      status: ChatStatus.searchingNotes,
+      searchingNotes: state.notes,
     ));
   }
 
-  Future<void> editMessage(Message msg, String text) async {
-    var dbProvider = DatabaseProvider.instance;
-    var message = Message(
-      id: msg.id,
-      eventId: state.event.id!,
+  void cancelSendTo() {
+    emit(state.copyWith(
+      selectedEvent: null,
+      events: [],
+      status: ChatStatus.primary,
+    ));
+  }
+
+  void cancelSearching() async {
+    await init();
+    emit(state.copyWith(
+      searchingNotes: [],
+      status: ChatStatus.primary,
+    ));
+  }
+
+  void editNote(String newText) {
+    _dbProvider.editNote(
+      state.editingNote!,
+      newText,
+    );
+    emit(state.copyWith(
+      status: ChatStatus.primary,
+      editingNote: null,
+    ));
+  }
+
+  void addNoteToSelectedEvent(String text) {
+    var note = Note(
+      eventId: state.selectedEvent!.id!,
       text: text,
       date: DateTime.now(),
     );
-    await dbProvider.updateMessage(message);
+    _dbProvider.createNote(note);
 
-    var messages = await dbProvider.readMessages(state.event.id!);
+    var lastActivity =
+        '${note.date.day < 10 ? '0${note.date.day}' : note.date.day}.${note.date.month < 10 ? '0${note.date.month}' : note.date.month}';
 
-    emit(state.copyWith(messages: messages));
-  }
-
-  Future<void> likeEvent() async {
-    var event = state.event;
-    event.isFavorite == true
-        ? event = event.copyWith(isFavorite: false)
-        : event = event.copyWith(isFavorite: true);
-
-    await DatabaseProvider.instance.updateEvent(event);
-    event = await DatabaseProvider.instance.readEvent(state.event.id!);
-
-    emit(state.copyWith(event: event));
-  }
-
-  void openSearchBar() {
+    if (note.text.length >= 20) {
+      var cutedMessage = '${note.text.substring(0, 17)}...';
+      _dbProvider.updateEvent(
+        state.selectedEvent!.id!,
+        state.selectedEvent!.copyWith(
+          lastMessage: cutedMessage,
+          lastActivity: lastActivity,
+        ),
+      );
+    } else {
+      _dbProvider.updateEvent(
+        state.selectedEvent!.id!,
+        state.selectedEvent!.copyWith(
+          lastMessage: note.text,
+          lastActivity: lastActivity,
+        ),
+      );
+    }
     emit(state.copyWith(
-      isSearchBarOpen: true,
-      searchingMessages: state.messages,
+      status: ChatStatus.primary,
+      selectedEvent: null,
+      events: [],
     ));
   }
 
-  void closeSearchBar() {
-    emit(state.copyWith(
-      isSearchBarOpen: false,
-      searchingMessages: [],
-    ));
+  void selectItemInEventBar(Event event) {
+    emit(state.copyWith(selectedEvent: event));
   }
 
-  void searchMessages(String value) {
-    var searchingMessages = state.messages
-        .where((element) =>
-            element.text.toLowerCase().contains(value.toLowerCase()))
-        .toList();
-    emit(state.copyWith(searchingMessages: searchingMessages));
+  void searchNote(String text) {
+    var searchingNotes =
+        state.notes.where((element) => element.text.contains(text)).toList();
+    searchingNotes.sort((a, b) => b.date.compareTo(a.date));
+    emit(state.copyWith(searchingNotes: searchingNotes));
   }
 
-  void openEventBar() {
-    emit(state.copyWith(isEventBarOpen: true));
-  }
-
-  void closeEventBar() {
-    emit(state.copyWith(isEventBarOpen: false));
-  }
-
-  void selectItemInEventBar(int itemIndex) {
-    emit(state.copyWith(
-      selectedItemInEventBar:
-          state.selectedItemInEventBar == itemIndex ? -1 : itemIndex,
-    ));
-  }
-
-  Future<void> sendMessageToEvent(Message message) async {
-    var dbProvider = DatabaseProvider.instance;
-
-    var msg = Message(
-      eventId: state.selectedItemInEventBar,
-      text: message.text,
-      date: message.date,
-    );
-
-    await dbProvider.createMessage(message);
-    emit(state.copyWith(selectedItemInEventBar: -1));
-  }
-
-  void addToForward(int index) {
-    var selectedMessages = Set<int>.from(state.forwardMessagesIndex);
+  void selectNote(String id) async {
+    var events = await _dbProvider.fetchEvents();
+    var selectedMessages = Set<String>.from(state.forwardNotes);
 
     if (selectedMessages.isEmpty) {
-      selectedMessages.add(index);
+      selectedMessages.add(id);
       emit(state.copyWith(
-        isForward: true,
-        forwardMessagesIndex: selectedMessages,
+        events: events,
+        status: ChatStatus.forwarding,
+        forwardNotes: selectedMessages,
       ));
     } else {
-      if (selectedMessages.contains(index)) {
-        selectedMessages.remove(index);
+      if (selectedMessages.contains(id)) {
+        selectedMessages.remove(id);
       } else {
-        selectedMessages.add(index);
+        selectedMessages.add(id);
       }
       if (selectedMessages.isEmpty) {
         emit(state.copyWith(
-          isForward: false,
-          forwardMessagesIndex: {},
-          selectedItemInEventBar: -1,
+          status: ChatStatus.primary,
+          forwardNotes: {},
+          selectedEvent: null,
         ));
       } else {
         emit(state.copyWith(
-          forwardMessagesIndex: selectedMessages,
+          forwardNotes: selectedMessages,
         ));
       }
     }
   }
 
-  Future<void> forwardMessage() async {
-    var dbProvider = DatabaseProvider.instance;
-    var event = state.events[state.selectedItemInEventBar];
-
-    for (var i = 0; i < state.messages.length; i++) {
-      if (state.forwardMessagesIndex.contains(i)) {
-        await dbProvider.updateMessage(
-          state.messages[i].copyWith(
-            eventId: event.id!,
-          ),
-        );
+  void forwardNotes() async {
+    for (var note in state.notes) {
+      for (var id in state.forwardNotes) {
+        if (id == note.id!) {
+          await _dbProvider.deleteNote(note.eventId, note.id!);
+          await _dbProvider
+              .createNote(note.copyWith(eventId: state.selectedEvent!.id));
+        }
       }
     }
-
-    var messages = await dbProvider.readMessages(state.event.id!);
     emit(state.copyWith(
-      messages: messages,
-      isForward: false,
-      isEventBarOpen: false,
-      selectedItemInEventBar: -1,
-      forwardMessagesIndex: {},
+      status: ChatStatus.primary,
+      forwardNotes: {},
+      selectedEvent: null,
     ));
   }
 
-  Future<void> editAppState() async {
-    var appState = await DatabaseProvider.instance.readAppState();
-    await DatabaseProvider.instance
-        .updateAppState(appState.copyWith(chatEventId: -1));
+  Future<String> imageURL(String imageName) async {
+    return await _storage.ref('images/$imageName').getDownloadURL();
   }
 }

@@ -1,16 +1,18 @@
 import 'package:equatable/equatable.dart';
 
-class Message extends Equatable {
+class Note extends Equatable {
   final String? id;
   final String eventId;
   final String text;
   final DateTime date;
+  final String imageName;
 
-  const Message({
+  const Note({
     this.id,
     required this.eventId,
     required this.text,
     required this.date,
+    this.imageName = '',
   });
 
   @override
@@ -19,19 +21,22 @@ class Message extends Equatable {
         eventId,
         text,
         date,
+        imageName,
       ];
 
-  Message copyWith({
+  Note copyWith({
     String? id,
     String? eventId,
     String? text,
     DateTime? date,
+    String? imageName,
   }) {
-    return Message(
+    return Note(
       id: id ?? this.id,
       eventId: eventId ?? this.eventId,
       text: text ?? this.text,
       date: date ?? this.date,
+      imageName: imageName ?? this.imageName,
     );
   }
 
@@ -41,15 +46,17 @@ class Message extends Equatable {
       'eventId': eventId,
       'text': text,
       'date': date.millisecondsSinceEpoch,
+      'imageName': imageName,
     };
   }
 
-  factory Message.fromMap(Map<String, dynamic> map) {
-    return Message(
-      id: map['id'] as String?,
+  factory Note.fromMap(Map<String, dynamic> map) {
+    return Note(
+      id: map['id'] != null ? map['id'] as String : null,
       eventId: map['eventId'] as String,
       text: map['text'] as String,
       date: DateTime.fromMillisecondsSinceEpoch(map['date'] as int),
+      imageName: map['imageName'] as String,
     );
   }
 }

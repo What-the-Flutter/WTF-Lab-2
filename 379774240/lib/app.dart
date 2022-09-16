@@ -1,28 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'inherited/app_theme.dart';
+import 'ui/components/auth/user_auth.dart';
 import 'ui/screens/home/home_screen.dart';
-import 'ui/themes/dark_theme.dart';
-import 'ui/themes/light_theme.dart';
+import 'ui/screens/settings/settings_cubit.dart';
 
-class ChatJournalApp extends StatelessWidget {
-  final String _appTitle = 'Chat Journal';
-  const ChatJournalApp({super.key});
+class NotikApp extends StatelessWidget {
+  final String _appTitle = 'Notik';
+  final SettingsState settings;
+
+  const NotikApp({
+    super.key,
+    required this.settings,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return AppThemeState(
-      child: Builder(
-        builder: (context) {
-          final isLightTheme = AppThemeInheritedWidget.of(context).isLightTheme;
-
-          return MaterialApp(
-            debugShowCheckedModeBanner: false,
-            title: _appTitle,
-            theme: isLightTheme ? lightThemeData : darkThemeData,
-            home: const HomeScreen(),
-          );
-        },
+    return UserAuth(
+      child: BlocProvider(
+        create: (context) => SettingsCubit(settings),
+        child: BlocBuilder<SettingsCubit, SettingsState>(
+          builder: (context, state) {
+            return MaterialApp(
+              debugShowCheckedModeBanner: false,
+              title: _appTitle,
+              theme: context.read<SettingsCubit>().fetchTheme(),
+              home: HomeScreen(
+                settingsCubit: context.read<SettingsCubit>(),
+              ),
+            );
+          },
+        ),
       ),
     );
   }

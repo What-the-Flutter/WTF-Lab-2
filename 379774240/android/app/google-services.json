@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "158095044754",
+    "firebase_url": "https://notik-265f9-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "notik-265f9",
+    "storage_bucket": "notik-265f9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:158095044754:android:c154f0ef5dac689a69f64b",
+        "android_client_info": {
+          "package_name": "com.example.notik"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "158095044754-5n6fq95nbpsj71401mjpt4n4n7o1nr1a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAxXwWUhL1ro5f4Rl9kLR3fKw7XRk_8NNM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "158095044754-5n6fq95nbpsj71401mjpt4n4n7o1nr1a.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

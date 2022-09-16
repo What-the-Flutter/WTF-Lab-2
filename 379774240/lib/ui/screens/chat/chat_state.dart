@@ -1,76 +1,71 @@
 part of 'chat_cubit.dart';
 
 class ChatState extends Equatable {
-  final bool isEditing;
-  final bool isSearchBarOpen;
-  final bool isEventBarOpen;
-  final bool isForward;
-
-  final int editingMessageIndex;
-  final int selectedItemInEventBar;
-
-  final Event event;
-
-  final Set<int> forwardMessagesIndex;
+  final ChatStatus status;
+  final XFile? image;
+  final Event? event;
+  final List<Note> notes;
+  final List<Note> searchingNotes;
   final List<Event> events;
-  final List<Message> searchingMessages;
-  final List<Message> messages;
+  final Note? editingNote;
+  final Event? selectedEvent;
+  final Set<String> forwardNotes;
 
   const ChatState({
-    this.isEditing = false,
-    this.isSearchBarOpen = false,
-    this.isEventBarOpen = false,
-    this.isForward = false,
-    this.editingMessageIndex = -1,
-    this.selectedItemInEventBar = -1,
-    required this.event,
-    this.forwardMessagesIndex = const {},
+    this.status = ChatStatus.primary,
+    this.image,
+    this.event,
+    this.notes = const [],
+    this.searchingNotes = const [],
     this.events = const [],
-    this.searchingMessages = const [],
-    this.messages = const [],
+    this.editingNote,
+    this.selectedEvent,
+    this.forwardNotes = const {},
   });
 
   @override
   List<Object?> get props => [
-        isEditing,
-        isSearchBarOpen,
-        isEventBarOpen,
-        isForward,
-        editingMessageIndex,
-        selectedItemInEventBar,
+        status,
+        image,
         event,
-        forwardMessagesIndex,
+        notes,
+        searchingNotes,
         events,
-        searchingMessages,
-        messages
+        editingNote,
+        selectedEvent,
+        forwardNotes,
       ];
 
   ChatState copyWith({
-    bool? isEditing,
-    bool? isSearchBarOpen,
-    bool? isEventBarOpen,
-    bool? isForward,
-    int? editingMessageIndex,
-    int? selectedItemInEventBar,
+    ChatStatus? status,
+    XFile? image,
     Event? event,
-    Set<int>? forwardMessagesIndex,
+    List<Note>? notes,
+    List<Note>? searchingNotes,
     List<Event>? events,
-    List<Message>? searchingMessages,
-    final List<Message>? messages,
+    Note? editingNote,
+    Event? selectedEvent,
+    Set<String>? forwardNotes,
   }) {
     return ChatState(
-      isEditing: isEditing ?? this.isEditing,
-      isSearchBarOpen: isSearchBarOpen ?? this.isSearchBarOpen,
-      isEventBarOpen: isEventBarOpen ?? this.isEventBarOpen,
-      isForward: isForward ?? this.isForward,
-      editingMessageIndex: editingMessageIndex ?? this.editingMessageIndex,
-      selectedItemInEventBar:
-          selectedItemInEventBar ?? this.selectedItemInEventBar,
+      status: status ?? this.status,
+      image: image ?? this.image,
       event: event ?? this.event,
-      forwardMessagesIndex: forwardMessagesIndex ?? this.forwardMessagesIndex,
+      notes: notes ?? this.notes,
+      searchingNotes: searchingNotes ?? this.searchingNotes,
       events: events ?? this.events,
-      searchingMessages: searchingMessages ?? this.searchingMessages,
-      messages: messages ?? this.messages,
+      editingNote: editingNote ?? this.editingNote,
+      selectedEvent: selectedEvent ?? this.selectedEvent,
+      forwardNotes: forwardNotes ?? this.forwardNotes,
     );
   }
+}
+
+enum ChatStatus {
+  primary,
+  editingMessage,
+  sendTo,
+  searchingNotes,
+  forwarding,
+  noteWithImage,
 }

@@ -1,95 +1,75 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 
-import '../../../domain/database_provider.dart';
-import '../../../domain/models/app_state.dart';
-import '../../../domain/models/event.dart';
-import '../../../domain/models/page_controller.dart' as models;
+import '../../../data/models/app_state.dart';
+import '../../../data/models/event.dart';
+import '../../../domain/database/database_provider.dart';
 
 part 'home_state.dart';
 
 class HomeCubit extends Cubit<HomeState> {
-  HomeCubit()
-      : super(HomeState(
-          pageController: models.PageController(),
-        ));
+  final dbProvider = DatabaseProvider();
 
-  Future<void> init() async {
-    var events = await DatabaseProvider.instance.readEvents();
-    DatabaseProvider.instance.createAppState(AppState(chatEventId: -1));
+  HomeCubit() : super(HomeState());
 
-    var likedEvents = <Event>[];
-    var unlikedEvents = <Event>[];
-    for (var i = 0; i < events.length; i++) {
-      if (events[i].isFavorite) {
-        likedEvents.add(events[i]);
-      } else {
-        unlikedEvents.add(events[i]);
-      }
-    }
-    events = likedEvents + unlikedEvents;
-    emit(state.copyWith(events: events));
+  void init() async {
+    _fetchEventsToState();
   }
 
-  void changePage(int currentPage) {
-    emit(state.copyWith(
-      pageController: state.pageController.copyWith(
-        currentPage: currentPage,
-      ),
-    ));
-  }
-
-  Future<void> removeEvent(int index) async {
-    var event = state.events[index];
-    await DatabaseProvider.instance.deleteEvent(event.id!);
-    var events = await DatabaseProvider.instance.readEvents();
-
-    var likedEvents = <Event>[];
-    var unlikedEvents = <Event>[];
-    for (var i = 0; i < events.length; i++) {
-      if (events[i].isFavorite) {
-        likedEvents.add(events[i]);
-      } else {
-        unlikedEvents.add(events[i]);
-      }
-    }
-    events = likedEvents + unlikedEvents;
-    emit(state.copyWith(events: events));
-  }
-
-  Future<void> likeEvent(int index) async {
-    var event = state.events[index];
-    event.isFavorite == true
-        ? event = event.copyWith(isFavorite: false)
-        : event = event.copyWith(isFavorite: true);
-    await DatabaseProvider.instance.updateEvent(event);
-    var events = await DatabaseProvider.instance.readEvents();
-
-    var likedEvents = <Event>[];
-    var unlikedEvents = <Event>[];
-    for (var i = 0; i < events.length; i++) {
-      if (events[i].isFavorite) {
-        likedEvents.add(events[i]);
-      } else {
-        unlikedEvents.add(events[i]);
-      }
-    }
-    events = likedEvents + unlikedEvents;
-    emit(state.copyWith(events: events));
-  }
-
-  Future<void> setAppState(Event event) async {
-    var appState = await DatabaseProvider.instance.readAppState();
-    DatabaseProvider.instance.updateAppState(
-      appState.copyWith(
-        chatEventId: event.id,
+  void likeEvent(Event event) {
+    dbProvider.updateEvent(
+      event.id!,
+      event.copyWith(
+        isFavorite: !event.isFavorite,
       ),
     );
   }
 
-  // void updateFromChatScreen(int index, Event event) {
-  //   var events = List<Event>.from(state.events);
-  //   events[index].copyWith(messages: event.messages);
-  //   emit(state.copyWith(events: events));
-  // }
+  void deleteEvent(Event event) {
+    dbProvider.deleteEvent(
+      event.id!,
+    );
+  }
+
+  void setSelectedEvent(Event event) {
+    emit(state.copyWith(
+      appState: state.appState.copyWith(
+        selectedEventId: event.id,
+      ),
+    ));
+    dbProvider.updateAppState(state.appState);
+  }
+
+  void _fetchEventsToState() {
+    dbProvider.listenEvents().listen((event) {
+      var events = <Event>[];
+      var data = (event.snapshot.value ?? {}) as Map;
+      data.forEach(((key, value) {
+        events.add(Event.fromMap({'id': key, ...value}));
+      }));
+      _sortEventsFromState(events);
+    });
+  }
+
+  void _sortEventsFromState(List<Event> events) {
+    var favoriveEvents = <Event>[];
+    var commonEvents = <Event>[];
+    for (var element in events) {
+      if (element.isFavorite) {
+        favoriveEvents.add(element);
+      } else {
+        commonEvents.add(element);
+      }
+    }
+    emit(state.copyWith(
+      favoriteEvents: favoriveEvents,
+      events: commonEvents,
+    ));
+  }
+
+  void selectPage(int index) {
+    if (index == state.selectedItemInNavBar) return;
+    emit(state.copyWith(selectedItemInNavBar: index));
+  }
 }
