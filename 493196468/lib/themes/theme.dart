@@ -28,7 +28,12 @@ final lightTheme = ThemeData(
       borderRadius: BorderRadius.circular(5),
     ),
   ),
-  listTileTheme: const ListTileThemeData(
-
+  iconTheme: const IconThemeData(
+    color: _primaryColorDark,
   ),
+);
+
+final darkTheme = ThemeData(
+  primaryColor: Colors.grey,
+  brightness: Brightness.dark,
 );
