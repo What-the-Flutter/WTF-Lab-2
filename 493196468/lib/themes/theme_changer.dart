@@ -5,7 +5,7 @@ import 'theme.dart';
 class StateChanger extends StatefulWidget {
   final Widget child;
 
-  StateChanger({Key? key, required this.child}) : super(key: key);
+  const StateChanger({Key? key, required this.child}) : super(key: key);
 
   @override
   State<StateChanger> createState() => _StateChangerState();
@@ -21,9 +21,9 @@ class _StateChangerState extends State<StateChanger> {
   @override
   Widget build(BuildContext context) {
     return ThemeChanger(
-      child: widget.child,
       theme: themeData,
       stateWidget: this,
+      child: widget.child,
     );
   }
 }
@@ -32,7 +32,7 @@ class ThemeChanger extends InheritedWidget {
   final ThemeData theme;
   final _StateChangerState stateWidget;
 
-  ThemeChanger({
+  const ThemeChanger({
     super.key,
     required super.child,
     required this.theme,

@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 
 const _primaryColorLight = Color(0xfffde0d3);
+const _primaryColorDarkLight = Color(0xff424242);
+const _primaryColorDarkDark = Color(0xff2a2a2a);
 const _primaryColorDark = Color(0xfff88766);
 
 final lightTheme = ThemeData(
+  backgroundColor: _primaryColorLight,
+  primaryColor: Colors.white,
+  primaryColorLight: _primaryColorLight,
+  primaryColorDark: _primaryColorDark,
   appBarTheme: const AppBarTheme(
     color: _primaryColorLight,
     titleTextStyle: TextStyle(
@@ -15,8 +21,7 @@ final lightTheme = ThemeData(
     selectedItemColor: _primaryColorDark,
     unselectedItemColor: _primaryColorLight,
   ),
-  primaryColorLight: _primaryColorLight,
-  primaryColorDark: _primaryColorDark,
+
   floatingActionButtonTheme: const FloatingActionButtonThemeData(
     foregroundColor: _primaryColorDark,
     backgroundColor: _primaryColorLight,
@@ -34,6 +39,14 @@ final lightTheme = ThemeData(
 );
 
 final darkTheme = ThemeData(
+  primaryColorDark: _primaryColorDarkDark,
+  primaryColorLight: _primaryColorDarkLight,
   primaryColor: Colors.grey,
   brightness: Brightness.dark,
+  appBarTheme: const AppBarTheme(
+      color: _primaryColorDarkDark,
+      titleTextStyle: TextStyle(
+        fontSize: 20,
+      )
+  ),
 );

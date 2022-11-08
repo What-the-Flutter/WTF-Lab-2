@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../cubit/home_cubit.dart';
+import '../home_entity/chat_card.dart';
 
-import '../entities/page_arguments.dart';
-
-class NewChatPage extends StatefulWidget {
-  const NewChatPage({Key? key}) : super(key: key);
+class NewChatView extends StatefulWidget {
+  const NewChatView({Key? key}) : super(key: key);
 
   @override
-  State<NewChatPage> createState() => _NewChatPageState();
+  State<NewChatView> createState() => _NewChatViewState();
 }
 
-class _NewChatPageState extends State<NewChatPage> {
+class _NewChatViewState extends State<NewChatView> {
   final _icons = [
     Icons.cake,
     Icons.add_location_sharp,
@@ -23,23 +24,35 @@ class _NewChatPageState extends State<NewChatPage> {
     Icons.search,
     Icons.close,
   ];
+
   final _textFormKey = GlobalKey<FormState>();
   var _text = '';
   var _iconIndex = -1;
   @override
   Widget build(BuildContext context) {
+
+    int anySelected = context
+        .read<HomeCubit>()
+        .state
+        .indexWhere((element) => element.isSelected);
+
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         child: _text.isEmpty
             ? const Icon(Icons.cancel_outlined)
             : const Icon(Icons.add),
         onPressed: () {
-          Navigator.pop(
-            context,
-            PageArguments({
-              _text: Icon(_icons[_iconIndex]),
-            }),
-          );
+          if(anySelected != -1) {
+            context.read<HomeCubit>().editChat(_text);
+          } else {
+            context.read<HomeCubit>().addChat(
+              newChatCard: ChatCard(
+                icon: Icon(_icons[_iconIndex]),
+                title: _text,
+              ),
+            );
+          }
+          Navigator.pop(context);
         },
       ),
       body: SafeArea(
@@ -55,6 +68,7 @@ class _NewChatPageState extends State<NewChatPage> {
             Form(
               key: _textFormKey,
               child: TextFormField(
+                initialValue: anySelected != -1 ? context.read<HomeCubit>().state[anySelected].title : null,
                 decoration: InputDecoration(
                   hintText: 'Name',
                   border: OutlineInputBorder(
