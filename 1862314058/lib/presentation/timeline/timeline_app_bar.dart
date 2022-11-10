@@ -6,7 +6,7 @@ class TimelineAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-        title: const Text('Timeline'),
+        title: const Text('Chat'),
         centerTitle: true,
         actions: <Widget>[
           IconButton(

@@ -10,5 +10,6 @@ abstract class Routes {
   static const String notification = 'notification';
   static const String statistics = 'statistics';
   static const String settings = 'settings';
-  
+
+  static const String bot = 'bot';
 }
