@@ -1,105 +1,123 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../home/cubit/home_cubit.dart';
-import '../../home/home_entity/chat_card.dart';
-import '../../themes/theme_changer.dart';
-import '../chat_entity/message.dart';
-import '../cubit/chat_cubit.dart';
-import 'filter_changer.dart';
+
+import '../models/chat_cubit.dart';
+import '../models/filter_cubit.dart';
+import '../models/home_cubit.dart';
+import '../themes/theme_changer.dart';
+import '../utils/chat_card.dart';
+import '../utils/message.dart';
 
 class ChatView extends StatelessWidget {
+  final ChatCard chatCard;
+
   const ChatView({
     super.key,
-    required this.chatTitle,
+    required this.chatCard,
   });
 
-  final String chatTitle;
+  Color? _getColor(ThemeData theme, bool isFiltered) {
+    if (!isFiltered) {
+      return theme.brightness == Brightness.light
+          ? theme.primaryColorLight
+          : theme.primaryColorDark;
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = ThemeChanger.of(context).theme;
-    return BlocBuilder<MessageCubit, List<Message>>(
-      builder: (context, state) {
-        final isSelectedList = state.where((element) => element.isSelected);
-        final int selectedAmount = isSelectedList.length;
-        return Scaffold(
-          appBar: FilterChanger.of(context).stateWidget.isFiltered
-              ? AppBar(
-                  leading: IconButton(
-                    icon: const Icon(Icons.arrow_back_ios),
-                    onPressed: () {
-                      FilterChanger.of(context).stateWidget
-                        ..filterOff()
-                        ..filter = '';
-                      context
-                          .read<MessageCubit>()
-                          .filterMessages('', chatTitle);
-                    },
-                  ),
-                  title: selectedAmount == 0
-                      ? AppBarTextField(
-                          chatTitle: chatTitle,
-                        )
-                      : const SizedBox(),
-                  actions: [
-                    _AppBarButtonsBuilder(
-                      chatTitle: chatTitle,
-                      selectedAmount: selectedAmount,
-                    ),
-                  ],
-                )
-              : AppBar(
-                  leading: selectedAmount >= 1
-                      ? IconButton(
-                          icon: const Icon(Icons.cancel_outlined),
-                          onPressed: () => context
-                              .read<MessageCubit>()
-                              .unselectAllMessages(chatTitle),
-                        )
-                      : null,
-                  actions: [
-                    _AppBarButtonsBuilder(
-                      isFiltered: true,
-                      chatTitle: chatTitle,
-                      selectedAmount: selectedAmount,
-                    ),
-                  ],
-                  title: Text(chatTitle),
-                ),
-          body: Container(
-            color: theme.brightness == Brightness.light
-                ? theme.primaryColorLight
-                : theme.primaryColorDark,
-            child: SafeArea(
-              child: Column(
-                children: [
-                  _MessagesBuilder(
-                    chatTitle: chatTitle,
-                  ),
-                  FilterChanger.of(context).stateWidget.isFiltered
-                      ? const SizedBox()
-                      : _TextField(
-                          key: UniqueKey(),
-                          messages: state,
-                          chatTitle: chatTitle,
-                        ),
-                ],
+    final theme = ThemeChanger.of(context).theme;
+    final chatId = chatCard.id!;
+    context.read<MessageCubit>().emitMessagesFromChat(chatId);
+    return BlocBuilder<FilterCubit, Filter>(
+      builder: (context, filterState) {
+        return BlocBuilder<MessageCubit, List<Message>>(
+          builder: (context, state) {
+            return Scaffold(
+              appBar: _getAppBar(
+                context,
+                state,
+                chatId,
               ),
-            ),
-          ),
+              body: Container(
+                color: _getColor(
+                  theme,
+                  filterState.isFiltered,
+                ),
+                child: SafeArea(
+                  child: Column(
+                    children: [
+                      _MessagesBuilder(chatId: chatId),
+                      context.read<FilterCubit>().isFiltered()
+                          ? const SizedBox()
+                          : _TextField(
+                              key: UniqueKey(),
+                              messages: state,
+                              chatId: chatId,
+                            ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
         );
       },
     );
   }
+
+  AppBar _getAppBar(BuildContext context, List<Message> state, int chatId) {
+    final isSelectedList = state.where((element) => element.isSelected);
+    final selectedAmount = isSelectedList.length;
+    return context.read<FilterCubit>().isFiltered()
+        ? AppBar(
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios),
+              onPressed: () {
+                context.read<FilterCubit>().deleteFilter();
+                context.read<MessageCubit>().filterMessages('', chatId);
+              },
+            ),
+            title: selectedAmount == 0
+                ? AppBarTextField(
+                    chatId: chatId,
+                  )
+                : const SizedBox(),
+            actions: [
+              _AppBarButtonsBuilder(
+                selectedAmount: selectedAmount,
+                chatId: chatId,
+              ),
+            ],
+          )
+        : AppBar(
+            leading: selectedAmount >= 1
+                ? IconButton(
+                    icon: const Icon(Icons.cancel_outlined),
+                    onPressed: () =>
+                        context.read<MessageCubit>().unselectAllMessages(),
+                  )
+                : null,
+            actions: [
+              _AppBarButtonsBuilder(
+                isFiltered: true,
+                chatId: chatId,
+                selectedAmount: selectedAmount,
+              ),
+            ],
+            title: selectedAmount == 0 ? Text(chatCard.title) : null,
+          );
+  }
 }
 
 class _MessageTile extends StatelessWidget {
+  final Message message;
+
   const _MessageTile({
     Key? key,
     required this.message,
   }) : super(key: key);
-
-  final Message message;
 
   @override
   Widget build(BuildContext context) {
@@ -119,7 +137,7 @@ class _MessageTile extends StatelessWidget {
           margin: const EdgeInsets.all(8),
           constraints: const BoxConstraints(maxWidth: 300),
           decoration: BoxDecoration(
-            color: ThemeChanger.of(context).theme.primaryColorLight,
+            color: Theme.of(context).primaryColorLight,
             borderRadius: BorderRadius.circular(5),
           ),
           child: Row(
@@ -151,34 +169,28 @@ class _MessageTile extends StatelessWidget {
 }
 
 class _SubmitButton extends StatelessWidget {
+  final TextEditingController controller;
+  final int chatId;
+  final bool onEdit;
+
   const _SubmitButton({
     Key? key,
     required this.controller,
-    required this.chatTitle,
+    required this.chatId,
     required this.onEdit,
   }) : super(key: key);
-
-  final TextEditingController controller;
-  final String chatTitle;
-  final bool onEdit;
 
   @override
   Widget build(BuildContext context) {
     return IconButton(
       onPressed: () {
-        if (controller.text.isNotEmpty) {
-          if (onEdit) {
-            context
-                .read<MessageCubit>()
-                .editMessage(controller.text, chatTitle);
-            context.read<MessageCubit>().completeEditMessage(chatTitle);
-          } else {
-            context
-                .read<MessageCubit>()
-                .addMessage(newMessage: controller.text, chatTitle: chatTitle);
-          }
-          controller.clear();
-        }
+        context.read<MessageCubit>().addMessage(
+              Message(
+                text: controller.text,
+                chatId: chatId,
+              ),
+            );
+        controller.clear();
       },
       icon: const Icon(Icons.arrow_forward),
     );
@@ -186,14 +198,14 @@ class _SubmitButton extends StatelessWidget {
 }
 
 class _TextField extends StatefulWidget {
+  final List<Message> messages;
+  final int chatId;
+
   const _TextField({
     Key? key,
-    required this.chatTitle,
+    required this.chatId,
     required this.messages,
   }) : super(key: key);
-
-  final List<Message> messages;
-  final String chatTitle;
 
   @override
   State<_TextField> createState() => _TextFieldState();
@@ -205,7 +217,7 @@ class _TextFieldState extends State<_TextField> {
   @override
   void initState() {
     super.initState();
-    final int editableMessageIndex =
+    final editableMessageIndex =
         widget.messages.indexWhere((element) => element.onEdit);
     _controller = editableMessageIndex != -1
         ? TextEditingController(
@@ -222,10 +234,10 @@ class _TextFieldState extends State<_TextField> {
 
   @override
   Widget build(BuildContext context) {
-    final int editableMessageIndex =
+    final editableMessageIndex =
         widget.messages.indexWhere((element) => element.onEdit);
-    final bool onEdit = editableMessageIndex != -1 ? true : false;
-    final ThemeData theme = ThemeChanger.of(context).theme;
+    final onEdit = editableMessageIndex != -1 ? true : false;
+    final theme = ThemeChanger.of(context).theme;
     return Container(
       color: theme.brightness == Brightness.light
           ? theme.primaryColorLight
@@ -233,44 +245,30 @@ class _TextFieldState extends State<_TextField> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          const SizedBox(
+            width: 16,
+          ),
           Expanded(
             child: TextField(
+              onSubmitted: (text) {
+                context.read<MessageCubit>().addMessage(
+                      Message(
+                        text: text,
+                        chatId: widget.chatId,
+                      ),
+                    );
+                _controller.clear();
+              },
               controller: _controller,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
+                border: InputBorder.none,
                 hintText: 'Write your event',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15),
-                  borderSide: BorderSide(
-                    color: theme.brightness == Brightness.light
-                        ? theme.primaryColorLight
-                        : theme.primaryColorDark,
-                    width: 2.0,
-                  ),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15),
-                  borderSide: BorderSide(
-                    color: theme.brightness == Brightness.light
-                        ? theme.primaryColorLight
-                        : theme.primaryColorDark,
-                    width: 2.0,
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15),
-                  borderSide: BorderSide(
-                    color: theme.brightness == Brightness.light
-                        ? theme.primaryColorLight
-                        : theme.primaryColorDark,
-                    width: 2.0,
-                  ),
-                ),
               ),
             ),
           ),
           _SubmitButton(
             controller: _controller,
-            chatTitle: widget.chatTitle,
+            chatId: widget.chatId,
             onEdit: onEdit,
           ),
         ],
@@ -280,23 +278,23 @@ class _TextFieldState extends State<_TextField> {
 }
 
 class _MessagesBuilder extends StatelessWidget {
+  final int chatId;
+
   const _MessagesBuilder({
     Key? key,
-    required this.chatTitle,
+    required this.chatId,
   }) : super(key: key);
-
-  final String chatTitle;
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = ThemeChanger.of(context).theme;
+    final theme = Theme.of(context);
     return Expanded(
       child: Container(
         color: theme.brightness == Brightness.light
             ? theme.primaryColor
             : theme.primaryColorDark,
         child: BlocBuilder<MessageCubit, List<Message>>(
-          builder: (BuildContext context, state) {
+          builder: (context, state) {
             return ListView.builder(
               reverse: true,
               itemCount: state.length,
@@ -304,41 +302,22 @@ class _MessagesBuilder extends StatelessWidget {
                 return GestureDetector(
                   onLongPress: () {
                     context.read<MessageCubit>().selectMessage(
-                          state.indexOf(
-                            state.reversed.elementAt(index),
-                          ),
-                          chatTitle,
+                          state.reversed.elementAt(index),
                         );
-                    if (FilterChanger.of(context).stateWidget.isFiltered) {
-                      final String filter =
-                          FilterChanger.of(context).stateWidget.filter;
-                      context
-                          .read<MessageCubit>()
-                          .filterMessages(filter, chatTitle);
-                    }
                   },
                   child: DismissibleMessage(
                     message: state[index],
-                    onDismissed: (DismissDirection direction) {
+                    onDismissed: (direction) {
                       switch (direction) {
                         case DismissDirection.startToEnd:
-                          context.read<MessageCubit>().selectMessage(
-                                state.indexOf(state.reversed.elementAt(index)),
-                                chatTitle,
+                          context.read<MessageCubit>().startEditMessage(
+                                state.reversed.elementAt(index),
                               );
-                          context
-                              .read<MessageCubit>()
-                              .startEditMessage(chatTitle);
-                          //context.read<MessageCubit>().editMessage(state[index].text, chatTitle);
                           break;
                         case DismissDirection.endToStart:
-                          context.read<MessageCubit>().selectMessage(
-                            state.indexOf(state.reversed.elementAt(index)),
-                            chatTitle,
-                          );
-                          context
-                              .read<MessageCubit>()
-                              .deleteSelectedMessage(chatTitle);
+                          context.read<MessageCubit>().deleteMessage(
+                                state.reversed.elementAt(index),
+                              );
                           break;
                         default:
                           break;
@@ -359,23 +338,23 @@ class _MessagesBuilder extends StatelessWidget {
 }
 
 class _AppBarButtonsBuilder extends StatelessWidget {
-  const _AppBarButtonsBuilder({
-    Key? key,
-    required this.selectedAmount,
-    required this.chatTitle,
-    this.isFiltered = false,
-  }) : super(key: key);
-
-  final String chatTitle;
+  final int chatId;
   final int selectedAmount;
   final bool isFiltered;
 
+  const _AppBarButtonsBuilder({
+    Key? key,
+    required this.selectedAmount,
+    required this.chatId,
+    this.isFiltered = false,
+  }) : super(key: key);
+
   List<IconButton> _getAppBarButtons(BuildContext context, int selectedAmount) {
-    List<IconButton> appBarButtonList = [];
+    final appBarButtonList = <IconButton>[];
     if (selectedAmount == 0 && isFiltered) {
       appBarButtonList.add(
         IconButton(
-          onPressed: () => FilterChanger.of(context).stateWidget.filterOn(),
+          onPressed: () => context.read<FilterCubit>().setFilter(''),
           icon: const Icon(Icons.search),
         ),
       );
@@ -395,8 +374,8 @@ class _AppBarButtonsBuilder extends StatelessWidget {
             showDialog(
               context: context,
               builder: (c) => ShearingDialog(
-                chatTitle: chatTitle,
                 messageContext: context,
+                chatId: chatId,
               ),
             );
           },
@@ -406,7 +385,7 @@ class _AppBarButtonsBuilder extends StatelessWidget {
       appBarButtonList.add(
         IconButton(
           onPressed: () =>
-              context.read<MessageCubit>().deleteSelectedMessage(chatTitle),
+              context.read<MessageCubit>().deleteSelectedMessages(),
           icon: const Icon(Icons.delete),
         ),
       );
@@ -416,14 +395,14 @@ class _AppBarButtonsBuilder extends StatelessWidget {
         appBarButtonList.add(
           IconButton(
             onPressed: () =>
-                context.read<MessageCubit>().startEditMessage(chatTitle),
+                context.read<MessageCubit>().startEditSelectedMessage(),
             icon: const Icon(Icons.edit),
           ),
         );
       }
       appBarButtonList.add(
         IconButton(
-          onPressed: () => context.read<MessageCubit>().copyMessage(chatTitle),
+          onPressed: () => context.read<MessageCubit>().copyMessage(),
           icon: const Icon(Icons.copy),
         ),
       );
@@ -434,18 +413,21 @@ class _AppBarButtonsBuilder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      children: _getAppBarButtons(context, selectedAmount),
+      children: _getAppBarButtons(
+        context,
+        selectedAmount,
+      ),
     );
   }
 }
 
 class AppBarTextField extends StatefulWidget {
+  final int chatId;
+
   const AppBarTextField({
     Key? key,
-    required this.chatTitle,
+    required this.chatId,
   }) : super(key: key);
-
-  final String chatTitle;
 
   @override
   State<AppBarTextField> createState() => _AppBarTextFieldState();
@@ -457,6 +439,7 @@ class _AppBarTextFieldState extends State<AppBarTextField> {
   @override
   void initState() {
     _controller = TextEditingController();
+    _controller.text = context.read<FilterCubit>().state.filter;
     super.initState();
   }
 
@@ -465,35 +448,37 @@ class _AppBarTextFieldState extends State<AppBarTextField> {
     return TextField(
       controller: _controller,
       onChanged: (filter) {
-        context.read<MessageCubit>().filterMessages(filter, widget.chatTitle);
-        FilterChanger.of(context).stateWidget.filter = filter;
+        context.read<MessageCubit>().filterMessages(filter, widget.chatId);
+        context.read<FilterCubit>().setFilter(filter);
       },
     );
   }
 }
 
 class ShearingDialog extends StatefulWidget {
+  final BuildContext messageContext;
+  final int chatId;
+
   const ShearingDialog({
     Key? key,
-    required this.chatTitle,
     required this.messageContext,
+    required this.chatId,
   }) : super(key: key);
-
-  final String chatTitle;
-  final BuildContext messageContext;
 
   @override
   State<ShearingDialog> createState() => _ShearingDialogState();
 }
 
 class _ShearingDialogState extends State<ShearingDialog> {
-  String _radioValue = '';
+  int _radioValue = -1;
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      backgroundColor: Theme.of(context).primaryColorLight,
       title: const Text(
-          'Select the page you want to migrate the selected event(S) to!'),
+        'Select the page you want to migrate the selected event(S) to!',
+      ),
       content: SizedBox(
         width: 300,
         height: 300,
@@ -501,17 +486,14 @@ class _ShearingDialogState extends State<ShearingDialog> {
           builder: (context, state) {
             return ListView.builder(
               itemCount: state.length,
-              itemBuilder: (BuildContext context, int index) {
+              itemBuilder: (context, index) {
                 return Row(
                   children: [
                     Radio(
-                      value: state[index].title,
+                      value: state[index].id,
                       groupValue: _radioValue,
-                      onChanged: (value) {
-                        setState(() {
-                          _radioValue = value!;
-                        });
-                      },
+                      onChanged: (value) =>
+                          setState(() => _radioValue = value!),
                     ),
                     Text(state[index].title),
                   ],
@@ -523,16 +505,14 @@ class _ShearingDialogState extends State<ShearingDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: () => Navigator.pop(context),
           child: const Text('Cancel'),
         ),
         TextButton(
           onPressed: () {
             widget.messageContext
                 .read<MessageCubit>()
-                .migrateMessages(widget.chatTitle, _radioValue);
+                .migrateMessages(_radioValue, widget.chatId);
             Navigator.pop(context);
           },
           child: const Text('Confirm'),

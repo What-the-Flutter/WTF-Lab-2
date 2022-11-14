@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../chat/view/chat_page.dart';
-import '../../themes/theme_changer.dart';
-import '../cubit/home_cubit.dart';
-import '../home_entity/chat_card.dart';
+
+import '../models/home_cubit.dart';
+import '../themes/theme_changer.dart';
+import '../utils/chat_card.dart';
+import 'chat_view.dart';
 import 'new_chat_view.dart';
 
 class HomeView extends StatelessWidget {
@@ -13,13 +14,8 @@ class HomeView extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<HomeCubit, List<ChatCard>>(
       builder: (context, state) {
-        // state.forEach(
-        //   (element) {
-        //     MessageListPreferences.delete(element.title);
-        //   },
-        // );
         final isSelectedList = state.where((element) => element.isSelected);
-        final int selectedAmount = isSelectedList.length;
+        final selectedAmount = isSelectedList.length;
         return Scaffold(
           appBar: AppBar(
             leading: selectedAmount >= 1
@@ -38,7 +34,7 @@ class HomeView extends StatelessWidget {
           ),
           body: ListView.builder(
             itemCount: state.length,
-            itemBuilder: (BuildContext context, int index) {
+            itemBuilder: (context, index) {
               return _ChatCardBuilder(
                 chatCard: state[index],
                 index: index,
@@ -64,6 +60,10 @@ class HomeView extends StatelessWidget {
 }
 
 class _ChatCardBuilder extends StatelessWidget {
+  final int index;
+  final int selectedAmount;
+  final ChatCard chatCard;
+
   const _ChatCardBuilder({
     Key? key,
     required this.chatCard,
@@ -71,17 +71,11 @@ class _ChatCardBuilder extends StatelessWidget {
     required this.selectedAmount,
   }) : super(key: key);
 
-  final int index;
-  final int selectedAmount;
-  final ChatCard chatCard;
-
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = ThemeChanger.of(context).theme;
+    final theme = ThemeChanger.of(context).theme;
     return GestureDetector(
-      onLongPress: () {
-        context.read<HomeCubit>().selectChat(index);
-      },
+      onLongPress: () => context.read<HomeCubit>().selectChat(chatCard),
       child: Card(
         child: ListTile(
           leading: CircleAvatar(
@@ -96,7 +90,9 @@ class _ChatCardBuilder extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ChatPage(chatTitle: chatCard.title),
+                builder: (context) => ChatView(
+                  chatCard: chatCard,
+                ),
               ),
             );
           },
@@ -108,21 +104,19 @@ class _ChatCardBuilder extends StatelessWidget {
 }
 
 class _AppBarButtonsBuilder extends StatelessWidget {
+  final int selectedAmount;
+
   const _AppBarButtonsBuilder({
     Key? key,
     required this.selectedAmount,
   }) : super(key: key);
 
-  final int selectedAmount;
-
-  List<IconButton> _getAppBarButtons(BuildContext context, int selectedAmount) {
-    List<IconButton> appBarButtonList = [];
+ List<IconButton> _getAppBarButtons(BuildContext context, int selectedAmount) {
+    var appBarButtonList = <IconButton>[];
     if (selectedAmount == 0) {
       appBarButtonList.add(
         IconButton(
-          onPressed: () {
-            ThemeChanger.of(context).stateWidget.changeTheme();
-          },
+          onPressed: () => ThemeChanger.of(context).stateWidget.changeTheme(),
           icon: const Icon(Icons.emoji_objects_outlined),
         ),
       );

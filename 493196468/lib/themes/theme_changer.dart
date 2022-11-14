@@ -1,23 +1,38 @@
 import 'package:flutter/material.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import 'theme.dart';
 
-class StateChanger extends StatefulWidget {
+class ThemeStateChanger extends StatefulWidget {
   final Widget child;
 
-  const StateChanger({Key? key, required this.child}) : super(key: key);
+  const ThemeStateChanger({Key? key, required this.child}) : super(key: key);
 
   @override
-  State<StateChanger> createState() => _StateChangerState();
+  State<ThemeStateChanger> createState() => _ThemeStateChangerState();
 }
 
-class _StateChangerState extends State<StateChanger> {
+class _ThemeStateChangerState extends State<ThemeStateChanger> {
   ThemeData themeData = lightTheme;
-  void changeTheme(){
+  final themePreferences = ThemePreferences();
+
+  @override
+  void initState() {
+
+    themePreferences.getTheme().then(
+          (value) => {
+            setState(() => themeData = value),
+          },
+        );
+    super.initState();
+  }
+
+  void changeTheme() {
     setState(() {
-      themeData =  themeData == darkTheme ?  lightTheme : darkTheme;
+      themeData = themeData == darkTheme ? lightTheme : darkTheme;
+      themePreferences.saveTheme(themeData);
     });
   }
+
   @override
   Widget build(BuildContext context) {
     return ThemeChanger(
@@ -30,7 +45,7 @@ class _StateChangerState extends State<StateChanger> {
 
 class ThemeChanger extends InheritedWidget {
   final ThemeData theme;
-  final _StateChangerState stateWidget;
+  final _ThemeStateChangerState stateWidget;
 
   const ThemeChanger({
     super.key,
@@ -40,12 +55,27 @@ class ThemeChanger extends InheritedWidget {
   });
 
   static ThemeChanger of(BuildContext context) {
-    final result =
-        context.dependOnInheritedWidgetOfExactType<ThemeChanger>();
+    final result = context.dependOnInheritedWidgetOfExactType<ThemeChanger>();
     assert(result != null, 'No context');
     return result!;
   }
 
   @override
   bool updateShouldNotify(ThemeChanger oldWidget) => true;
+}
+
+class ThemePreferences {
+  static const themeMode = 'themeMode';
+
+  Future saveTheme(ThemeData themeData) async {
+    final preferences = await SharedPreferences.getInstance();
+    final stringThemeMode = themeData == lightTheme ? 'lightTheme' : 'darkTheme';
+    preferences.setString(themeMode, stringThemeMode);
+  }
+
+  Future<ThemeData> getTheme() async {
+    final preferences = await SharedPreferences.getInstance();
+    final theme = preferences.getString(themeMode);
+    return theme == 'lightTheme' ? lightTheme : darkTheme;
+  }
 }
