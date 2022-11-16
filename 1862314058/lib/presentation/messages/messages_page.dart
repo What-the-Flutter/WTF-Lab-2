@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../data/message.dart';
 
 class MessagesPage extends StatefulWidget {
-  const MessagesPage({Key? key}) : super(key: key);
+  final String item;
+  final int index;
+
+  const MessagesPage({super.key, required this.item, required this.index});
 
   @override
   State<MessagesPage> createState() => _MessagesPageState();
@@ -20,7 +24,15 @@ class _MessagesPageState extends State<MessagesPage> {
     });
   }
 
-  deleteMessage(int index) {
+  void editMessage(int index, Message messageModel) {
+    setState(() {
+      messagesList.insert(index, messageModel);
+    });
+  }
+
+  void copyMessage() {}
+
+  void deleteMessage(int index) {
     setState(() {
       messagesList.removeAt(index);
     });
@@ -29,9 +41,7 @@ class _MessagesPageState extends State<MessagesPage> {
   static final AppBar _defaultBar =
       AppBar(title: const Text('Chat'), centerTitle: true, actions: <Widget>[
     IconButton(
-      icon: const Icon(
-        Icons.search,
-      ),
+      icon: const Icon(Icons.search),
       onPressed: () {},
     ),
     IconButton(
@@ -49,7 +59,7 @@ class _MessagesPageState extends State<MessagesPage> {
       const Icon(Icons.copy),
       const Icon(Icons.bookmark_border),
       IconButton(
-        icon: Icon(Icons.delete),
+        icon: const Icon(Icons.delete),
         onPressed: () {},
       ),
     ],
@@ -67,7 +77,23 @@ class _MessagesPageState extends State<MessagesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _appBar,
+      appBar: AppBar(
+        title: const Text('1*'),
+        leading: const Icon(Icons.close),
+        actions: <Widget>[
+          const Icon(Icons.flag),
+          const Icon(Icons.edit),
+          const Icon(Icons.copy),
+          const Icon(Icons.bookmark_border),
+          IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: () {
+              deleteMessage(2);
+            },
+          ),
+        ],
+        backgroundColor: Colors.deepPurple,
+      ),
       body: Column(
         children: <Widget>[
           Expanded(
@@ -83,6 +109,13 @@ class _MessagesPageState extends State<MessagesPage> {
                         tileColor: Colors.grey,
                         title: Text(messagesList[index].textMessage),
                         subtitle: Text(messagesList[index].dateTime.toString()),
+                        onTap: () async {
+                          await Clipboard.setData(
+                            ClipboardData(
+                                text: messagesList[index].textMessage),
+                          );
+                          // copied successfully
+                        },
                       ),
                     ),
                   );

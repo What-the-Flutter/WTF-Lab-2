@@ -3,12 +3,16 @@ import 'package:flutter/material.dart';
 import '../../widgets/choose_icon_widget.dart';
 
 class AddPostPage extends StatefulWidget {
+  final Function(String) addPost;
+
+  const AddPostPage({super.key, required this.addPost});
+
   @override
   State<AddPostPage> createState() => _AddPostPageState();
 }
 
 class _AddPostPageState extends State<AddPostPage> {
-  String? title;
+  TextEditingController postTitle = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -27,9 +31,7 @@ class _AddPostPageState extends State<AddPostPage> {
                   height: 10,
                 ),
                 TextFormField(
-                  onChanged: (value) {
-                    title = value;
-                  },
+                  controller: postTitle,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     labelText: 'Name of the Page',
@@ -57,7 +59,16 @@ class _AddPostPageState extends State<AddPostPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.pop(context);
+          if (postTitle.text.isEmpty) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Error correct title'),
+              ),
+            );
+          } else {
+            widget.addPost(postTitle.text);
+            Navigator.pop(context);
+          }
         },
         backgroundColor: Colors.amber,
         child: const Icon(Icons.add),
