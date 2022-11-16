@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class TimelineAppBar extends StatelessWidget {
-  const TimelineAppBar({Key? key}) : super(key: key);
+class DefaultMessageAppBar extends StatelessWidget {
+  const DefaultMessageAppBar({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -10,14 +10,16 @@ class TimelineAppBar extends StatelessWidget {
         centerTitle: true,
         actions: <Widget>[
           IconButton(
-              icon: const Icon(
-                Icons.search,
-              ),
-              onPressed: () {}),
+            icon: const Icon(
+              Icons.search,
+            ),
+            onPressed: () {},
+          ),
           IconButton(
             icon: const Icon(Icons.bookmark_border),
             onPressed: () {},
           ),
         ]);
+    ;
   }
 }
