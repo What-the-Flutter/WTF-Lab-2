@@ -1,109 +1,110 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../data/post.dart';
 import '../../widgets/info_post_widget.dart';
 import '../bot/bot_page.dart';
+import '../messages/messages_cubit.dart';
+
 import '../messages/messages_page.dart';
 import 'add_post_page.dart';
+import 'home_state.dart';
 
 class HomePage extends StatefulWidget {
-  final List<String> postList = ['1', '2', '3'];
-
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  void addPost(String title) {
-    setState(() {
-      widget.postList.add(title);
-    });
-  }
+  final titleController = TextEditingController();
 
-  void deletePost(int index) {
-    setState(() {
-      widget.postList.removeAt(index);
-      Navigator.pop(context);
-    });
-  }
-
-  void pinPost(int index) {
-    setState(() {
-      if (index == 0) {
-        widget.postList.insert(3, widget.postList[index].toString());
-        widget.postList.removeAt(0);
-      } else {
-        widget.postList.insert(0, widget.postList[index].toString());
-        widget.postList.removeAt(index + 1);
-      }
-      Navigator.pop(context);
-    });
+  @override
+  void initState() {
+    super.initState();
+    BlocProvider.of<HomeCubit>(context).init();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 25),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                minWidth: double.infinity,
-                minHeight: 50,
-              ),
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const BotPage(),
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.smart_toy),
-                label: const Text('Questionnaire bot'),
-              ),
-            ),
-          ),
-          Expanded(
-            child: ListView.separated(
-                separatorBuilder: (context, index) => const Divider(),
-                itemCount: widget.postList.length,
-                itemBuilder: (context, index) {
-                  return GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
+      body: BlocBuilder<HomeCubit, HomeState>(
+        builder: (context, state) {
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 8.0, horizontal: 25),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    minWidth: double.infinity,
+                    minHeight: 50,
+                  ),
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (context) => MessagesPage(
-                            item: widget.postList[index],
-                            index: index,
-                          ),
+                          builder: (context) => const BotPage(),
                         ),
                       );
                     },
-                    onLongPress: () => _postBottomSheet(index),
-                    child: ListTile(
-                      leading: const Icon(Icons.book),
-                      title: Text(
-                        widget.postList[index].toString(),
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      subtitle: const Text('No events'),
-                    ),
-                  );
-                }),
-          ),
-        ],
+                    icon: const Icon(Icons.smart_toy),
+                    label: const Text('Questionnaire bot'),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: ListView.separated(
+                    separatorBuilder: (context, index) => const Divider(),
+                    itemCount: state.postList.length,
+                    itemBuilder: (context, index) {
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => MessagesPage(
+                                item: state.postList[index],
+                                index: index,
+                              ),
+                            ),
+                          );
+                        },
+                        onLongPress: (() => {
+                              showModalBottomSheet(
+                                  context: context,
+                                  builder: (context) {
+                                    return Container(
+                                      height: 280,
+                                      child: _buildPostBottomMenu(
+                                          state.postList[index], index),
+                                    );
+                                  })
+                            }),
+                        child: ListTile(
+                          leading: const Icon(Icons.book),
+                          title: Text(
+                            state.postList[index].title,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: const Text('No events'),
+                        ),
+                      );
+                    }),
+              ),
+            ],
+          );
+        },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => AddPostPage(
-                addPost: addPost,
+              builder: (_) => BlocProvider.value(
+                value: BlocProvider.of<HomeCubit>(context),
+                child: const AddPostPage(),
               ),
             ),
           );
@@ -115,18 +116,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  _postBottomSheet(int index) {
-    showModalBottomSheet(
-        context: context,
-        builder: (context) {
-          return Container(
-            height: 280,
-            child: _buildPostBottomMenu(index),
-          );
-        });
-  }
-
-  Column _buildPostBottomMenu(int index) {
+  Column _buildPostBottomMenu(Post postItem, int index) {
     return Column(
       children: <Widget>[
         ListTile(
@@ -135,7 +125,7 @@ class _HomePageState extends State<HomePage> {
             color: Colors.green,
           ),
           title: const Text('Info'),
-          onTap: () => showPostInfo(index),
+          onTap: () => _showPostInfo(postItem),
         ),
         ListTile(
           leading: const Icon(
@@ -143,7 +133,7 @@ class _HomePageState extends State<HomePage> {
             color: Colors.lightGreen,
           ),
           title: const Text('Pin/Unpin Page'),
-          onTap: () => pinPost(index),
+          onTap: () => context.read<HomeCubit>().pinPost(postItem, index),
         ),
         ListTile(
           leading: const Icon(
@@ -159,7 +149,7 @@ class _HomePageState extends State<HomePage> {
             color: Colors.blue,
           ),
           title: const Text('Edit Page'),
-          onTap: () => print('ok'),
+          onTap: () => context.read<HomeCubit>().editPost(postItem, index),
         ),
         ListTile(
           leading: const Icon(
@@ -167,22 +157,23 @@ class _HomePageState extends State<HomePage> {
             color: Colors.red,
           ),
           title: const Text('Delete Page'),
-          onTap: () => showDeletePost(index),
+          onTap: () => _showDeletePost(index),
         ),
       ],
     );
   }
 
-  showPostInfo(int index) {
+  void _showPostInfo(Post postItem) {
     showDialog(
       context: context,
       builder: (_) => InfoPost(
-          title: widget.postList[index].toString(),
-          postIcon: Icons.add_a_photo),
+        title: postItem.title,
+        postIcon: Icons.add_a_photo,
+      ),
     );
   }
 
-  showDeletePost(int index) {
+  void _showDeletePost(int index) {
     showModalBottomSheet(
         context: context,
         builder: (context) {
@@ -200,7 +191,7 @@ class _HomePageState extends State<HomePage> {
                   leading: const Icon(Icons.delete),
                   title: const Text('Delete'),
                   onTap: () {
-                    deletePost(index);
+                    context.read<HomeCubit>().deletePost(index);
                     Navigator.pop(context);
                   },
                 ),

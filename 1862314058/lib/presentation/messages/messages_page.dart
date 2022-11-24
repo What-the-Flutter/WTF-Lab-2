@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../data/message.dart';
+import '../../data/post.dart';
+import 'messages_cubit.dart';
+import 'messages_state.dart';
 
 class MessagesPage extends StatefulWidget {
-  final String item;
+  final Post item;
   final int index;
 
   const MessagesPage({super.key, required this.item, required this.index});
@@ -14,135 +17,119 @@ class MessagesPage extends StatefulWidget {
 }
 
 class _MessagesPageState extends State<MessagesPage> {
-  List<Message> messagesList = [];
-  String? message;
-  int currentIndex = 1;
+  final TextEditingController _messageController = TextEditingController();
+  bool _isSelected = true;
 
-  void addMessage(Message messageModel) {
-    setState(() {
-      messagesList.add(messageModel);
-    });
+  @override
+  void initState() {
+    super.initState();
+    BlocProvider.of<MessagesCubit>(context).init();
   }
 
-  void editMessage(int index, Message messageModel) {
+  void changeAppBar() {
     setState(() {
-      messagesList.insert(index, messageModel);
-    });
-  }
-
-  void copyMessage() {}
-
-  void deleteMessage(int index) {
-    setState(() {
-      messagesList.removeAt(index);
-    });
-  }
-
-  static final AppBar _defaultBar =
-      AppBar(title: const Text('Chat'), centerTitle: true, actions: <Widget>[
-    IconButton(
-      icon: const Icon(Icons.search),
-      onPressed: () {},
-    ),
-    IconButton(
-      icon: const Icon(Icons.bookmark_border),
-      onPressed: () {},
-    ),
-  ]);
-
-  static final AppBar _selectBar = AppBar(
-    title: const Text('1*'),
-    leading: const Icon(Icons.close),
-    actions: <Widget>[
-      const Icon(Icons.flag),
-      const Icon(Icons.edit),
-      const Icon(Icons.copy),
-      const Icon(Icons.bookmark_border),
-      IconButton(
-        icon: const Icon(Icons.delete),
-        onPressed: () {},
-      ),
-    ],
-    backgroundColor: Colors.deepPurple,
-  );
-
-  AppBar _appBar = _defaultBar;
-
-  changeAppBar() {
-    setState(() {
-      _appBar = _appBar == _defaultBar ? _selectBar : _defaultBar;
+      _isSelected = !_isSelected;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('1*'),
-        leading: const Icon(Icons.close),
-        actions: <Widget>[
-          const Icon(Icons.flag),
-          const Icon(Icons.edit),
-          const Icon(Icons.copy),
-          const Icon(Icons.bookmark_border),
-          IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: () {
-              deleteMessage(2);
-            },
+    return BlocBuilder<MessagesCubit, MessagesState>(
+      builder: (context, state) {
+        return Scaffold(
+          appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(56),
+            child: _isSelected ? _defaultBar() : _selectBar(2),
           ),
-        ],
-        backgroundColor: Colors.deepPurple,
-      ),
-      body: Column(
-        children: <Widget>[
-          Expanded(
-            child: ListView.builder(
-                reverse: true,
-                itemCount: messagesList.length,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 0, 100, 7),
-                    child: GestureDetector(
-                      onLongPress: changeAppBar,
-                      child: ListTile(
-                        tileColor: Colors.grey,
-                        title: Text(messagesList[index].textMessage),
-                        subtitle: Text(messagesList[index].dateTime.toString()),
-                        onTap: () async {
-                          await Clipboard.setData(
-                            ClipboardData(
-                                text: messagesList[index].textMessage),
-                          );
-                          // copied successfully
-                        },
-                      ),
-                    ),
-                  );
-                }),
-          ),
-          Row(
-            children: [
+          body: Column(
+            children: <Widget>[
               Expanded(
-                child: TextField(
-                  decoration: const InputDecoration(hintText: 'Enter event'),
-                  onChanged: (value) {
-                    message = value;
-                  },
-                ),
+                child: ListView.builder(
+                    reverse: true,
+                    itemCount: state.messageList.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 0, 100, 7),
+                        child: GestureDetector(
+                          onLongPress: changeAppBar,
+                          child: ListTile(
+                            tileColor: Colors.grey,
+                            title: Text(state.messageList[index].textMessage),
+                            subtitle: Text(
+                                state.messageList[index].dateTime.toString()),
+                          ),
+                        ),
+                      );
+                    }),
               ),
-              IconButton(
-                icon: const Icon(Icons.playlist_add_outlined),
-                onPressed: () {
-                  final newMessage =
-                      Message(textMessage: message!, dateTime: DateTime.now());
-                  addMessage(newMessage);
-                },
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _messageController,
+                      decoration:
+                          const InputDecoration(hintText: 'Enter event'),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.send),
+                    onPressed: () {
+                      final newMessage = Message(
+                          textMessage: _messageController.text,
+                          dateTime: DateTime.now());
+                      context.read<MessagesCubit>().addMessage(newMessage);
+                    },
+                  ),
+                ],
               ),
             ],
           ),
-        ],
+        );
+      },
+    );
+  }
+
+  AppBar _defaultBar() {
+    return AppBar(
+      title: const Text('Chat'),
+      centerTitle: true,
+      actions: <Widget>[
+        IconButton(
+          onPressed: () {},
+          icon: const Icon(Icons.search),
+        ),
+        IconButton(
+          onPressed: () {},
+          icon: const Icon(Icons.bookmark_border),
+        ),
+      ],
+    );
+  }
+
+  AppBar _selectBar(int index) {
+    return AppBar(
+      title: const Text('1*'),
+      leading: IconButton(
+        icon: const Icon(Icons.close),
+        onPressed: changeAppBar,
       ),
+      actions: <Widget>[
+        const Icon(Icons.flag),
+        IconButton(
+          icon: const Icon(Icons.edit),
+          onPressed: () {},
+        ),
+        IconButton(
+          icon: const Icon(Icons.copy),
+          onPressed: () {},
+        ),
+        const Icon(Icons.bookmark_border),
+        IconButton(
+          icon: const Icon(Icons.delete),
+          onPressed: () => context.read<MessagesCubit>().deleteMessage(index),
+        ),
+      ],
+      backgroundColor: Colors.deepPurple,
     );
   }
 }

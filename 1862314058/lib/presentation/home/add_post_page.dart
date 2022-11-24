@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../data/choice_icon.dart';
+import '../../data/post.dart';
 import '../../widgets/choose_icon_widget.dart';
+import 'home_state.dart';
 
 class AddPostPage extends StatefulWidget {
-  final Function(String) addPost;
+  final Post? postItem;
 
-  const AddPostPage({super.key, required this.addPost});
+  const AddPostPage({super.key, this.postItem});
 
   @override
   State<AddPostPage> createState() => _AddPostPageState();
 }
 
 class _AddPostPageState extends State<AddPostPage> {
-  TextEditingController postTitle = TextEditingController();
+  final TextEditingController _postTitle = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +35,7 @@ class _AddPostPageState extends State<AddPostPage> {
                   height: 10,
                 ),
                 TextFormField(
-                  controller: postTitle,
+                  controller: _postTitle,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     labelText: 'Name of the Page',
@@ -57,64 +61,27 @@ class _AddPostPageState extends State<AddPostPage> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          if (postTitle.text.isEmpty) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Error correct title'),
-              ),
-            );
-          } else {
-            widget.addPost(postTitle.text);
-            Navigator.pop(context);
-          }
-        },
-        backgroundColor: Colors.amber,
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton:
+          BlocBuilder<HomeCubit, HomeState>(builder: (context, state) {
+        return FloatingActionButton(
+          onPressed: () {
+            if (_postTitle.text.isEmpty) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Error correct title'),
+                ),
+              );
+            } else {
+              var newPost = Post(title: _postTitle.text);
+              context.read<HomeCubit>().addPost(newPost);
+              _postTitle.clear();
+              Navigator.pop(context);
+            }
+          },
+          backgroundColor: Colors.amber,
+          child: const Icon(Icons.add),
+        );
+      }),
     );
   }
 }
-
-class ChoiceIcon {
-  final IconData icon;
-
-  const ChoiceIcon({required this.icon});
-}
-
-const List<ChoiceIcon> choices = [
-  ChoiceIcon(icon: Icons.text_fields),
-  ChoiceIcon(icon: Icons.directions_walk),
-  ChoiceIcon(icon: Icons.smoke_free),
-  ChoiceIcon(icon: Icons.no_meals_outlined),
-  ChoiceIcon(icon: Icons.directions_car),
-  ChoiceIcon(icon: Icons.directions_bike),
-  ChoiceIcon(icon: Icons.directions_walk),
-  ChoiceIcon(icon: Icons.drafts),
-  ChoiceIcon(icon: Icons.dvr),
-  ChoiceIcon(icon: Icons.museum_outlined),
-  ChoiceIcon(icon: Icons.music_note_outlined),
-  ChoiceIcon(icon: Icons.copyright),
-  ChoiceIcon(icon: Icons.monetization_on),
-  ChoiceIcon(icon: Icons.directions_walk),
-  ChoiceIcon(icon: Icons.smoke_free),
-  ChoiceIcon(icon: Icons.no_meals_outlined),
-  ChoiceIcon(icon: Icons.directions_car),
-  ChoiceIcon(icon: Icons.directions_bike),
-  ChoiceIcon(icon: Icons.directions_walk),
-  ChoiceIcon(icon: Icons.drafts),
-  ChoiceIcon(icon: Icons.dvr),
-  ChoiceIcon(icon: Icons.museum_outlined),
-  ChoiceIcon(icon: Icons.music_note_outlined),
-  ChoiceIcon(icon: Icons.copyright),
-  ChoiceIcon(icon: Icons.text_fields),
-  ChoiceIcon(icon: Icons.directions_walk),
-  ChoiceIcon(icon: Icons.smoke_free),
-  ChoiceIcon(icon: Icons.no_meals_outlined),
-  ChoiceIcon(icon: Icons.drafts),
-  ChoiceIcon(icon: Icons.dvr),
-  ChoiceIcon(icon: Icons.museum_outlined),
-  ChoiceIcon(icon: Icons.music_note_outlined),
-  ChoiceIcon(icon: Icons.copyright),
-];

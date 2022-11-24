@@ -12,9 +12,9 @@ import '../timeline/timeline_app_bar.dart';
 import '../timeline/timeline_page.dart';
 
 class AppPage extends StatefulWidget {
-  const AppPage({Key? key, required this.title}) : super(key: key);
-
   final String title;
+
+  const AppPage({Key? key, required this.title}) : super(key: key);
 
   @override
   State<AppPage> createState() => _AppPageState();
