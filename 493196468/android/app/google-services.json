@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "48159016032",
+    "project_id": "chat-diary-a42e7",
+    "storage_bucket": "chat-diary-a42e7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:48159016032:android:1fc599e81b964a15c52f05",
+        "android_client_info": {
+          "package_name": "com.example.diary"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "48159016032-i0rtrep2blqege4qj4dmpv035o1v7cpa.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBkBe9kdVIwOZtEXtzjuA5wx0YRYnIiHHQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "48159016032-i0rtrep2blqege4qj4dmpv035o1v7cpa.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

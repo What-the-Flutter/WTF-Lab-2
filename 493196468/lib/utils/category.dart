@@ -1,43 +1,37 @@
-import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
-class ChatCard extends Equatable {
-  final String? id;
+class Category {
+  final int? id;
   final Icon icon;
   final String title;
-  final String subtitle;
   final bool isSelected;
 
-  const ChatCard({
+  const Category({
     this.id,
     required this.icon,
     required this.title,
     this.isSelected = false,
-    this.subtitle = 'No Events. Click to create one',
   });
 
-  ChatCard copyWith({
-    String? id,
+  Category copyWith({
+    int? id,
     Icon? icon,
     String? title,
-    String? subtitle,
     bool? isSelected,
   }) {
-    return ChatCard(
+    return Category(
       id: id ?? this.id,
       icon: icon ?? this.icon,
       title: title ?? this.title,
-      subtitle: subtitle ?? this.subtitle,
       isSelected: isSelected ?? this.isSelected,
     );
   }
 
-  factory ChatCard.fromJson(Map<String, dynamic> json) {
-    return ChatCard(
-      id: json['chat_id'],
-      icon: Icon(IconData(int.parse(json['icon']), fontFamily: 'MaterialIcons')),
+  factory Category.fromJson(Map<String, dynamic> json) {
+    return Category(
+      id: json['category_id'],
+      icon: Icon(IconData(json['icon'], fontFamily: 'MaterialIcons')),
       title: json['title'],
-      subtitle: json['subtitle'],
       isSelected: json['is_selected'] == 0 ? false : true,
     );
   }
@@ -47,7 +41,6 @@ class ChatCard extends Equatable {
       'chat_id': id,
       'icon': icon.icon?.codePoint.toString(),
       'title': title,
-      'subtitle': subtitle,
       'is_selected': isSelected == false ? 0 : 1,
     };
   }
@@ -57,7 +50,4 @@ class ChatCard extends Equatable {
   String toString() {
     return '$title ${icon.icon!.codePoint.toString()}';
   }
-
-  @override
-  List<Object?> get props => [id, icon, title, subtitle, isSelected];
 }
