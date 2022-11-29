@@ -1,37 +1,45 @@
 import 'package:equatable/equatable.dart';
 
 class Message extends Equatable {
-  final int? id;
+  final String? id;
   final String text;
+  final String? pictureURL;
   final DateTime sentTime;
   final bool isSelected;
   final bool onEdit;
-  final int? chatId;
+  final String? chatId;
+  final int? categoryId;
 
   Message({
     this.id,
     required this.text,
     sentTime,
+    this.pictureURL,
     this.isSelected = false,
     this.onEdit = false,
     this.chatId,
+    this.categoryId,
   }) : sentTime = sentTime ?? DateTime.now();
 
   Message copyWith({
-    int? id,
+    String? id,
     String? text,
+    String? pictureURL,
     DateTime? sentTime,
     bool? isSelected,
     bool? onEdit,
-    int? chatId,
+    String? chatId,
+    int? categoryId,
   }) {
     return Message(
       id: id ?? this.id,
       text: text ?? this.text,
+      pictureURL: pictureURL ?? this.pictureURL,
       sentTime: sentTime ?? this.sentTime,
       isSelected: isSelected ?? this.isSelected,
       onEdit: onEdit ?? this.onEdit,
       chatId: chatId ?? this.chatId,
+      categoryId: categoryId ?? this.categoryId,
     );
   }
 
@@ -39,29 +47,34 @@ class Message extends Equatable {
     return Message(
       id: json['message_id'],
       text: json['text'],
+      pictureURL: json['pictureURL'],
       sentTime: DateTime.parse(json['sent_time']),
       isSelected: json['is_selected'] == 0 ? false : true,
       onEdit: json['on_edit'] == 0 ? false : true,
       chatId: json['FK_chat_table'],
+      categoryId: json['FK_category_table'],
     );
   }
 
-  Map<String,dynamic> toJson(){
+  Map<String, dynamic> toJson() {
     return {
       'message_id': id,
       'text': text,
+      'pictureURL': pictureURL,
       'sent_time': sentTime.toString(),
       'is_selected': isSelected == false ? 0 : 1,
       'on_edit': onEdit == false ? 0 : 1,
       'FK_chat_table': chatId,
+      'FK_category_table': categoryId,
     };
   }
 
   @override
   String toString() {
-    return onEdit.toString();
+    return pictureURL.toString();
   }
 
   @override
-  List<Object?> get props => [id, text, sentTime, isSelected, onEdit, chatId];
+  List<Object?> get props =>
+      [id, text, sentTime, isSelected, onEdit, chatId, categoryId];
 }

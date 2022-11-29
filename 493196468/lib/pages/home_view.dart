@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../models/home_cubit.dart';
-import '../themes/theme_changer.dart';
+import '../models/theme_cubit.dart';
 import '../utils/chat_card.dart';
 import 'chat_view.dart';
 import 'new_chat_view.dart';
@@ -12,19 +12,15 @@ class HomeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<HomeCubit, List<ChatCard>>(
+    return BlocBuilder<HomeCubit, ChatsState>(
       builder: (context, state) {
-        final isSelectedList = state.where((element) => element.isSelected);
+        final isSelectedList =
+            state.chatCards.where((element) => element.isSelected);
         final selectedAmount = isSelectedList.length;
         return Scaffold(
           appBar: AppBar(
-            leading: selectedAmount >= 1
-                ? IconButton(
-                    icon: const Icon(Icons.cancel_outlined),
-                    onPressed: () =>
-                        context.read<HomeCubit>().unselectAllChats(),
-                  )
-                : null,
+            leading:
+                selectedAmount >= 1 ? cancelSelectionButton(context) : null,
             actions: [
               _AppBarButtonsBuilder(
                 selectedAmount: selectedAmount,
@@ -33,10 +29,10 @@ class HomeView extends StatelessWidget {
             title: const Text('Home'),
           ),
           body: ListView.builder(
-            itemCount: state.length,
+            itemCount: state.chatCards.length,
             itemBuilder: (context, index) {
               return _ChatCardBuilder(
-                chatCard: state[index],
+                chatCard: state.chatCards[index],
                 index: index,
                 selectedAmount: selectedAmount,
               );
@@ -57,6 +53,13 @@ class HomeView extends StatelessWidget {
       },
     );
   }
+
+  IconButton cancelSelectionButton(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.cancel_outlined),
+      onPressed: () => context.read<HomeCubit>().unselectAllChats(),
+    );
+  }
 }
 
 class _ChatCardBuilder extends StatelessWidget {
@@ -73,7 +76,7 @@ class _ChatCardBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = ThemeChanger.of(context).theme;
+    final theme = Theme.of(context);
     return GestureDetector(
       onLongPress: () => context.read<HomeCubit>().selectChat(chatCard),
       child: Card(
@@ -111,12 +114,12 @@ class _AppBarButtonsBuilder extends StatelessWidget {
     required this.selectedAmount,
   }) : super(key: key);
 
- List<IconButton> _getAppBarButtons(BuildContext context, int selectedAmount) {
-    var appBarButtonList = <IconButton>[];
+  List<IconButton> _getAppBarButtons(BuildContext context, int selectedAmount) {
+    final appBarButtonList = <IconButton>[];
     if (selectedAmount == 0) {
       appBarButtonList.add(
         IconButton(
-          onPressed: () => ThemeChanger.of(context).stateWidget.changeTheme(),
+          onPressed: () => context.read<ThemeCubit>().changeTheme(),
           icon: const Icon(Icons.emoji_objects_outlined),
         ),
       );
