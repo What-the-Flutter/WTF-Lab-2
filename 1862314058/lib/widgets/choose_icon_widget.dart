@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../presentation/home/add_post_page.dart';
+import '../data/choice_icon.dart';
 
 class ChooseIcon extends StatelessWidget {
   final ChoiceIcon choiceIcon;
