@@ -3,11 +3,10 @@ import 'package:flutter/material.dart';
 class InfoPost extends StatelessWidget {
   final String title;
   final IconData postIcon;
-
-  // final DateTime postCreated;
+  final String postCreated;
   // final DateTime postLatestEvent;
 
-  const InfoPost({super.key, required this.title, required this.postIcon});
+  const InfoPost({super.key, required this.title, required this.postIcon, required this.postCreated});
 
   @override
   Widget build(BuildContext context) {
@@ -35,9 +34,9 @@ class InfoPost extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          const ListTile(
-            title: Text('Created'),
-            subtitle: Text('30/11/22'),
+          ListTile(
+            title: const Text('Created'),
+            subtitle: Text(postCreated),
           ),
           const SizedBox(
             height: 30,

@@ -1,4 +1,4 @@
-import '../../data/message.dart';
+import '../../data/models/message.dart';
 
 class MessagesState {
   final List<Message> messageList;
