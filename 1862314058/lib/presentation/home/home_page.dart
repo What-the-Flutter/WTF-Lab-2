@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../data/post.dart';
+import '../../data/models/post.dart';
+import '../../data/provider_db.dart';
 import '../../widgets/info_post_widget.dart';
 import '../bot/bot_page.dart';
-import '../messages/messages_cubit.dart';
 
 import '../messages/messages_page.dart';
 import 'add_post_page.dart';
@@ -22,6 +22,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     BlocProvider.of<HomeCubit>(context).init();
+    DBProvider.instance.getAllPosts();
   }
 
   @override
@@ -83,7 +84,9 @@ class _HomePageState extends State<HomePage> {
                                   })
                             }),
                         child: ListTile(
-                          leading: const Icon(Icons.book),
+                          //leading: state.postList[index].icon,
+                          trailing: Text(
+                              state.postList[index].createPostTime.toString()),
                           title: Text(
                             state.postList[index].title,
                             style: const TextStyle(fontWeight: FontWeight.bold),
@@ -104,7 +107,9 @@ class _HomePageState extends State<HomePage> {
             MaterialPageRoute(
               builder: (_) => BlocProvider.value(
                 value: BlocProvider.of<HomeCubit>(context),
-                child: const AddPostPage(),
+                child: const AddPostPage(
+                  isEditMode: false,
+                ),
               ),
             ),
           );
@@ -149,7 +154,15 @@ class _HomePageState extends State<HomePage> {
             color: Colors.blue,
           ),
           title: const Text('Edit Page'),
-          onTap: () => context.read<HomeCubit>().editPost(postItem, index),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => AddPostPage(
+                    postItem: postItem, isEditMode: true, index: index),
+              ),
+            );
+          },
         ),
         ListTile(
           leading: const Icon(
@@ -169,6 +182,7 @@ class _HomePageState extends State<HomePage> {
       builder: (_) => InfoPost(
         title: postItem.title,
         postIcon: Icons.add_a_photo,
+        postCreated: postItem.createPostTime,
       ),
     );
   }

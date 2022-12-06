@@ -3,33 +3,41 @@ part of 'home_state.dart';
 class HomeCubit extends Cubit<HomeState> {
   HomeCubit() : super(HomeState());
 
-  final List<Post> _postList = [Post(title: 'Journal'), Post(title: 'Travel')];
+  void init() async {
+    emit(state.copyWith(postList: await DBProvider.instance.getAllPosts()));
+  }
 
-  void init() => emit(state.copyWith(postList: _postList));
-
-  void addPost(Post post) {
-    state.postList.add(post);
-    emit(state.copyWith(postList: state.postList));
+  void addPost(Post post) async {
+    final newPost = await DBProvider.instance.addPost(post);
+    final listP = state.postList;
+    listP.add(newPost);
+    emit(state.copyWith(postList: listP));
   }
 
   void editPost(Post postItem, int index) {
-    state.postList[index] = postItem;
-    emit(state.copyWith(postList: state.postList));
+    final listP = state.postList;
+    DBProvider.instance.editPost(listP[index]);
+    listP[index] = postItem;
+    emit(state.copyWith(postList: listP));
   }
 
   void deletePost(int index) {
-    state.postList.removeAt(index);
-    emit(state.copyWith(postList: state.postList));
+    final listP = state.postList;
+
+    DBProvider.instance.deletePost(listP[index]);
+    listP.removeAt(index);
+    emit(state.copyWith(postList: listP));
   }
 
   void pinPost(Post postItem, int index) {
+    final listP = state.postList;
     if (index == 0) {
-      state.postList.insert(3, state.postList[index]);
-      state.postList.removeAt(0);
+      listP.insert(3, listP[index]);
+      listP.removeAt(0);
     } else {
-      state.postList.insert(0, state.postList[index]);
-      state.postList.removeAt(index + 1);
+      listP.insert(0, listP[index]);
+      listP.removeAt(index + 1);
     }
-    emit(state.copyWith(postList: state.postList));
+    emit(state.copyWith(postList: listP));
   }
 }

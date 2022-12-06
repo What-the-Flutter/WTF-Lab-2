@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 
 import '../../data/choice_icon.dart';
-import '../../data/post.dart';
+import '../../data/models/post.dart';
 import '../../widgets/choose_icon_widget.dart';
 import 'home_state.dart';
 
 class AddPostPage extends StatefulWidget {
   final Post? postItem;
+  final bool isEditMode;
+  final int? index;
 
-  const AddPostPage({super.key, this.postItem});
+  const AddPostPage(
+      {super.key, this.postItem, required this.isEditMode, this.index});
 
   @override
   State<AddPostPage> createState() => _AddPostPageState();
@@ -17,6 +21,15 @@ class AddPostPage extends StatefulWidget {
 
 class _AddPostPageState extends State<AddPostPage> {
   final TextEditingController _postTitle = TextEditingController();
+  GlobalKey<FormState> globalKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.isEditMode) {
+      _postTitle.text = widget.postItem!.title;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,14 +40,15 @@ class _AddPostPageState extends State<AddPostPage> {
           children: [
             Column(
               children: [
-                const Text(
-                  'Create a new Page',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+                Text(
+                  widget.isEditMode ? 'Edit Page' : 'Create a new Page',
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 24),
                 ),
                 const SizedBox(
                   height: 10,
                 ),
-                TextFormField(
+                TextField(
                   controller: _postTitle,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
@@ -61,27 +75,35 @@ class _AddPostPageState extends State<AddPostPage> {
           ],
         ),
       ),
-      floatingActionButton:
-          BlocBuilder<HomeCubit, HomeState>(builder: (context, state) {
-        return FloatingActionButton(
-          onPressed: () {
-            if (_postTitle.text.isEmpty) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Error correct title'),
-                ),
-              );
-            } else {
-              var newPost = Post(title: _postTitle.text);
-              context.read<HomeCubit>().addPost(newPost);
-              _postTitle.clear();
-              Navigator.pop(context);
-            }
-          },
-          backgroundColor: Colors.amber,
-          child: const Icon(Icons.add),
-        );
-      }),
+      floatingActionButton: BlocBuilder<HomeCubit, HomeState>(
+        builder: (context, state) {
+          return FloatingActionButton(
+            onPressed: widget.isEditMode ? updateData : submitData,
+            backgroundColor: Colors.amber,
+            child: const Icon(Icons.add),
+          );
+        },
+      ),
     );
+  }
+
+  void updateData() {
+    var newPost = Post(
+        title: _postTitle.text,
+        //icon: const Icon(Icons.ac_unit),
+        createPostTime: DateFormat.yMd().format(DateTime.now()).toString());
+    context.read<HomeCubit>().editPost(newPost, widget.index!);
+    Navigator.pop(context);
+    Navigator.pop(context);
+  }
+
+  void submitData() {
+    var newPost = Post(
+        title: _postTitle.text,
+        //icon: const Icon(Icons.ac_unit),
+        createPostTime: DateFormat.yMd().format(DateTime.now()).toString());
+    context.read<HomeCubit>().addPost(newPost);
+    _postTitle.clear();
+    Navigator.pop(context);
   }
 }

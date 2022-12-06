@@ -1,5 +1,8 @@
 import 'package:bloc/bloc.dart';
-import '../../data/post.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import '../../data/models/post.dart';
+import '../../data/provider_db.dart';
 
 part 'home_cubit.dart';
 
