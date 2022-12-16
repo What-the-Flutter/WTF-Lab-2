@@ -29,6 +29,7 @@ class DBProvider {
   Future _createDB(Database db, int version) async {
     final idType = 'INTEGER PRIMARY KEY AUTOINCREMENT';
     final textType = 'TEXT';
+    final boolType = 'BOOL';
 
     await db.execute('''
     CREATE TABLE $postTable (
@@ -36,13 +37,17 @@ class DBProvider {
     ${PostFields.title} $textType,
     ${PostFields.createPostTime} $textType
     )
+    
+    
     ''');
 
     await db.execute('''
     CREATE TABLE $messageTable (
     ${MessageFields.id} $idType,
     ${MessageFields.textMessage} $textType,
-    ${MessageFields.createMessageTime} $textType
+    ${MessageFields.createMessageTime} $textType,
+    ${MessageFields.typeMessage} $textType,
+    ${MessageFields.isSelectedMessage} $boolType
     )
     ''');
   }
@@ -50,7 +55,7 @@ class DBProvider {
   Future<Post> addPost(Post post) async {
     final db = await instance.database;
     final id = await db.insert(postTable, post.toJson());
-    return post.copy(id: id);
+    return post.copyWith(id: id);
   }
 
   Future<int> editPost(Post post) async {
@@ -90,13 +95,13 @@ class DBProvider {
   Future<Message> addMessage(Message message) async {
     final db = await instance.database;
     final id = await db.insert(messageTable, message.toJson());
-    return message.copy(id: id);
+    return message.copyWith(id: id);
   }
 
-  Future<void> deleteMessage(int id) async {
+  Future<void> deleteMessage(Message message) async {
     final db = await instance.database;
     await db.delete(messageTable,
-        where: '${MessageFields.id} = ?', whereArgs: [id]);
+        where: '${MessageFields.id} = ?', whereArgs: [message.id]);
   }
 
   Future<int> editMessage(Message message) async {

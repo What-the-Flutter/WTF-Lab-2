@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../data/models/post.dart';
-import '../../data/provider_db.dart';
+import '../../repository/anonymous_auth.dart';
 import '../../widgets/info_post_widget.dart';
 import '../bot/bot_page.dart';
 
@@ -22,7 +22,6 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     BlocProvider.of<HomeCubit>(context).init();
-    DBProvider.instance.getAllPosts();
   }
 
   @override
@@ -34,6 +33,7 @@ class _HomePageState extends State<HomePage> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              Text(AuthService().currentUser!.uid),
               Padding(
                 padding:
                     const EdgeInsets.symmetric(vertical: 8.0, horizontal: 25),
@@ -57,44 +57,48 @@ class _HomePageState extends State<HomePage> {
               ),
               Expanded(
                 child: ListView.separated(
-                    separatorBuilder: (context, index) => const Divider(),
-                    itemCount: state.postList.length,
-                    itemBuilder: (context, index) {
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => MessagesPage(
-                                item: state.postList[index],
-                                index: index,
-                              ),
+                  separatorBuilder: (context, index) => const Divider(),
+                  itemCount: state.postList.length,
+                  itemBuilder: (context, index) {
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MessagesPage(
+                              item: state.postList[index],
+                              index: index,
                             ),
-                          );
-                        },
-                        onLongPress: (() => {
-                              showModalBottomSheet(
-                                  context: context,
-                                  builder: (context) {
-                                    return Container(
-                                      height: 280,
-                                      child: _buildPostBottomMenu(
-                                          state.postList[index], index),
-                                    );
-                                  })
-                            }),
-                        child: ListTile(
-                          //leading: state.postList[index].icon,
-                          trailing: Text(
-                              state.postList[index].createPostTime.toString()),
-                          title: Text(
-                            state.postList[index].title,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          subtitle: const Text('No events'),
+                        );
+                      },
+                      onLongPress: (() => {
+                            showModalBottomSheet(
+                              context: context,
+                              builder: (context) {
+                                return Container(
+                                  height: 280,
+                                  child: _buildPostBottomMenu(
+                                      state.postList[index], index),
+                                );
+                              },
+                            )
+                          }),
+                      child: ListTile(
+                        //leading: state.postList[index].icon,
+                        trailing: Text(
+                            state.postList[index].createPostTime.toString()),
+                        title: Text(
+                          state.postList[index].title,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      );
-                    }),
+                        subtitle: const Text('No events'),
+                      ),
+                    );
+                  },
+                ),
               ),
             ],
           );
@@ -159,7 +163,10 @@ class _HomePageState extends State<HomePage> {
               context,
               MaterialPageRoute(
                 builder: (context) => AddPostPage(
-                    postItem: postItem, isEditMode: true, index: index),
+                  postItem: postItem,
+                  isEditMode: true,
+                  index: index,
+                ),
               ),
             );
           },
@@ -189,34 +196,37 @@ class _HomePageState extends State<HomePage> {
 
   void _showDeletePost(int index) {
     showModalBottomSheet(
-        context: context,
-        builder: (context) {
-          return SizedBox(
-            height: 200,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                const Text(
-                  'Delete Page?',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+      context: context,
+      builder: (context) {
+        return SizedBox(
+          height: 200,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              const Text(
+                'Delete Page?',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
                 ),
-                const Text('Are you sure you want to delete this page?'),
-                ListTile(
-                  leading: const Icon(Icons.delete),
-                  title: const Text('Delete'),
-                  onTap: () {
-                    context.read<HomeCubit>().deletePost(index);
-                    Navigator.pop(context);
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.cancel),
-                  title: const Text('Cancel'),
-                  onTap: () => Navigator.pop(context),
-                ),
-              ],
-            ),
-          );
-        });
+              ),
+              const Text('Are you sure you want to delete this page?'),
+              ListTile(
+                leading: const Icon(Icons.delete),
+                title: const Text('Delete'),
+                onTap: () {
+                  context.read<HomeCubit>().deletePost(index);
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.cancel),
+                title: const Text('Cancel'),
+                onTap: () => Navigator.pop(context),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }

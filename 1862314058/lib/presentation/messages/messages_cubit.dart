@@ -1,33 +1,83 @@
 import 'package:bloc/bloc.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
 import '../../data/models/message.dart';
+import '../../data/models/post.dart';
 import '../../data/provider_db.dart';
+import '../../repository/chat_repository.dart';
+import '../../repository/firebase_repository.dart';
 import 'messages_state.dart';
 
 class MessagesCubit extends Cubit<MessagesState> {
-  MessagesCubit() : super(MessagesState());
+  // final ChatRepository _chatRepository;
 
-  void init() async {
+  User? user;
+  late final FirebaseRepository _firebaseRepository =
+      FirebaseRepository(user: user);
+
+  MessagesCubit({required this.user}) : super(MessagesState(editMode: false));
+
+  void init(Post post) async {
     emit(state.copyWith(
-        messageList: await DBProvider.instance.getAllMessages()));
+        messageList: await _firebaseRepository.getAllMessages(post)));
   }
 
   void addMessage(Message message) async {
-    final newMessage = await DBProvider.instance.addMessage(message);
+    await _firebaseRepository.addMessage(message);
     final listM = state.messageList;
-    listM.add(newMessage);
+    listM.add(message);
     emit(state.copyWith(messageList: listM));
   }
 
-  void editMessage(Message messageItem, int index) {
+  void editMessage(Message messageItem, int index) async {
+    await _firebaseRepository.editMessage(messageItem);
     final listM = state.messageList;
     listM[index] = messageItem;
     emit(state.copyWith(messageList: listM));
   }
 
-  void deleteMessage(int index) {
+  void deleteMessage() async {
+    for (var i = 0; i < state.messageList.length; i++) {
+      if (state.messageList[i].isSelectedMessage) {
+        await _firebaseRepository.deleteMessage(state.messageList[i]);
+        state.messageList.removeAt(i);
+        i--;
+      }
+    }
+    emit(state.copyWith(messageList: state.messageList));
+  }
+
+  void changeEditMode() {
+    emit(
+      state.copyWith(
+        editMode: !state.editMode,
+      ),
+    );
+  }
+
+  void isSelectMessage(int index) {
     final listM = state.messageList;
-    listM.removeAt(index);
+    listM[index].isSelectedMessage = true;
     emit(state.copyWith(messageList: listM));
+  }
+
+  void cancelSelectMessage() {
+    for (var mess in state.messageList) {
+      if (mess.isSelectedMessage) {
+        mess.isSelectedMessage = false;
+      }
+    }
+    emit(state.copyWith(editMode: false));
+  }
+
+  void copyClipboardMessage() {
+    var selectMessage = '';
+    for (var mess in state.messageList) {
+      if (mess.isSelectedMessage) {
+        selectMessage += '${mess.textMessage}';
+      }
+    }
+    Clipboard.setData(ClipboardData(text: selectMessage));
+    cancelSelectMessage();
   }
 }

@@ -63,13 +63,16 @@ class _AddPostPageState extends State<AddPostPage> {
             Expanded(
               child: GridView.count(
                 crossAxisCount: 4,
-                children: List.generate(choices.length, (index) {
-                  return Center(
-                    child: ChooseIcon(
-                      choiceIcon: choices[index],
-                    ),
-                  );
-                }),
+                children: List.generate(
+                  choices.length,
+                  (index) {
+                    return Center(
+                      child: ChooseIcon(
+                        choiceIcon: choices[index],
+                      ),
+                    );
+                  },
+                ),
               ),
             )
           ],
@@ -88,20 +91,24 @@ class _AddPostPageState extends State<AddPostPage> {
   }
 
   void updateData() {
-    var newPost = Post(
-        title: _postTitle.text,
-        //icon: const Icon(Icons.ac_unit),
-        createPostTime: DateFormat.yMd().format(DateTime.now()).toString());
+    final newPost = Post(
+      id: DateTime.now().millisecondsSinceEpoch.toInt(),
+      title: _postTitle.text,
+      //icon: const Icon(Icons.ac_unit),
+      createPostTime: DateFormat.yMd().format(DateTime.now()).toString(),
+    );
     context.read<HomeCubit>().editPost(newPost, widget.index!);
     Navigator.pop(context);
     Navigator.pop(context);
   }
 
   void submitData() {
-    var newPost = Post(
-        title: _postTitle.text,
-        //icon: const Icon(Icons.ac_unit),
-        createPostTime: DateFormat.yMd().format(DateTime.now()).toString());
+    final newPost = Post(
+      id: DateTime.now().millisecondsSinceEpoch.toInt(),
+      title: _postTitle.text,
+      //icon: const Icon(Icons.ac_unit),
+      createPostTime: DateFormat.yMd().format(DateTime.now()).toString(),
+    );
     context.read<HomeCubit>().addPost(newPost);
     _postTitle.clear();
     Navigator.pop(context);

@@ -11,7 +11,9 @@ class HomeAppBar extends StatelessWidget {
       actions: <Widget>[
         IconButton(
           onPressed: () {},
-          icon: const Icon(Icons.water_drop_outlined),
+          icon: const Icon(
+            Icons.water_drop_outlined,
+          ),
         ),
       ],
     );

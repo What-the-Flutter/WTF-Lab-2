@@ -11,18 +11,19 @@ class PostFields {
 }
 
 class Post {
-  final int? id;
+  final int id;
   final String title;
 
-  //final Icon icon;
+  //final IconData icon;
   final String createPostTime;
-  List<Message> messages = [];
+
+  //final List<Message> messages = [];
 
   Post({
     required this.title,
     required this.createPostTime,
     //required this.icon,
-    this.id,
+    required this.id,
   });
 
   Map<String, dynamic> toJson() => {
@@ -39,7 +40,7 @@ class Post {
         createPostTime: json[PostFields.createPostTime] as String,
       );
 
-  Post copy({int? id, String? title, String? createPostTime}) => Post(
+  Post copyWith({int? id, String? title, String? createPostTime}) => Post(
         id: id ?? this.id,
         title: title ?? this.title,
         //icon: icon ?? this.icon,
