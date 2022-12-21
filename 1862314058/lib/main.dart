@@ -7,11 +7,8 @@ import 'repository/anonymous_auth.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  final currentUser = await AuthService().signInAnonymous();
 
   runApp(
-    ChatJournal(
-      user: currentUser,
-    ),
+    const ChatJournal(),
   );
 }

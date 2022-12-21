@@ -5,7 +5,10 @@ import '../data/choice_icon.dart';
 class ChooseIcon extends StatelessWidget {
   final ChoiceIcon choiceIcon;
 
-  const ChooseIcon({super.key, required this.choiceIcon});
+  const ChooseIcon({
+    super.key,
+    required this.choiceIcon,
+  });
 
   @override
   Widget build(BuildContext context) {

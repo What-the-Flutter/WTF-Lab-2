@@ -2,11 +2,8 @@ import '../../data/models/message.dart';
 
 class MessagesState {
   final List<Message> messageList;
-  int? index;
-  bool editMode;
-
-  // bool searchMode;
-  // bool favoriteMode;
+  final int? index;
+  final bool editMode;
 
   MessagesState({
     this.messageList = const [],

@@ -4,7 +4,7 @@ class MessageFields {
     textMessage,
     createMessageTime,
     typeMessage,
-    isSelectedMessage
+    isSelectedMessage,
   ];
   static const String id = '_id';
   static const String textMessage = 'textMessage';

@@ -8,7 +8,7 @@ part 'home_cubit.dart';
 
 class HomeState {
   final List<Post> postList;
-  int? index;
+  final int index;
 
   HomeState({
     this.postList = const [],

@@ -12,8 +12,12 @@ class AddPostPage extends StatefulWidget {
   final bool isEditMode;
   final int? index;
 
-  const AddPostPage(
-      {super.key, this.postItem, required this.isEditMode, this.index});
+  const AddPostPage({
+    super.key,
+    this.postItem,
+    required this.isEditMode,
+    this.index,
+  });
 
   @override
   State<AddPostPage> createState() => _AddPostPageState();
@@ -43,7 +47,9 @@ class _AddPostPageState extends State<AddPostPage> {
                 Text(
                   widget.isEditMode ? 'Edit Page' : 'Create a new Page',
                   style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 24),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 24,
+                  ),
                 ),
                 const SizedBox(
                   height: 10,
@@ -94,7 +100,6 @@ class _AddPostPageState extends State<AddPostPage> {
     final newPost = Post(
       id: DateTime.now().millisecondsSinceEpoch.toInt(),
       title: _postTitle.text,
-      //icon: const Icon(Icons.ac_unit),
       createPostTime: DateFormat.yMd().format(DateTime.now()).toString(),
     );
     context.read<HomeCubit>().editPost(newPost, widget.index!);
@@ -106,7 +111,6 @@ class _AddPostPageState extends State<AddPostPage> {
     final newPost = Post(
       id: DateTime.now().millisecondsSinceEpoch.toInt(),
       title: _postTitle.text,
-      //icon: const Icon(Icons.ac_unit),
       createPostTime: DateFormat.yMd().format(DateTime.now()).toString(),
     );
     context.read<HomeCubit>().addPost(newPost);

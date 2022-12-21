@@ -2,27 +2,26 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../repository/chat_repository.dart';
+import '../../repository/anonymous_auth.dart';
 import '../../theme/theme_constant.dart';
 import '../home/home_state.dart';
 import '../messages/messages_cubit.dart';
 import 'app_page.dart';
 
 class ChatJournal extends StatelessWidget {
-  final User? user;
-  const ChatJournal({Key? key, required this.user}) : super(key: key);
+  const ChatJournal({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    ///final chatRepository = ChatRepository();
+    final loginUser = AuthService().signInAnonymous();
 
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (context) => HomeCubit(user: user),
+          create: (context) => HomeCubit(user: AuthService().currentUser!),
         ),
         BlocProvider(
-          create: (context) => MessagesCubit(user: user),
+          create: (context) => MessagesCubit(user: AuthService().currentUser!),
         ),
       ],
       child: MaterialApp(

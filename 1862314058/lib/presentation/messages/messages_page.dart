@@ -14,7 +14,11 @@ class MessagesPage extends StatefulWidget {
   final Post item;
   final int index;
 
-  const MessagesPage({super.key, required this.item, required this.index});
+  const MessagesPage({
+    super.key,
+    required this.item,
+    required this.index,
+  });
 
   @override
   State<MessagesPage> createState() => _MessagesPageState();
@@ -40,11 +44,12 @@ class _MessagesPageState extends State<MessagesPage> {
     if (pickedFile != null) {
       imageFile = File(pickedFile.path);
     }
-    var newMess = Message(
-        id: DateTime.now().millisecondsSinceEpoch.toInt(),
-        textMessage: imageFile!.path,
-        createMessageTime: DateFormat.jm().format(DateTime.now()).toString(),
-        typeMessage: MessageType.image);
+    final newMess = Message(
+      id: DateTime.now().millisecondsSinceEpoch.toInt(),
+      textMessage: imageFile!.path,
+      createMessageTime: DateFormat.jm().format(DateTime.now()).toString(),
+      typeMessage: MessageType.image,
+    );
     context.read<MessagesCubit>().addMessage(newMess);
   }
 
@@ -56,7 +61,7 @@ class _MessagesPageState extends State<MessagesPage> {
     if (pickedFile != null) {
       imageFile = File(pickedFile.path);
     }
-    var newMess = Message(
+    final newMess = Message(
         id: DateTime.now().millisecondsSinceEpoch.toInt(),
         textMessage: imageFile!.path,
         createMessageTime: DateFormat.jm().format(DateTime.now()).toString(),
@@ -147,7 +152,8 @@ class _MessagesPageState extends State<MessagesPage> {
                                                 state.messageList[index]
                                                     .createMessageTime,
                                                 style: const TextStyle(
-                                                    color: Colors.grey),
+                                                  color: Colors.grey,
+                                                ),
                                               ),
                                             ],
                                           ),
@@ -178,8 +184,9 @@ class _MessagesPageState extends State<MessagesPage> {
                         }
                       },
                       controller: _messageController,
-                      decoration:
-                          const InputDecoration(hintText: 'Enter event...'),
+                      decoration: const InputDecoration(
+                        hintText: 'Enter event...',
+                      ),
                     ),
                   ),
                   IconButton(
@@ -191,12 +198,12 @@ class _MessagesPageState extends State<MessagesPage> {
                         openMediaDialog();
                       } else {
                         final newMessage = Message(
-                            id: DateTime.now().millisecondsSinceEpoch.toInt(),
-                            textMessage: _messageController.text,
-                            createMessageTime: DateFormat.jm()
-                                .format(DateTime.now())
-                                .toString(),
-                            typeMessage: MessageType.text);
+                          id: DateTime.now().millisecondsSinceEpoch.toInt(),
+                          textMessage: _messageController.text,
+                          createMessageTime:
+                              DateFormat.jm().format(DateTime.now()).toString(),
+                          typeMessage: MessageType.text,
+                        );
                         context.read<MessagesCubit>().addMessage(newMessage);
                       }
                     },

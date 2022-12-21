@@ -4,9 +4,13 @@ class InfoPost extends StatelessWidget {
   final String title;
   final IconData postIcon;
   final String postCreated;
-  // final DateTime postLatestEvent;
 
-  const InfoPost({super.key, required this.title, required this.postIcon, required this.postCreated});
+  const InfoPost({
+    super.key,
+    required this.title,
+    required this.postIcon,
+    required this.postCreated,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +30,9 @@ class InfoPost extends StatelessWidget {
           ),
           Text(
             title,
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ],
       ),

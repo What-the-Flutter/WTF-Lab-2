@@ -4,7 +4,10 @@ class MenuBar extends StatefulWidget {
   final int selectionIndex;
   final Function(int) onItemTapped;
 
-  MenuBar({required this.selectionIndex, required this.onItemTapped});
+  MenuBar({
+    required this.selectionIndex,
+    required this.onItemTapped,
+  });
 
   @override
   State<MenuBar> createState() => _MenuBarState();

@@ -35,8 +35,10 @@ class _HomePageState extends State<HomePage> {
             children: [
               Text(AuthService().currentUser!.uid),
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 8.0, horizontal: 25),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 8.0,
+                  horizontal: 25,
+                ),
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(
                     minWidth: double.infinity,
@@ -79,15 +81,17 @@ class _HomePageState extends State<HomePage> {
                                 return Container(
                                   height: 280,
                                   child: _buildPostBottomMenu(
-                                      state.postList[index], index),
+                                    state.postList[index],
+                                    index,
+                                  ),
                                 );
                               },
                             )
                           }),
                       child: ListTile(
-                        //leading: state.postList[index].icon,
                         trailing: Text(
-                            state.postList[index].createPostTime.toString()),
+                          state.postList[index].createPostTime.toString(),
+                        ),
                         title: Text(
                           state.postList[index].title,
                           style: const TextStyle(
@@ -142,7 +146,10 @@ class _HomePageState extends State<HomePage> {
             color: Colors.lightGreen,
           ),
           title: const Text('Pin/Unpin Page'),
-          onTap: () => context.read<HomeCubit>().pinPost(postItem, index),
+          onTap: () => context.read<HomeCubit>().pinPost(
+                postItem,
+                index,
+              ),
         ),
         ListTile(
           leading: const Icon(
@@ -209,7 +216,9 @@ class _HomePageState extends State<HomePage> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const Text('Are you sure you want to delete this page?'),
+              const Text(
+                'Are you sure you want to delete this page?',
+              ),
               ListTile(
                 leading: const Icon(Icons.delete),
                 title: const Text('Delete'),
