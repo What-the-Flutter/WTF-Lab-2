@@ -10,7 +10,9 @@ class FirebaseRepository {
   final FirebaseStorage _firebaseStorage = FirebaseStorage.instance;
   final User? user;
 
-  FirebaseRepository({required this.user});
+  FirebaseRepository({
+    required this.user,
+  });
 
   Future<List<Post>> getAllPosts() async {
     final posts = <Post>[];

@@ -4,7 +4,7 @@
    <application
         android:label="chat_app"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/launch_image">
         <activity
             android:name=".MainActivity"
             android:exported="true"

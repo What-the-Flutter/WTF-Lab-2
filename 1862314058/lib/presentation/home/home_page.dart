@@ -33,7 +33,9 @@ class _HomePageState extends State<HomePage> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(AuthService().currentUser!.uid),
+              Text(
+                AuthService().currentUser!.uid,
+              ),
               Padding(
                 padding: const EdgeInsets.symmetric(
                   vertical: 8.0,
@@ -52,8 +54,12 @@ class _HomePageState extends State<HomePage> {
                         ),
                       );
                     },
-                    icon: const Icon(Icons.smart_toy),
-                    label: const Text('Questionnaire bot'),
+                    icon: const Icon(
+                      Icons.smart_toy,
+                    ),
+                    label: Text(
+                      'Questionnaire bot',
+                    ),
                   ),
                 ),
               ),

@@ -81,7 +81,7 @@ class MessagesCubit extends Cubit<MessagesState> {
   }
 
   void copyClipboardMessage() {
-    var selectMessage = '';
+    String selectMessage = '';
     for (final mess in state.messageList) {
       if (mess.isSelectedMessage) {
         selectMessage += '${mess.textMessage}';

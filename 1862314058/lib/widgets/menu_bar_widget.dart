@@ -20,7 +20,7 @@ class _MenuBarState extends State<MenuBar> {
       type: BottomNavigationBarType.fixed,
       items: const <BottomNavigationBarItem>[
         BottomNavigationBarItem(
-          icon: Icon(Icons.home),
+          icon: Icon(Icons.home, ),
           label: 'Home',
         ),
         BottomNavigationBarItem(
@@ -37,7 +37,7 @@ class _MenuBarState extends State<MenuBar> {
         ),
       ],
       currentIndex: widget.selectionIndex,
-      selectedItemColor: Colors.green,
+      selectedItemColor: Theme.of(context).iconTheme.color,
       unselectedItemColor: Colors.blueGrey,
       onTap: widget.onItemTapped,
     );

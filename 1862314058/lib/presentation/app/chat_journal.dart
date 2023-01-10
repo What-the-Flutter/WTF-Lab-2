@@ -1,34 +1,59 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../repository/anonymous_auth.dart';
-import '../../theme/theme_constant.dart';
+import '../../theme/theme_state.dart';
 import '../home/home_state.dart';
 import '../messages/messages_cubit.dart';
+import '../settings/settings_state.dart';
 import 'app_page.dart';
 
 class ChatJournal extends StatelessWidget {
-  const ChatJournal({Key? key}) : super(key: key);
+  final User? curUser;
+  final SharedPreferences? sharPref;
+
+  const ChatJournal({
+    super.key,
+    this.curUser,
+    this.sharPref,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final loginUser = AuthService().signInAnonymous();
-
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (context) => HomeCubit(user: AuthService().currentUser!),
+          create: (context) => HomeCubit(
+            user: curUser,
+          ),
         ),
         BlocProvider(
-          create: (context) => MessagesCubit(user: AuthService().currentUser!),
+          create: (context) => MessagesCubit(
+            user: curUser,
+          ),
+        ),
+        BlocProvider(
+          create: (context) => ThemeCubit(
+            sharPref!,
+          ),
+        ),
+        BlocProvider(
+          create: (context) => SettingsCubit(
+            sharPref!,
+          ),
         ),
       ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        theme: AppThemes.lightTheme,
-        darkTheme: AppThemes.darkTheme,
-        home: const AppPage(title: 'Home'),
+      child: BlocBuilder<ThemeCubit, ThemeState>(
+        builder: (context, state) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: state.appThemes,
+            home: const AppPage(
+              title: 'Home',
+            ),
+          );
+        },
       ),
     );
   }
