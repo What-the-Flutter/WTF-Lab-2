@@ -9,6 +9,7 @@ class Message extends Equatable {
   final bool onEdit;
   final String? chatId;
   final int? categoryId;
+  final bool isBookmarked;
 
   Message({
     this.id,
@@ -19,7 +20,8 @@ class Message extends Equatable {
     this.onEdit = false,
     this.chatId,
     this.categoryId,
-  }) : sentTime = sentTime ?? DateTime.now();
+    this.isBookmarked = false,
+  })  : sentTime = sentTime ?? DateTime.now();
 
   Message copyWith({
     String? id,
@@ -30,6 +32,7 @@ class Message extends Equatable {
     bool? onEdit,
     String? chatId,
     int? categoryId,
+    bool? isBookmarked,
   }) {
     return Message(
       id: id ?? this.id,
@@ -40,6 +43,7 @@ class Message extends Equatable {
       onEdit: onEdit ?? this.onEdit,
       chatId: chatId ?? this.chatId,
       categoryId: categoryId ?? this.categoryId,
+      isBookmarked: isBookmarked ?? this.isBookmarked,
     );
   }
 
@@ -53,6 +57,7 @@ class Message extends Equatable {
       onEdit: json['on_edit'] == 0 ? false : true,
       chatId: json['FK_chat_table'],
       categoryId: json['FK_category_table'],
+      isBookmarked: json['is_bookmarked'] == 0 ? false : true,
     );
   }
 
@@ -66,6 +71,7 @@ class Message extends Equatable {
       'on_edit': onEdit == false ? 0 : 1,
       'FK_chat_table': chatId,
       'FK_category_table': categoryId,
+      'is_bookmarked': isBookmarked == false ? 0 : 1,
     };
   }
 
@@ -75,6 +81,14 @@ class Message extends Equatable {
   }
 
   @override
-  List<Object?> get props =>
-      [id, text, sentTime, isSelected, onEdit, chatId, categoryId];
+  List<Object?> get props => [
+        id,
+        text,
+        sentTime,
+        isSelected,
+        onEdit,
+        chatId,
+        categoryId,
+        isBookmarked
+      ];
 }

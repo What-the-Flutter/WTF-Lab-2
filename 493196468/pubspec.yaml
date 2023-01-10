@@ -26,6 +26,10 @@ dependencies:
   image_picker: ^0.8.6
   permission_handler: ^10.2.0
   cached_network_image: ^3.2.3
+  hashtagable: ^2.1.0
+  share_plus: ^6.3.0
+  animations: ^2.0.7
+  rive: ^0.10.0
 
 dev_dependencies:
   flutter_test:
@@ -36,4 +40,6 @@ dev_dependencies:
 flutter:
 
   uses-material-design: true
+  assets:
+    - assets/
 

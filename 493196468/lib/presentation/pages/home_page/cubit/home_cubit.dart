@@ -1,24 +1,42 @@
 import 'package:bloc/bloc.dart';
-import '../repo/firebase/chats_repository.dart';
-import '../utils/chat_card.dart';
+
+import '/utils/chat_card.dart';
+import '../../../../repo/firebase/chats_repository.dart';
+
+part 'home_state.dart';
 
 class HomeCubit extends Cubit<ChatsState> {
-  final ChatsRepository chatsRepository = ChatsRepository();
+  final ChatsRepository chatsRepository;
 
-  HomeCubit() : super(const ChatsState([]));
+  HomeCubit(this.chatsRepository) : super(const ChatsState([], 0)) {
+    _init();
+  }
 
-  void init() async => emit(ChatsState(await chatsRepository.getAllChats()));
+  void _init() async {
+    _updateStateFromRepo();
+    chatsRepository.listenForUpdates(onUpdate: _updateStateFromRepo);
+  }
 
-  void checkForUpdates() async =>
-      await chatsRepository.checkForUpdates(onUpdate: init);
+  void _updateStateFromRepo() async {
+    emit(
+      ChatsState(
+        await chatsRepository.getAllChats(),
+        0,
+      ),
+    );
+  }
 
-  void emitAllChats() => emit(state.copyWith(state.chatCards));
+  void emitAllChats() {
+    final chatCards = state.chatCards;
+    emit(state.copyWith(chatCards: chatCards));
+  }
 
   void addChat({required ChatCard newChatCard}) async {
     final id = await chatsRepository.addChat(newChatCard);
     var chats = state.chatCards;
     chats.add(newChatCard.copyWith(id: id));
-    emit(ChatsState(chats));
+    final newState = ChatsState(chats, state.selectedTabIndex);
+    emit(newState);
   }
 
   ChatCard getSelectedChat() =>
@@ -64,23 +82,8 @@ class HomeCubit extends Cubit<ChatsState> {
     }
     emitAllChats();
   }
-}
 
-class ChatsState {
-  final List<ChatCard> chatCards;
-
-  const ChatsState(this.chatCards);
-
-  ChatsState copyWith(
-    List<ChatCard>? chatCards,
-  ) {
-    return ChatsState(
-      chatCards ?? this.chatCards,
-    );
-  }
-
-  @override
-  String toString() {
-    return chatCards.toString();
+  void changeTabIndex(int selectedTabIndex) {
+    emit(state.copyWith(selectedTabIndex: selectedTabIndex));
   }
 }

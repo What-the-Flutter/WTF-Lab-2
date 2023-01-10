@@ -1,7 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/cupertino.dart';
 
-import '../utils/chat_card.dart';
+import '/utils/chat_card.dart';
 
 
 class NewChatCubit extends Cubit<ChatCard> {

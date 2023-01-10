@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../models/home_cubit.dart';
-import '../models/new_chat_cubit.dart';
-import '../utils/chat_card.dart';
+
+import '../../settings/cubit/settings_cubit/settings_cubit.dart';
+import '../../settings/theme.dart';
+import '/utils/chat_card.dart';
+import '../home_page/cubit/home_cubit.dart';
+import 'cubit/new_chat_cubit.dart';
 
 class NewChatView extends StatelessWidget {
   static const _icons = [
@@ -67,15 +70,17 @@ class NewChatView extends StatelessWidget {
                 ? const Icon(Icons.cancel_outlined)
                 : const Icon(Icons.add),
             onPressed: () {
-              onEdit
-                  ? context.read<HomeCubit>().editChat(state)
-                  : context.read<HomeCubit>().addChat(newChatCard: state);
-              context.read<NewChatCubit>().setChatCard(
-                    ChatCard(
-                      icon: _icons[0],
-                      title: '',
-                    ),
-                  );
+              if (state.title.isNotEmpty) {
+                onEdit
+                    ? context.read<HomeCubit>().editChat(state)
+                    : context.read<HomeCubit>().addChat(newChatCard: state);
+                context.read<NewChatCubit>().setChatCard(
+                      ChatCard(
+                        icon: _icons[0],
+                        title: '',
+                      ),
+                    );
+              }
               Navigator.pop(context);
             },
           ),
@@ -86,7 +91,10 @@ class NewChatView extends StatelessWidget {
                   margin: const EdgeInsets.symmetric(vertical: 30),
                   child: Text(
                     onEdit ? 'Edit Chat' : 'Create a new Chat',
-                    style: const TextStyle(fontSize: 20),
+                    style: getHeadLineText(
+                      context.read<SettingsCubit>().state.textSize,
+                      context,
+                    ),
                   ),
                 ),
                 _TitleTextField(
@@ -155,6 +163,10 @@ class _TitleTextField extends StatelessWidget {
       initialValue: onEdit ? editableChatCards.first.title : null,
       decoration: InputDecoration(
         hintText: 'Name',
+        hintStyle: getTitleText(
+          context.read<SettingsCubit>().state.textSize,
+          context,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
           borderSide: BorderSide(

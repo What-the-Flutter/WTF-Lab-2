@@ -1,72 +1,31 @@
 import 'dart:io';
-
-import 'package:firebase_database/firebase_database.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-
-import '../../../utils/message.dart';
+import '/utils/message.dart';
+import 'firebase_implementation.dart';
 
 class MessagesRepository {
-  final ref = FirebaseDatabase.instance.ref();
-  final storageRef = FirebaseStorage.instance.ref();
+  final FirebaseRepository _firebaseRepository;
 
-  Future checkForUpdates({required Function onUpdate}) async {
-    ref.child('messages').onValue.listen(
-          (event) => onUpdate(),
-        );
-  }
+  MessagesRepository(this._firebaseRepository);
 
-  Future<List<Message>> getAllMessages() async {
-    final snapshot = await ref.child('messages').get();
+  void listenForUpdates({required Function onUpdate}) =>
+      _firebaseRepository.listenForUpdates(onUpdate: onUpdate);
 
-    final messages = <Message>[];
-    if (snapshot.exists) {
-      for (final child in snapshot.children) {
-        messages.add(
-          Message.fromJson(
-            Map<String, dynamic>.from(child.value as Map<Object?, Object?>),
-          ),
-        );
-      }
-    } else {
-      print('Error with firebase');
-    }
-    return messages;
-  }
+  Future<List<Message>> getAllMessages() async =>
+      _firebaseRepository.getAllMessages();
 
-  String? addMessage(Message message) {
-    final newRef = ref.child('messages').push();
-    newRef.set(message.copyWith(id: newRef.key).toJson());
-    return newRef.key;
-  }
+  String? addMessage(Message message) =>
+      _firebaseRepository.addMessage(message);
 
-  void editMessage(Message message) async {
-    final snapshot = await ref.child('messages/${message.id}');
-    snapshot.update(message.toJson());
-  }
+  void editMessage(Message message) => _firebaseRepository.editMessage(message);
 
-  void deleteMessage(Message message) async {
-    final id = message.id;
-    if (id != null) {
-      final snapshot = await ref.child('messages/$id');
-      deletePicture(id);
-      snapshot.remove();
-    }
-  }
+  void deleteMessage(Message message) =>
+      _firebaseRepository.deleteMessage(message);
 
-  Future<String> uploadPicture(File file, String id) async {
-    final pictureRef = storageRef.child('images/$id.jpg');
-    await pictureRef.putFile(file);
-    return await storageRef.child('images/$id.jpg').getDownloadURL();
-  }
+  Future<String> uploadPicture(File file, String id) async =>
+      _firebaseRepository.uploadPicture(file, id);
 
-  void deletePicture(String id) async {
-    final pictureRef = storageRef.child('images/$id.jpg');
-    await pictureRef.delete();
-  }
+  void deletePicture(String id) => _firebaseRepository.deletePicture(id);
 
-  Future<String> editPicture(File file, String id) async {
-    final pictureRef = storageRef.child('images/$id.jpg');
-    await pictureRef.putFile(file);
-    return await storageRef.child('images/$id.jpg').getDownloadURL();
-  }
+  Future<String> editPicture(File file, String id) async =>
+      _firebaseRepository.editPicture(file, id);
 }
