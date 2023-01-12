@@ -4,12 +4,12 @@ enum ThemeTypes { light, dark, darker }
 
 class AppThemes {
   static final ThemeData lightTheme = ThemeData(
-      brightness: Brightness.light,
-      primaryColor: Colors.green
+    brightness: Brightness.light,
+    primaryColor: Colors.green,
   );
 
   static final ThemeData darkTheme = ThemeData(
-      brightness: Brightness.dark,
-      primaryColor: Colors.black87
+    brightness: Brightness.dark,
+    primaryColor: Colors.black87,
   );
 }

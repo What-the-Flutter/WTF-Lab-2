@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import '../../data/models/message.dart';
 import '../../data/models/post.dart';
+import '../../repository/firebase_repository.dart';
 import 'messages_cubit.dart';
 import 'messages_state.dart';
 
@@ -13,7 +14,11 @@ class MessagesPage extends StatefulWidget {
   final Post item;
   final int index;
 
-  const MessagesPage({super.key, required this.item, required this.index});
+  const MessagesPage({
+    super.key,
+    required this.item,
+    required this.index,
+  });
 
   @override
   State<MessagesPage> createState() => _MessagesPageState();
@@ -22,42 +27,46 @@ class MessagesPage extends StatefulWidget {
 class _MessagesPageState extends State<MessagesPage> {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   final TextEditingController _messageController = TextEditingController();
-  bool _isSelected = true;
   bool _isEmpty = true;
   File? imageFile;
 
   @override
   void initState() {
     super.initState();
-    BlocProvider.of<MessagesCubit>(context).init();
+    BlocProvider.of<MessagesCubit>(context).init(widget.item);
   }
 
-  void changeAppBar() {
-    setState(() {
-      _isSelected = !_isSelected;
-    });
-  }
+  Future _getFromCamera() async {
+    final imagePicker = ImagePicker();
+    XFile? pickedFile;
 
-  _getFromCamera() async {
-    PickedFile? pickedFile = await ImagePicker()
-        .getImage(source: ImageSource.camera, maxHeight: 1000, maxWidth: 1000);
+    pickedFile = await imagePicker.pickImage(source: ImageSource.camera);
     if (pickedFile != null) {
-      setState(() {
-        imageFile = File(pickedFile.path);
-      });
+      imageFile = File(pickedFile.path);
     }
-    return imageFile;
+    final newMess = Message(
+      id: DateTime.now().millisecondsSinceEpoch.toInt(),
+      textMessage: imageFile!.path,
+      createMessageTime: DateFormat.jm().format(DateTime.now()).toString(),
+      typeMessage: MessageType.image,
+    );
+    context.read<MessagesCubit>().addMessage(newMess);
   }
 
-  _getFromGallery() async {
-    PickedFile? pickedFile = await ImagePicker()
-        .getImage(source: ImageSource.gallery, maxHeight: 1000, maxWidth: 1000);
+  Future _getFromGallery() async {
+    final imagePicker = ImagePicker();
+    XFile? pickedFile;
+
+    pickedFile = await imagePicker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
-      setState(() {
-        imageFile = File(pickedFile.path);
-      });
+      imageFile = File(pickedFile.path);
     }
-    return imageFile;
+    final newMess = Message(
+        id: DateTime.now().millisecondsSinceEpoch.toInt(),
+        textMessage: imageFile!.path,
+        createMessageTime: DateFormat.jm().format(DateTime.now()).toString(),
+        typeMessage: MessageType.image);
+    context.read<MessagesCubit>().addMessage(newMess);
   }
 
   @override
@@ -68,29 +77,96 @@ class _MessagesPageState extends State<MessagesPage> {
           key: scaffoldKey,
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(56),
-            child: _isSelected ? _defaultBar() : _selectBar(2),
+            child: state.editMode ? _selectBar(context, state) : _defaultBar(),
           ),
           body: Column(
             children: <Widget>[
               Expanded(
                 child: ListView.builder(
-                    reverse: true,
-                    itemCount: state.messageList.length,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 0, 100, 7),
-                        child: GestureDetector(
-                          onLongPress: changeAppBar,
-                          child: ListTile(
-                            tileColor: Colors.grey,
-                            title: Text(state.messageList[index].textMessage),
-                            subtitle: Text(state
-                                .messageList[index].createMessageTime
-                                .toString()),
-                          ),
+                  reverse: true,
+                  itemCount: state.messageList.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 0, 100, 7),
+                      child: GestureDetector(
+                        onLongPress: () =>
+                            BlocProvider.of<MessagesCubit>(context)
+                              ..changeEditMode()
+                              ..isSelectMessage(index),
+                        child: Row(
+                          children: [
+                            state.messageList[index].typeMessage ==
+                                    MessageType.text
+                                ? SizedBox(
+                                    height: 60,
+                                    width: 120,
+                                    child: Card(
+                                      elevation: 15,
+                                      color: Colors.lightGreenAccent,
+                                      child: InkWell(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                state.messageList[index]
+                                                    .textMessage,
+                                              ),
+                                              Text(
+                                                state.messageList[index]
+                                                    .createMessageTime,
+                                                style: const TextStyle(
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                : SizedBox(
+                                    height: 150,
+                                    width: 120,
+                                    child: Card(
+                                      elevation: 15,
+                                      color: Colors.lightGreenAccent,
+                                      child: InkWell(
+                                        onTap: () {},
+                                        child: Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 8.0),
+                                          child: Column(
+                                            children: [
+                                              Image.file(
+                                                File(
+                                                  state.messageList[index]
+                                                      .textMessage,
+                                                ),
+                                                height: 110,
+                                                width: 100,
+                                              ),
+                                              Text(
+                                                state.messageList[index]
+                                                    .createMessageTime,
+                                                style: const TextStyle(
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                          ],
                         ),
-                      );
-                    }),
+                      ),
+                    );
+                  },
+                ),
               ),
               Row(
                 children: [
@@ -108,8 +184,9 @@ class _MessagesPageState extends State<MessagesPage> {
                         }
                       },
                       controller: _messageController,
-                      decoration:
-                          const InputDecoration(hintText: 'Enter event'),
+                      decoration: const InputDecoration(
+                        hintText: 'Enter event...',
+                      ),
                     ),
                   ),
                   IconButton(
@@ -118,41 +195,15 @@ class _MessagesPageState extends State<MessagesPage> {
                         : const Icon(Icons.send),
                     onPressed: () {
                       if (_isEmpty) {
-                        scaffoldKey.currentState!.showBottomSheet(
-                          (context) => Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: <Widget>[
-                              ElevatedButton.icon(
-                                style: ElevatedButton.styleFrom(
-                                    primary: Colors.deepOrangeAccent,
-                                    onPrimary: Colors.black),
-                                onPressed: _getFromCamera,
-                                icon: const Icon(Icons.camera_enhance_sharp),
-                                label: const Text('Open Camera'),
-                              ),
-                              ElevatedButton.icon(
-                                style: ElevatedButton.styleFrom(
-                                    primary: Colors.deepOrangeAccent,
-                                    onPrimary: Colors.black),
-                                onPressed: _getFromGallery,
-                                icon: const Icon(Icons.image),
-                                label: const Text('Open Gallery'),
-                              ),
-                            ],
-                          ),
-                        );
-                        final newMessage = Message(
-                            textMessage: imageFile!.path,
-                            createMessageTime: DateFormat.jm()
-                                .format(DateTime.now())
-                                .toString());
-                        context.read<MessagesCubit>().addMessage(newMessage);
+                        openMediaDialog();
                       } else {
                         final newMessage = Message(
-                            textMessage: _messageController.text,
-                            createMessageTime: DateFormat.jm()
-                                .format(DateTime.now())
-                                .toString());
+                          id: DateTime.now().millisecondsSinceEpoch.toInt(),
+                          textMessage: _messageController.text,
+                          createMessageTime:
+                              DateFormat.jm().format(DateTime.now()).toString(),
+                          typeMessage: MessageType.text,
+                        );
                         context.read<MessagesCubit>().addMessage(newMessage);
                       }
                     },
@@ -168,8 +219,7 @@ class _MessagesPageState extends State<MessagesPage> {
 
   AppBar _defaultBar() {
     return AppBar(
-      title: const Text('Chat'),
-      centerTitle: true,
+      title: Text(widget.item.title),
       actions: <Widget>[
         IconButton(
           onPressed: () {},
@@ -183,30 +233,59 @@ class _MessagesPageState extends State<MessagesPage> {
     );
   }
 
-  AppBar _selectBar(int index) {
+  AppBar _selectBar(BuildContext context, MessagesState state) {
     return AppBar(
-      title: const Text('1*'),
+      title: const Text('count select'),
       leading: IconButton(
         icon: const Icon(Icons.close),
-        onPressed: changeAppBar,
+        onPressed: () {
+          context.read<MessagesCubit>().cancelSelectMessage();
+        },
       ),
       actions: <Widget>[
-        const Icon(Icons.flag),
         IconButton(
           icon: const Icon(Icons.edit),
           onPressed: () {},
         ),
         IconButton(
           icon: const Icon(Icons.copy),
-          onPressed: () {},
+          onPressed: () {
+            BlocProvider.of<MessagesCubit>(context).copyClipboardMessage();
+          },
         ),
         const Icon(Icons.bookmark_border),
         IconButton(
           icon: const Icon(Icons.delete),
-          onPressed: () => context.read<MessagesCubit>().deleteMessage(index),
+          onPressed: () {
+            BlocProvider.of<MessagesCubit>(context).deleteMessage();
+          },
         ),
       ],
       backgroundColor: Colors.deepPurple,
+    );
+  }
+
+  void openMediaDialog() {
+    scaffoldKey.currentState!.showBottomSheet(
+      (context) => Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: <Widget>[
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+                primary: Colors.deepOrangeAccent, onPrimary: Colors.black),
+            onPressed: _getFromCamera,
+            icon: const Icon(Icons.camera_enhance_sharp),
+            label: const Text('Open Camera'),
+          ),
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+                primary: Colors.deepOrangeAccent, onPrimary: Colors.black),
+            onPressed: _getFromGallery,
+            icon: const Icon(Icons.image),
+            label: const Text('Open Gallery'),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -23,12 +23,17 @@ class DBProvider {
   Future<Database> _initDB(String filePath) async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
-    return await openDatabase(path, version: 1, onCreate: _createDB);
+    return await openDatabase(
+      path,
+      version: 1,
+      onCreate: _createDB,
+    );
   }
 
   Future _createDB(Database db, int version) async {
     final idType = 'INTEGER PRIMARY KEY AUTOINCREMENT';
     final textType = 'TEXT';
+    final boolType = 'BOOL';
 
     await db.execute('''
     CREATE TABLE $postTable (
@@ -36,35 +41,52 @@ class DBProvider {
     ${PostFields.title} $textType,
     ${PostFields.createPostTime} $textType
     )
+    
+    
     ''');
 
     await db.execute('''
     CREATE TABLE $messageTable (
     ${MessageFields.id} $idType,
     ${MessageFields.textMessage} $textType,
-    ${MessageFields.createMessageTime} $textType
+    ${MessageFields.createMessageTime} $textType,
+    ${MessageFields.typeMessage} $textType,
+    ${MessageFields.isSelectedMessage} $boolType
     )
     ''');
   }
 
   Future<Post> addPost(Post post) async {
     final db = await instance.database;
-    final id = await db.insert(postTable, post.toJson());
-    return post.copy(id: id);
+    final id = await db.insert(
+      postTable,
+      post.toJson(),
+    );
+    return post.copyWith(id: id);
   }
 
   Future<int> editPost(Post post) async {
     final db = await instance.database;
-    return db.update(postTable, post.toJson(),
-        where: '${PostFields.id} = ?', whereArgs: [post.id]);
+    return db.update(
+      postTable,
+      post.toJson(),
+      where: '${PostFields.id} = ?',
+      whereArgs: [post.id],
+    );
   }
 
   Future<void> deletePost(Post post) async {
     final db = await instance.database;
-    await db
-        .delete(postTable, where: '${PostFields.id} = ?', whereArgs: [post.id]);
-    await db.delete(messageTable,
-        where: '${MessageFields.id} = ?', whereArgs: [post.id]);
+    await db.delete(
+      postTable,
+      where: '${PostFields.id} = ?',
+      whereArgs: [post.id],
+    );
+    await db.delete(
+      messageTable,
+      where: '${MessageFields.id} = ?',
+      whereArgs: [post.id],
+    );
   }
 
   Future<List<Post>> getAllPosts() async {
@@ -89,20 +111,30 @@ class DBProvider {
 
   Future<Message> addMessage(Message message) async {
     final db = await instance.database;
-    final id = await db.insert(messageTable, message.toJson());
-    return message.copy(id: id);
+    final id = await db.insert(
+      messageTable,
+      message.toJson(),
+    );
+    return message.copyWith(id: id);
   }
 
-  Future<void> deleteMessage(int id) async {
+  Future<void> deleteMessage(Message message) async {
     final db = await instance.database;
-    await db.delete(messageTable,
-        where: '${MessageFields.id} = ?', whereArgs: [id]);
+    await db.delete(
+      messageTable,
+      where: '${MessageFields.id} = ?',
+      whereArgs: [message.id],
+    );
   }
 
   Future<int> editMessage(Message message) async {
     final db = await instance.database;
-    return db.update(messageTable, message.toJson(),
-        where: '${MessageFields.id} = ?', whereArgs: [message.id]);
+    return db.update(
+      messageTable,
+      message.toJson(),
+      where: '${MessageFields.id} = ?',
+      whereArgs: [message.id],
+    );
   }
 
   Future closeDB() async {

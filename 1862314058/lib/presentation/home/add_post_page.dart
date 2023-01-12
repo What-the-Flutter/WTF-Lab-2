@@ -12,8 +12,12 @@ class AddPostPage extends StatefulWidget {
   final bool isEditMode;
   final int? index;
 
-  const AddPostPage(
-      {super.key, this.postItem, required this.isEditMode, this.index});
+  const AddPostPage({
+    super.key,
+    this.postItem,
+    required this.isEditMode,
+    this.index,
+  });
 
   @override
   State<AddPostPage> createState() => _AddPostPageState();
@@ -43,7 +47,9 @@ class _AddPostPageState extends State<AddPostPage> {
                 Text(
                   widget.isEditMode ? 'Edit Page' : 'Create a new Page',
                   style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 24),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 24,
+                  ),
                 ),
                 const SizedBox(
                   height: 10,
@@ -63,13 +69,16 @@ class _AddPostPageState extends State<AddPostPage> {
             Expanded(
               child: GridView.count(
                 crossAxisCount: 4,
-                children: List.generate(choices.length, (index) {
-                  return Center(
-                    child: ChooseIcon(
-                      choiceIcon: choices[index],
-                    ),
-                  );
-                }),
+                children: List.generate(
+                  choices.length,
+                  (index) {
+                    return Center(
+                      child: ChooseIcon(
+                        choiceIcon: choices[index],
+                      ),
+                    );
+                  },
+                ),
               ),
             )
           ],
@@ -88,20 +97,22 @@ class _AddPostPageState extends State<AddPostPage> {
   }
 
   void updateData() {
-    var newPost = Post(
-        title: _postTitle.text,
-        //icon: const Icon(Icons.ac_unit),
-        createPostTime: DateFormat.yMd().format(DateTime.now()).toString());
+    final newPost = Post(
+      id: DateTime.now().millisecondsSinceEpoch.toInt(),
+      title: _postTitle.text,
+      createPostTime: DateFormat.yMd().format(DateTime.now()).toString(),
+    );
     context.read<HomeCubit>().editPost(newPost, widget.index!);
     Navigator.pop(context);
     Navigator.pop(context);
   }
 
   void submitData() {
-    var newPost = Post(
-        title: _postTitle.text,
-        //icon: const Icon(Icons.ac_unit),
-        createPostTime: DateFormat.yMd().format(DateTime.now()).toString());
+    final newPost = Post(
+      id: DateTime.now().millisecondsSinceEpoch.toInt(),
+      title: _postTitle.text,
+      createPostTime: DateFormat.yMd().format(DateTime.now()).toString(),
+    );
     context.read<HomeCubit>().addPost(newPost);
     _postTitle.clear();
     Navigator.pop(context);

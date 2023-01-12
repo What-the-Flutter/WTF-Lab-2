@@ -1,14 +1,14 @@
 import 'package:bloc/bloc.dart';
-import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import '../../data/models/post.dart';
-import '../../data/provider_db.dart';
+import '../../repository/firebase_repository.dart';
 
 part 'home_cubit.dart';
 
 class HomeState {
   final List<Post> postList;
-  int? index;
+  final int index;
 
   HomeState({
     this.postList = const [],

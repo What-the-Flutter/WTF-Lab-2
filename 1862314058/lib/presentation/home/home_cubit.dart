@@ -1,32 +1,44 @@
 part of 'home_state.dart';
 
 class HomeCubit extends Cubit<HomeState> {
-  HomeCubit() : super(HomeState());
+  User? user;
+  late final _firebaseRepository = FirebaseRepository(user: user);
+
+  HomeCubit({required this.user}) : super(HomeState());
 
   void init() async {
-    emit(state.copyWith(postList: await DBProvider.instance.getAllPosts()));
+    emit(
+      state.copyWith(
+        postList: await _firebaseRepository.getAllPosts(),
+      ),
+    );
   }
 
   void addPost(Post post) async {
-    final newPost = await DBProvider.instance.addPost(post);
+    _firebaseRepository.addPost(post);
     final listP = state.postList;
-    listP.add(newPost);
-    emit(state.copyWith(postList: listP));
+    listP.add(post);
+    emit(
+      state.copyWith(postList: listP),
+    );
   }
 
   void editPost(Post postItem, int index) {
     final listP = state.postList;
-    DBProvider.instance.editPost(listP[index]);
+    _firebaseRepository.editPost(postItem);
     listP[index] = postItem;
-    emit(state.copyWith(postList: listP));
+    emit(
+      state.copyWith(postList: listP),
+    );
   }
 
   void deletePost(int index) {
     final listP = state.postList;
-
-    DBProvider.instance.deletePost(listP[index]);
+    _firebaseRepository.deletePost(listP[index]);
     listP.removeAt(index);
-    emit(state.copyWith(postList: listP));
+    emit(
+      state.copyWith(postList: listP),
+    );
   }
 
   void pinPost(Post postItem, int index) {
@@ -38,6 +50,8 @@ class HomeCubit extends Cubit<HomeState> {
       listP.insert(0, listP[index]);
       listP.removeAt(index + 1);
     }
-    emit(state.copyWith(postList: listP));
+    emit(
+      state.copyWith(postList: listP),
+    );
   }
 }

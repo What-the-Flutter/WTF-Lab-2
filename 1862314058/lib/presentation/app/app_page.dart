@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../theme/theme_state.dart';
 import '../../widgets/drawer_widget.dart';
 import '../../widgets/menu_bar_widget.dart';
 import '../daily/daily_app_bar.dart';
@@ -14,7 +16,10 @@ import '../timeline/timeline_page.dart';
 class AppPage extends StatefulWidget {
   final String title;
 
-  const AppPage({Key? key, required this.title}) : super(key: key);
+  const AppPage({
+    Key? key,
+    required this.title,
+  }) : super(key: key);
 
   @override
   State<AppPage> createState() => _AppPageState();
@@ -41,6 +46,12 @@ class _AppPageState extends State<AppPage> {
     setState(() {
       _selectionIndex = index;
     });
+  }
+
+  @override
+  void initState() {
+    BlocProvider.of<ThemeCubit>(context).init();
+    super.initState();
   }
 
   @override
