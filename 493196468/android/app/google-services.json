@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "48159016032",
+    "firebase_url": "https://chat-diary-a42e7-default-rtdb.europe-west1.firebasedatabase.app",
     "project_id": "chat-diary-a42e7",
     "storage_bucket": "chat-diary-a42e7.appspot.com"
   },
@@ -29,6 +30,13 @@
             {
               "client_id": "48159016032-i0rtrep2blqege4qj4dmpv035o1v7cpa.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "48159016032-94ktbmhka37ook6aekqboj8n5alm9c2c.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.diary"
+              }
             }
           ]
         }

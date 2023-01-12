@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../models/home_cubit.dart';
-import '../models/theme_cubit.dart';
-import '../utils/chat_card.dart';
-import 'chat_view.dart';
-import 'new_chat_view.dart';
+import '/utils/chat_card.dart';
+import '../../settings/cubit/settings_cubit/settings_cubit.dart';
+import '../../settings/theme.dart';
+import '../chat_page/chat_view.dart';
+import '../new_chat_page/new_chat_view.dart';
+import 'cubit/home_cubit.dart';
 
 class HomeView extends StatelessWidget {
   const HomeView({Key? key}) : super(key: key);
@@ -19,14 +20,21 @@ class HomeView extends StatelessWidget {
         final selectedAmount = isSelectedList.length;
         return Scaffold(
           appBar: AppBar(
-            leading:
-                selectedAmount >= 1 ? cancelSelectionButton(context) : null,
+            leading: selectedAmount >= 1
+                ? cancelSelectionButton(context)
+                : openDrawerButton(context),
             actions: [
               _AppBarButtonsBuilder(
                 selectedAmount: selectedAmount,
               ),
             ],
-            title: const Text('Home'),
+            title: Text(
+              'Home',
+              style: getHeadLineText(
+                context.read<SettingsCubit>().state.textSize,
+                context,
+              ),
+            ),
           ),
           body: ListView.builder(
             itemCount: state.chatCards.length,
@@ -48,7 +56,7 @@ class HomeView extends StatelessWidget {
                 ),
               );
             },
-          ),
+          ), // bottomNavigationBar: const MainBottomNavigationBar(),
         );
       },
     );
@@ -58,6 +66,13 @@ class HomeView extends StatelessWidget {
     return IconButton(
       icon: const Icon(Icons.cancel_outlined),
       onPressed: () => context.read<HomeCubit>().unselectAllChats(),
+    );
+  }
+
+  IconButton openDrawerButton(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.menu),
+      onPressed: () => Scaffold.of(context).openDrawer(),
     );
   }
 }
@@ -87,8 +102,20 @@ class _ChatCardBuilder extends StatelessWidget {
                 : theme.primaryColor,
             child: chatCard.icon,
           ),
-          title: Text(chatCard.title),
-          subtitle: Text(chatCard.subtitle),
+          title: Text(
+            chatCard.title,
+            style: getTitleText(
+              context.read<SettingsCubit>().state.textSize,
+              context,
+            ),
+          ),
+          subtitle: Text(
+            chatCard.subtitle,
+            style: getBodyText(
+              context.read<SettingsCubit>().state.textSize,
+              context,
+            ),
+          ),
           onTap: () {
             Navigator.push(
               context,
@@ -119,7 +146,9 @@ class _AppBarButtonsBuilder extends StatelessWidget {
     if (selectedAmount == 0) {
       appBarButtonList.add(
         IconButton(
-          onPressed: () => context.read<ThemeCubit>().changeTheme(),
+          onPressed: () {
+            context.read<SettingsCubit>().changeTheme();
+          },
           icon: const Icon(Icons.emoji_objects_outlined),
         ),
       );
