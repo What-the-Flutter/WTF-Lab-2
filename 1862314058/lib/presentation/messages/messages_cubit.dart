@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../data/models/message.dart';
 import '../../data/models/post.dart';
 import '../../repository/firebase_repository.dart';
+import '../../repository/shared_pref_app.dart';
 import 'messages_state.dart';
 
 class MessagesCubit extends Cubit<MessagesState> {
@@ -13,9 +14,19 @@ class MessagesCubit extends Cubit<MessagesState> {
   MessagesCubit({required this.user}) : super(MessagesState(editMode: false));
 
   void init(Post post) async {
+    initSharPref();
     emit(
       state.copyWith(
         messageList: await _firebaseRepository.getAllMessages(post),
+      ),
+    );
+  }
+
+  void initSharPref() {
+    emit(
+      state.copyWith(
+        isBubbleAlignment: SharedPreferencesServices().loadBubbleAlignment(),
+        backgroundImage: SharedPreferencesServices().loadBackgroundImage(),
       ),
     );
   }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:transparent_image/transparent_image.dart';
 import '../../data/models/message.dart';
 import '../../data/models/post.dart';
 import '../../repository/firebase_repository.dart';
@@ -25,7 +26,7 @@ class MessagesPage extends StatefulWidget {
 }
 
 class _MessagesPageState extends State<MessagesPage> {
-  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> _messageKey = GlobalKey<ScaffoldState>();
   final TextEditingController _messageController = TextEditingController();
   bool _isEmpty = true;
   File? imageFile;
@@ -74,143 +75,52 @@ class _MessagesPageState extends State<MessagesPage> {
     return BlocBuilder<MessagesCubit, MessagesState>(
       builder: (context, state) {
         return Scaffold(
-          key: scaffoldKey,
+          key: _messageKey,
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(56),
             child: state.editMode ? _selectBar(context, state) : _defaultBar(),
           ),
-          body: Column(
-            children: <Widget>[
-              Expanded(
-                child: ListView.builder(
-                  reverse: true,
-                  itemCount: state.messageList.length,
-                  itemBuilder: (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 0, 100, 7),
-                      child: GestureDetector(
+          body: Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                fit: BoxFit.cover,
+                image: state.backgroundImage != null
+                    ? FileImage(
+                        File(state.backgroundImage),
+                      )
+                    : MemoryImage(kTransparentImage) as ImageProvider,
+              ),
+            ),
+            child: Column(
+              children: <Widget>[
+                Expanded(
+                  child: ListView.builder(
+                    reverse: true,
+                    itemCount: state.messageList.length,
+                    itemBuilder: (context, index) {
+                      return GestureDetector(
                         onLongPress: () =>
                             BlocProvider.of<MessagesCubit>(context)
                               ..changeEditMode()
                               ..isSelectMessage(index),
                         child: Row(
+                          mainAxisAlignment: state.isBubbleAlignment
+                              ? MainAxisAlignment.end
+                              : MainAxisAlignment.start,
                           children: [
                             state.messageList[index].typeMessage ==
                                     MessageType.text
-                                ? SizedBox(
-                                    height: 60,
-                                    width: 120,
-                                    child: Card(
-                                      elevation: 15,
-                                      color: Colors.lightGreenAccent,
-                                      child: InkWell(
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                state.messageList[index]
-                                                    .textMessage,
-                                              ),
-                                              Text(
-                                                state.messageList[index]
-                                                    .createMessageTime,
-                                                style: const TextStyle(
-                                                  color: Colors.grey,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  )
-                                : SizedBox(
-                                    height: 150,
-                                    width: 120,
-                                    child: Card(
-                                      elevation: 15,
-                                      color: Colors.lightGreenAccent,
-                                      child: InkWell(
-                                        onTap: () {},
-                                        child: Padding(
-                                          padding:
-                                              const EdgeInsets.only(top: 8.0),
-                                          child: Column(
-                                            children: [
-                                              Image.file(
-                                                File(
-                                                  state.messageList[index]
-                                                      .textMessage,
-                                                ),
-                                                height: 110,
-                                                width: 100,
-                                              ),
-                                              Text(
-                                                state.messageList[index]
-                                                    .createMessageTime,
-                                                style: const TextStyle(
-                                                  color: Colors.grey,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
+                                ? _textTypeMessage(state, index)
+                                : _imageTypeMessage(state, index),
                           ],
                         ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      onChanged: (value) {
-                        if (value.isNotEmpty) {
-                          setState(() {
-                            _isEmpty = false;
-                          });
-                        } else {
-                          setState(() {
-                            _isEmpty = true;
-                          });
-                        }
-                      },
-                      controller: _messageController,
-                      decoration: const InputDecoration(
-                        hintText: 'Enter event...',
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    icon: _isEmpty
-                        ? const Icon(Icons.camera_enhance_sharp)
-                        : const Icon(Icons.send),
-                    onPressed: () {
-                      if (_isEmpty) {
-                        openMediaDialog();
-                      } else {
-                        final newMessage = Message(
-                          id: DateTime.now().millisecondsSinceEpoch.toInt(),
-                          textMessage: _messageController.text,
-                          createMessageTime:
-                              DateFormat.jm().format(DateTime.now()).toString(),
-                          typeMessage: MessageType.text,
-                        );
-                        context.read<MessagesCubit>().addMessage(newMessage);
-                      }
+                      );
                     },
                   ),
-                ],
-              ),
-            ],
+                ),
+                _textMessageRow(),
+              ],
+            ),
           ),
         );
       },
@@ -265,8 +175,117 @@ class _MessagesPageState extends State<MessagesPage> {
     );
   }
 
-  void openMediaDialog() {
-    scaffoldKey.currentState!.showBottomSheet(
+  SizedBox _imageTypeMessage(MessagesState state, int index) {
+    return SizedBox(
+      height: 150,
+      width: 120,
+      child: Card(
+        elevation: 15,
+        color: Colors.lightGreenAccent,
+        child: InkWell(
+          onTap: () {},
+          child: Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: Column(
+              children: [
+                Image.file(
+                  File(
+                    state.messageList[index].textMessage,
+                  ),
+                  height: 110,
+                  width: 100,
+                ),
+                Text(
+                  state.messageList[index].createMessageTime,
+                  style: const TextStyle(
+                    color: Colors.grey,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  SizedBox _textTypeMessage(MessagesState state, int index) {
+    return SizedBox(
+      height: 70,
+      width: 120,
+      child: Card(
+        elevation: 15,
+        color: Colors.lightGreenAccent,
+        child: InkWell(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  state.messageList[index].textMessage,
+                ),
+                Text(
+                  state.messageList[index].createMessageTime,
+                  style: const TextStyle(
+                    color: Colors.grey,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Row _textMessageRow() {
+    return Row(
+      children: [
+        Expanded(
+          child: TextFormField(
+            onChanged: (value) {
+              if (value.isNotEmpty) {
+                setState(() {
+                  _isEmpty = false;
+                });
+              } else {
+                setState(() {
+                  _isEmpty = true;
+                });
+              }
+            },
+            controller: _messageController,
+            decoration: const InputDecoration(
+              hintText: 'Enter event...',
+            ),
+          ),
+        ),
+        IconButton(
+          icon: _isEmpty
+              ? const Icon(Icons.camera_enhance_sharp)
+              : const Icon(Icons.send),
+          onPressed: () {
+            if (_isEmpty) {
+              _openMediaDialog();
+            } else {
+              final newMessage = Message(
+                id: DateTime.now().millisecondsSinceEpoch.toInt(),
+                textMessage: _messageController.text,
+                createMessageTime:
+                    DateFormat.jm().format(DateTime.now()).toString(),
+                typeMessage: MessageType.text,
+              );
+              context.read<MessagesCubit>().addMessage(newMessage);
+            }
+          },
+        ),
+      ],
+    );
+  }
+
+  void _openMediaDialog() {
+    _messageKey.currentState!.showBottomSheet(
       (context) => Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[

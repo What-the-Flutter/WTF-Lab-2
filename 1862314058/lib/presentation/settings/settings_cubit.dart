@@ -1,44 +1,56 @@
 part of 'settings_state.dart';
 
 class SettingsCubit extends Cubit<SettingsState> {
-  final SharedPreferences _prefs;
-
-  SettingsCubit(this._prefs) : super(SettingsState());
+  SettingsCubit()
+      : super(
+          SettingsState(
+            isBubbleAlignment: false,
+            isCenterDateBubble: false,
+            backgroundImage: '',
+          ),
+        );
 
   void init() {
     emit(
       state.copyWith(
-        isBubbleAlignment: _loadBubbleAlignment(),
-        isCenterDateBubble: _loadCenterAlignment(),
+        isBubbleAlignment: SharedPreferencesServices().loadBubbleAlignment(),
+        isCenterDateBubble: SharedPreferencesServices().loadCenterAlignment(),
+        backgroundImage: SharedPreferencesServices().loadBackgroundImage(),
       ),
     );
   }
 
-  bool _loadCenterAlignment() => _prefs.getBool('is_center_alignment') ?? false;
-
-  bool _loadBubbleAlignment() => _prefs.getBool('is_bubble') ?? false;
-
   void changeBubbleAlignment() {
     emit(
       state.copyWith(
-        isBubbleAlignment: !state.isBubbleAlignment!,
+        isBubbleAlignment: !state.isBubbleAlignment,
       ),
     );
-    _prefs.setBool(
-      'is_bubble',
-      state.isBubbleAlignment!,
-    );
+    SharedPreferencesServices().changeBubbleAlignment(state.isBubbleAlignment);
   }
 
   void changeCenterDateBubble() {
     emit(
       state.copyWith(
-        isCenterDateBubble: !state.isCenterDateBubble!,
+        isCenterDateBubble: !state.isCenterDateBubble,
       ),
     );
-    _prefs.setBool(
-      'is_center_alignment',
-      state.isCenterDateBubble!,
+    SharedPreferencesServices().changeCenterAlignment(state.isCenterDateBubble);
+  }
+
+  void saveBackgroundImage(String img) {
+    emit(
+      state.copyWith(backgroundImage: state.backgroundImage),
     );
+    SharedPreferencesServices().updateBackgroundImage(img);
+    init();
+  }
+
+  void deleteBackgroundImage() {
+    emit(
+      state.copyWith(backgroundImage: state.backgroundImage),
+    );
+    SharedPreferencesServices().deleteBackgroundImage();
+    init();
   }
 }

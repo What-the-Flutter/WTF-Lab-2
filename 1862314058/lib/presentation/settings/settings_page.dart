@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lottie/lottie.dart';
 import '../../theme/theme_state.dart';
 import 'set_background_image.dart';
 import 'settings_app_bar.dart';
@@ -12,11 +13,29 @@ class SettingsPage extends StatefulWidget {
   State<SettingsPage> createState() => _SettingsPageState();
 }
 
-class _SettingsPageState extends State<SettingsPage> {
+class _SettingsPageState extends State<SettingsPage>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _resetAnimationController;
+
   @override
   void initState() {
     BlocProvider.of<SettingsCubit>(context).init();
+    _resetAnimationController = AnimationController(
+      vsync: this,
+    );
+    _resetAnimationController.addStatusListener((status) async {
+      if (status == AnimationStatus.completed) {
+        Navigator.pop(context);
+        _resetAnimationController.reset();
+      }
+    });
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _resetAnimationController.dispose();
+    super.dispose();
   }
 
   @override
@@ -31,66 +50,18 @@ class _SettingsPageState extends State<SettingsPage> {
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              const Text(
+              Text(
                 'Visuals',
-                style: TextStyle(
-                  fontSize: 20,
-                ),
+                style: Theme.of(context).textTheme.headline5,
+              ),
+              _visualsSettingsList(state),
+              Text(
+                'Chat Interface',
+                style: Theme.of(context).textTheme.headline5,
               ),
               ListView(
                 shrinkWrap: true,
                 children: <Widget>[
-                  ListTile(
-                    leading: const Icon(
-                      Icons.water_drop_outlined,
-                    ),
-                    title: const Text(
-                      'Theme',
-                    ),
-                    subtitle: const Text(
-                      'Light / Dark / Amoled',
-                    ),
-                    onTap: () {
-                      final cubit = context.read<ThemeCubit>();
-                      cubit.changeTheme();
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(
-                      Icons.text_fields,
-                    ),
-                    title: const Text('Font Size'),
-                    subtitle: const Text('Small / Default / Large'),
-                    onTap: () {
-                      fontSizeChangeDialog(state);
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(
-                      Icons.lock_reset,
-                    ),
-                    title: const Text(
-                      'Reset all Preferences',
-                    ),
-                    subtitle: const Text(
-                      'Reset all Visual Customization',
-                    ),
-                    onTap: () {
-                      BlocProvider.of<ThemeCubit>(context)
-                          .resetAllPreferences();
-                    },
-                  ),
-                ],
-              ),
-              const Text(
-                'Chat Interface',
-                style: TextStyle(
-                  fontSize: 20,
-                ),
-              ),
-              ListView(
-                shrinkWrap: true,
-                children: [
                   ListTile(
                     leading: const Icon(
                       Icons.format_list_bulleted,
@@ -106,7 +77,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         BlocProvider.of<SettingsCubit>(context)
                             .changeBubbleAlignment();
                       },
-                      value: state.isBubbleAlignment!,
+                      value: state.isBubbleAlignment,
                     ),
                   ),
                   ListTile(
@@ -121,12 +92,10 @@ class _SettingsPageState extends State<SettingsPage> {
                         BlocProvider.of<SettingsCubit>(context)
                             .changeCenterDateBubble();
                       },
-                      value: state.isCenterDateBubble!,
+                      value: state.isCenterDateBubble,
                     ),
                   ),
-
-                  ///Выбор фоновой картинки
-                  setBackgroundListTile(),
+                  _setBackgroundListTile(),
                 ],
               )
             ],
@@ -136,7 +105,76 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  void fontSizeChangeDialog(SettingsState state) {
+  ListView _visualsSettingsList(SettingsState state) {
+    return ListView(
+      shrinkWrap: true,
+      children: <Widget>[
+        ListTile(
+          leading: const Icon(
+            Icons.water_drop_outlined,
+          ),
+          title: const Text(
+            'Theme',
+          ),
+          subtitle: const Text(
+            'Light / Dark / Amoled',
+          ),
+          onTap: () {
+            final cubit = context.read<ThemeCubit>();
+            cubit.changeTheme();
+          },
+        ),
+        ListTile(
+          leading: const Icon(
+            Icons.text_fields,
+          ),
+          title: const Text('Font Size'),
+          subtitle: const Text('Small / Default / Large'),
+          onTap: () {
+            _fontSizeChangeDialog(state);
+          },
+        ),
+        ListTile(
+          leading: const Icon(
+            Icons.lock_reset,
+          ),
+          title: const Text(
+            'Reset all Preferences',
+          ),
+          subtitle: const Text(
+            'Reset all Visual Customization',
+          ),
+          onTap: () {
+            showResetDialog(context);
+            BlocProvider.of<ThemeCubit>(context).resetAllPreferences();
+          },
+        ),
+      ],
+    );
+  }
+
+  void showResetDialog(BuildContext context) => showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (context) => Dialog(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Lottie.asset('assets/reset2.json',
+                  repeat: false, controller: _resetAnimationController,
+                  onLoaded: (composition) {
+                _resetAnimationController.duration = composition.duration;
+                _resetAnimationController.forward();
+              }),
+              const Text(
+                'Done!',
+              ),
+            ],
+          ),
+        ),
+      );
+
+  void _fontSizeChangeDialog(SettingsState state) {
     showDialog(
       context: context,
       builder: (context) {
@@ -147,11 +185,9 @@ class _SettingsPageState extends State<SettingsPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                const Text(
+                Text(
                   'Font Size',
-                  style: TextStyle(
-                    fontSize: 20,
-                  ),
+                  style: Theme.of(context).textTheme.headline5,
                 ),
                 ListTile(
                   title: const Text(
@@ -193,7 +229,7 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  ListTile setBackgroundListTile() {
+  ListTile _setBackgroundListTile() {
     return ListTile(
       leading: const Icon(
         Icons.image_outlined,
@@ -208,7 +244,7 @@ class _SettingsPageState extends State<SettingsPage> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => const SetBackgroundImage(),
+            builder: (context) => SetBackgroundImage(),
           ),
         );
       },

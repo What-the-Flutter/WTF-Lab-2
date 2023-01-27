@@ -20,7 +20,7 @@ class _MenuBarState extends State<MenuBar> {
       type: BottomNavigationBarType.fixed,
       items: const <BottomNavigationBarItem>[
         BottomNavigationBarItem(
-          icon: Icon(Icons.home, ),
+          icon: Icon(Icons.home),
           label: 'Home',
         ),
         BottomNavigationBarItem(

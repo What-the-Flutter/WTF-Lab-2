@@ -1,18 +1,18 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../repository/shared_pref_app.dart';
 
 part 'theme_cubit.dart';
 
 class ThemeState {
-  final bool? isLightTheme;
-  final ThemeData? appThemes;
-  final TextTheme? textTheme;
+  final bool isLightTheme;
+  final ThemeData appThemes;
+  final TextTheme textTheme;
 
   ThemeState({
-    this.isLightTheme,
-    this.appThemes,
-    this.textTheme,
+    required this.isLightTheme,
+    required this.appThemes,
+    required this.textTheme,
   });
 
   ThemeState copyWith({
@@ -27,17 +27,17 @@ class ThemeState {
     );
   }
 
-
   ThemeState get lightTheme {
     return ThemeState(
       isLightTheme: true,
       appThemes: ThemeData(
-        primaryColor: Colors.green,
+        primaryColor: Colors.deepPurple,
         scaffoldBackgroundColor: Colors.white,
         colorScheme: const ColorScheme.light(),
         iconTheme: const IconThemeData(color: Colors.green),
         textTheme: textTheme,
       ),
+      textTheme: textTheme,
     );
   }
 
@@ -45,16 +45,15 @@ class ThemeState {
     return ThemeState(
       isLightTheme: false,
       appThemes: ThemeData(
-        primaryColor: Colors.grey.shade900,
+        primaryColor: Colors.grey.shade800,
         scaffoldBackgroundColor: Colors.grey.shade900,
         colorScheme: const ColorScheme.dark(),
         iconTheme: const IconThemeData(color: Colors.yellow),
         textTheme: textTheme,
       ),
+      textTheme: textTheme,
     );
   }
-
-
 
   static const TextTheme largeTextTheme = TextTheme(
     headline1: TextStyle(
@@ -154,5 +153,4 @@ class ThemeState {
       fontSize: 14,
     ),
   );
-
 }
