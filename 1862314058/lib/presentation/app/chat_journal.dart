@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../theme/theme_state.dart';
 import '../home/home_state.dart';
@@ -11,12 +10,10 @@ import 'app_page.dart';
 
 class ChatJournal extends StatelessWidget {
   final User? curUser;
-  final SharedPreferences? sharPref;
 
   const ChatJournal({
     super.key,
     this.curUser,
-    this.sharPref,
   });
 
   @override
@@ -34,14 +31,10 @@ class ChatJournal extends StatelessWidget {
           ),
         ),
         BlocProvider(
-          create: (context) => ThemeCubit(
-            sharPref!,
-          ),
+          create: (context) => ThemeCubit(),
         ),
         BlocProvider(
-          create: (context) => SettingsCubit(
-            sharPref!,
-          ),
+          create: (context) => SettingsCubit(),
         ),
       ],
       child: BlocBuilder<ThemeCubit, ThemeState>(

@@ -25,7 +25,6 @@ class AddPostPage extends StatefulWidget {
 
 class _AddPostPageState extends State<AddPostPage> {
   final TextEditingController _postTitle = TextEditingController();
-  GlobalKey<FormState> globalKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -87,7 +86,7 @@ class _AddPostPageState extends State<AddPostPage> {
       floatingActionButton: BlocBuilder<HomeCubit, HomeState>(
         builder: (context, state) {
           return FloatingActionButton(
-            onPressed: widget.isEditMode ? updateData : submitData,
+            onPressed: widget.isEditMode ? _updateData : _submitData,
             backgroundColor: Colors.amber,
             child: const Icon(Icons.add),
           );
@@ -96,7 +95,7 @@ class _AddPostPageState extends State<AddPostPage> {
     );
   }
 
-  void updateData() {
+  void _updateData() {
     final newPost = Post(
       id: DateTime.now().millisecondsSinceEpoch.toInt(),
       title: _postTitle.text,
@@ -107,7 +106,7 @@ class _AddPostPageState extends State<AddPostPage> {
     Navigator.pop(context);
   }
 
-  void submitData() {
+  void _submitData() {
     final newPost = Post(
       id: DateTime.now().millisecondsSinceEpoch.toInt(),
       title: _postTitle.text,

@@ -16,8 +16,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final titleController = TextEditingController();
-
   @override
   void initState() {
     super.initState();
@@ -57,7 +55,7 @@ class _HomePageState extends State<HomePage> {
                     icon: const Icon(
                       Icons.smart_toy,
                     ),
-                    label: Text(
+                    label: const Text(
                       'Questionnaire bot',
                     ),
                   ),
@@ -129,7 +127,7 @@ class _HomePageState extends State<HomePage> {
           );
         },
         tooltip: 'New Page',
-        backgroundColor: Colors.amber,
+        backgroundColor: Theme.of(context).iconTheme.color,
         child: const Icon(Icons.add),
       ),
     );

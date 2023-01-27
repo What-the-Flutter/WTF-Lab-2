@@ -1,42 +1,37 @@
 part of 'theme_state.dart';
 
 class ThemeCubit extends Cubit<ThemeState> {
-  final SharedPreferences _prefs;
-
-  ThemeCubit(this._prefs) : super(ThemeState()) {}
+  ThemeCubit()
+      : super(
+          ThemeState(
+            isLightTheme: true,
+            textTheme: ThemeState.defaultTextTheme,
+            appThemes: ThemeData(),
+          ),
+        );
 
   void init() {
-    emit(state.copyWith(isLightTheme: _loadTheme()));
-    setFontSizeText(_loadFontSize());
+    emit(
+      state.copyWith(
+        isLightTheme: SharedPreferencesServices().loadTheme(),
+      ),
+    );
+    setFontSizeText(
+      SharedPreferencesServices().loadFontSize(),
+    );
   }
-
-  bool _loadTheme() => _prefs.getBool('light_theme') ?? true;
 
   void updateTheme() {
     final updateThemeApp =
-        state.isLightTheme! ? state.lightTheme : state.darkTheme;
+        state.isLightTheme ? state.lightTheme : state.darkTheme;
     emit(updateThemeApp);
   }
 
   void changeTheme() {
-    emit(state.copyWith(isLightTheme: !state.isLightTheme!));
-    // if (state.appThemes == ThemeState.lightTheme) {
-    //   emit(
-    //     ThemeState.darkTheme(),
-    //   );
-    // } else {
-    //   emit(
-    //     ThemeState.lightTheme(),
-    //   );
-    // }
-    _prefs.setBool(
-      'light_theme',
-      state.isLightTheme!,
-    );
+    emit(state.copyWith(isLightTheme: !state.isLightTheme));
+    SharedPreferencesServices().changeTheme(state.isLightTheme);
     updateTheme();
   }
-
-  int _loadFontSize() => _prefs.getInt('font_size_app') ?? 2;
 
   setFontSizeText(int fontSizeIndex) {
     switch (fontSizeIndex) {
@@ -56,16 +51,12 @@ class ThemeCubit extends Cubit<ThemeState> {
         );
         break;
     }
-    _prefs.setInt(
-      'font_size_app',
-      fontSizeIndex,
-    );
+    SharedPreferencesServices().changeFontSizeText(fontSizeIndex);
     updateTheme();
   }
 
   void resetAllPreferences() {
-    _prefs.setInt('font_size_app', 2);
-    _prefs.setBool('light_theme', true);
+    SharedPreferencesServices().resetAllPreferences();
     init();
   }
 }
