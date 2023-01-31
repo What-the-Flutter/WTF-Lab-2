@@ -1,27 +1,24 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../../repo/setting_repository.dart';
 import '../../theme.dart';
 
 part 'settings_state.dart';
 
 class SettingsCubit extends Cubit<SettingsState> {
-  final _themePrefs = ThemePreferences();
-  final _alignmentPrefs = AlignmentPreferences();
-  final _textSizePrefs = TextSizePreferences();
-  final _centerDatePrefs = CenterDateAlignmentPreferences();
+  final SettingsRepository _settingsPrefs;
 
-  SettingsCubit() : super(SettingsState()) {
-    _init();
+  SettingsCubit(this._settingsPrefs) : super(SettingsState()) {
+    _init(_settingsPrefs);
   }
 
-  void _init() async {
-    final themeData = await _themePrefs.getTheme();
-    final bubbleAlignment = await _alignmentPrefs.getAlignment();
-    final textSize = await _textSizePrefs.getFontSize();
-    final isCenterDateAlignment = await _centerDatePrefs.getAlignment();
+  void _init(SettingsRepository _settingsPrefs) async {
+    final themeData = await _settingsPrefs.getTheme();
+    final bubbleAlignment = await _settingsPrefs.getAlignment();
+    final textSize = await _settingsPrefs.getFontSize();
+    final isCenterDateAlignment = await _settingsPrefs.getCenterBubble();
     emit(
       SettingsState(
         themeMode: themeData,
@@ -40,7 +37,7 @@ class SettingsCubit extends Cubit<SettingsState> {
   void changeTheme() {
     final newThemeMode =
         state.themeMode.name == 'dark' ? ThemeMode.light : ThemeMode.dark;
-    _themePrefs.saveTheme(newThemeMode);
+    _settingsPrefs.saveTheme(newThemeMode);
     emit(state.copyWith(themeMode: newThemeMode));
   }
 
@@ -48,13 +45,13 @@ class SettingsCubit extends Cubit<SettingsState> {
     final newAlignment = state.bubbleAlignment == BubbleAlignment.left
         ? BubbleAlignment.right
         : BubbleAlignment.left;
-    _alignmentPrefs.saveAlignment(newAlignment);
+    _settingsPrefs.saveAlignment(newAlignment);
     emit(state.copyWith(bubbleAlignment: newAlignment));
   }
 
   void changeDateBubbleAlignment() {
     final isCenter = !state.isCenterDateAlignment;
-    _centerDatePrefs.saveAlignment(isCenter);
+    _settingsPrefs.saveCenterBubble(isCenter);
     emit(state.copyWith(isCenterDateAlignment: isCenter));
   }
 
@@ -62,15 +59,15 @@ class SettingsCubit extends Cubit<SettingsState> {
     switch (textSize) {
       case TextSizeKeys.small:
         emit(state.copyWith(textSize: TextSizeKeys.small));
-        _textSizePrefs.saveTextSize(TextSizeKeys.small);
+        _settingsPrefs.saveTextSize(TextSizeKeys.small);
         break;
       case TextSizeKeys.medium:
         emit(state.copyWith(textSize: TextSizeKeys.medium));
-        _textSizePrefs.saveTextSize(TextSizeKeys.medium);
+        _settingsPrefs.saveTextSize(TextSizeKeys.medium);
         break;
       case TextSizeKeys.large:
         emit(state.copyWith(textSize: TextSizeKeys.large));
-        _textSizePrefs.saveTextSize(TextSizeKeys.large);
+        _settingsPrefs.saveTextSize(TextSizeKeys.large);
         break;
     }
   }

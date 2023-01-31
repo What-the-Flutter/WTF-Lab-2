@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '/utils/chat_card.dart';
 import '../../settings/cubit/settings_cubit/settings_cubit.dart';
 import '../../settings/theme.dart';
-import '/utils/chat_card.dart';
 import '../home_page/cubit/home_cubit.dart';
 import 'cubit/new_chat_cubit.dart';
 
@@ -57,7 +57,7 @@ class NewChatView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final editableChatCards = context.read<HomeCubit>().getSelectedChats();
+    final editableChatCards = context.read<HomeCubit>().getSelectedChats() ?? [];
     final onEdit = editableChatCards.isNotEmpty;
     if (onEdit) {
       context.read<NewChatCubit>().setChatCard(editableChatCards.first);

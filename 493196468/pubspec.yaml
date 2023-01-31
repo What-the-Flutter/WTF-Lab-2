@@ -29,13 +29,20 @@ dependencies:
   hashtagable: ^2.1.0
   share_plus: ^6.3.0
   animations: ^2.0.7
-  rive: ^0.10.0
+  rive: ^0.10.1
+  bloc_test: ^9.1.0
+  mockito: ^5.3.2
+  mocktail: ^0.3.0
+  syncfusion_flutter_charts: ^20.4.44
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
+  integration_test:
+    sdk: flutter
   flutter_lints: ^2.0.0
+  test: ^1.21.4
+  build_runner: ^2.3.0
 
 flutter:
 

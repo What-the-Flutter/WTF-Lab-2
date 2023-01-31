@@ -37,6 +37,7 @@ class HomeView extends StatelessWidget {
             ),
           ),
           body: ListView.builder(
+            key: const Key('ChatsView'),
             itemCount: state.chatCards.length,
             itemBuilder: (context, index) {
               return _ChatCardBuilder(
@@ -47,6 +48,7 @@ class HomeView extends StatelessWidget {
             },
           ),
           floatingActionButton: FloatingActionButton(
+            heroTag: null,
             child: const Icon(Icons.add),
             onPressed: () {
               Navigator.push(
@@ -146,9 +148,7 @@ class _AppBarButtonsBuilder extends StatelessWidget {
     if (selectedAmount == 0) {
       appBarButtonList.add(
         IconButton(
-          onPressed: () {
-            context.read<SettingsCubit>().changeTheme();
-          },
+          onPressed: () => context.read<SettingsCubit>().changeTheme(),
           icon: const Icon(Icons.emoji_objects_outlined),
         ),
       );

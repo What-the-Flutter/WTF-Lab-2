@@ -5,15 +5,6 @@ import 'package:flutter/material.dart';
 import '../../settings/theme.dart';
 
 class DarkTransition extends StatefulWidget {
-  const DarkTransition(
-      {required this.childBuilder,
-      Key? key,
-      this.offset = Offset.zero,
-      this.themeController,
-      this.radius,
-      this.duration = const Duration(milliseconds: 400),
-      this.isDark = false})
-      : super(key: key);
 
   final Widget Function(BuildContext, int) childBuilder;
 
@@ -26,6 +17,16 @@ class DarkTransition extends StatefulWidget {
   final double? radius;
 
   final Duration? duration;
+
+  const DarkTransition(
+      {required this.childBuilder,
+      Key? key,
+      this.offset = Offset.zero,
+      this.themeController,
+      this.radius,
+      this.duration = const Duration(milliseconds: 400),
+      this.isDark = false})
+      : super(key: key);
 
   @override
   _DarkTransitionState createState() => _DarkTransitionState();

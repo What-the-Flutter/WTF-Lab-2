@@ -12,12 +12,12 @@ import '../../../../repo/firebase/messages_repository.dart';
 
 part 'chat_state.dart';
 
-class MessageCubit extends Cubit<MessagesState> {
-  final MessagesRepository messagesRepository;
+class ChatCubit extends Cubit<ChatState> {
+  final MessagesRepository _messagesRepository;
 
-  MessageCubit(this.messagesRepository)
+  ChatCubit(this._messagesRepository)
       : super(
-          MessagesState(
+          ChatState(
             messages: [],
             filter: Filter(
               isFiltered: false,
@@ -32,11 +32,11 @@ class MessageCubit extends Cubit<MessagesState> {
 
   void _init() async {
     _updateStateFromRepo();
-    messagesRepository.listenForUpdates(onUpdate: _updateStateFromRepo);
+    _messagesRepository.listenForUpdates(onUpdate: _updateStateFromRepo);
   }
 
   void _updateStateFromRepo() async => emit(
-        state.copyWith(messages: await messagesRepository.getAllMessages()),
+        state.copyWith(messages: await _messagesRepository.getAllMessages()),
       );
 
   void emitMessages() {
@@ -48,7 +48,7 @@ class MessageCubit extends Cubit<MessagesState> {
     final inEdit = state.messages.indexWhere((element) => element.onEdit);
     if (message.text.isNotEmpty) {
       if (inEdit == -1) {
-        final id = await messagesRepository.addMessage(message);
+        final id = await _messagesRepository.addMessage(message);
         state.messages.add(message.copyWith(
           id: id,
         ));
@@ -69,11 +69,11 @@ class MessageCubit extends Cubit<MessagesState> {
     String? filePath,
   ) async {
     if (filePath != null && id != null) {
-      final pictureURL = await messagesRepository.uploadPicture(
+      final pictureURL = await _messagesRepository.uploadPicture(
         File(filePath),
         id,
       );
-      messagesRepository.editMessage(
+      _messagesRepository.editMessage(
         message.copyWith(
           id: id,
           pictureURL: pictureURL,
@@ -95,7 +95,7 @@ class MessageCubit extends Cubit<MessagesState> {
     final indexOfEditableMessage = state.messages.indexOf(editableMessage);
 
     state.messages[indexOfEditableMessage] = editedMessage;
-    messagesRepository.editMessage(editedMessage);
+    _messagesRepository.editMessage(editedMessage);
 
     emitMessages();
   }
@@ -124,7 +124,7 @@ class MessageCubit extends Cubit<MessagesState> {
         state.messages.where((element) => element.isSelected).toList();
     for (final element in selectedMessages) {
       state.messages.remove(element);
-      messagesRepository.deleteMessage(element);
+      _messagesRepository.deleteMessage(element);
     }
 
     emitMessages();
@@ -132,7 +132,7 @@ class MessageCubit extends Cubit<MessagesState> {
 
   void deleteMessage(Message message) {
     state.messages.remove(message);
-    messagesRepository.deleteMessage(message);
+    _messagesRepository.deleteMessage(message);
     emitMessages();
   }
 
@@ -179,7 +179,7 @@ class MessageCubit extends Cubit<MessagesState> {
     for (final element in selectedMessages) {
       final editedMessage =
           element.copyWith(isSelected: false, chatId: selectedChatId);
-      messagesRepository.editMessage(editedMessage);
+      _messagesRepository.editMessage(editedMessage);
       editMessage(
         editedMessage,
       );
@@ -282,7 +282,7 @@ class MessageCubit extends Cubit<MessagesState> {
     for (final element in selectedMessages) {
       final editableMessage = element.copyWith(
           isSelected: false, isBookmarked: !element.isBookmarked);
-      messagesRepository.editMessage(editableMessage);
+      _messagesRepository.editMessage(editableMessage);
       editMessage(
         editableMessage,
       );
