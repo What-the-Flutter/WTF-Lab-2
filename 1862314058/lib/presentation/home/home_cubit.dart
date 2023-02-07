@@ -1,8 +1,10 @@
 part of 'home_state.dart';
 
 class HomeCubit extends Cubit<HomeState> {
-  User? user;
-  late final _firebaseRepository = FirebaseRepository(user: user);
+  final FirebaseAuthRepository user;
+  late final _firebaseRepository = FirebaseRepository(
+    user: user.currentUser,
+  );
 
   HomeCubit({required this.user}) : super(HomeState());
 

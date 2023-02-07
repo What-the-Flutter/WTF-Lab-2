@@ -3,13 +3,17 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import '../../data/models/message.dart';
 import '../../data/models/post.dart';
+import '../../repository/firebase_auth_repository.dart';
 import '../../repository/firebase_repository.dart';
 import '../../repository/shared_pref_app.dart';
 import 'messages_state.dart';
 
 class MessagesCubit extends Cubit<MessagesState> {
-  User? user;
-  late final _firebaseRepository = FirebaseRepository(user: user);
+  // User? user;
+  // late final _firebaseRepository = FirebaseRepository(user: user);
+
+  final FirebaseAuthRepository user;
+  late final _firebaseRepository = FirebaseRepository(user: user.currentUser);
 
   MessagesCubit({required this.user}) : super(MessagesState(editMode: false));
 
