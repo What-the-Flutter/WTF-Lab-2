@@ -5,6 +5,7 @@ import '/utils/chat_card.dart';
 import '../../settings/cubit/settings_cubit/settings_cubit.dart';
 import '../../settings/theme.dart';
 import '../chat_page/chat_view.dart';
+import '../chat_page/cubit/chat_cubit.dart';
 import '../new_chat_page/new_chat_view.dart';
 import 'cubit/home_cubit.dart';
 
@@ -94,6 +95,10 @@ class _ChatCardBuilder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final messages = context
+        .read<ChatCubit>()
+        .getMessagesFromChat(chatCard.id ?? '');
+    final subtitle = messages.isNotEmpty ? messages.last.text : 'No elements';
     return GestureDetector(
       onLongPress: () => context.read<HomeCubit>().selectChat(chatCard),
       child: Card(
@@ -112,7 +117,7 @@ class _ChatCardBuilder extends StatelessWidget {
             ),
           ),
           subtitle: Text(
-            chatCard.subtitle,
+            subtitle,
             style: getBodyText(
               context.read<SettingsCubit>().state.textSize,
               context,
