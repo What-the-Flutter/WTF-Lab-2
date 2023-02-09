@@ -266,9 +266,7 @@ class _CategoryView extends StatelessWidget {
                 );
               }
             default:
-              {
                 return _categoryButtons(index - 2, state);
-              }
           }
         },
       ),
@@ -277,7 +275,7 @@ class _CategoryView extends StatelessWidget {
 
   Container _categoryButtons(int index, CategoryState state) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -321,7 +319,7 @@ class _CategoryView extends StatelessWidget {
           ),
           Text(
             text,
-            style: getBodyText(context, context),
+            style: getBodyText(TextSizeKeys.medium, context),
           ),
         ],
       ),
