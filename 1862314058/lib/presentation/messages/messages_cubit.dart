@@ -1,29 +1,19 @@
 import 'package:bloc/bloc.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import '../../data/models/message.dart';
 import '../../data/models/post.dart';
-import '../../repository/firebase_auth_repository.dart';
 import '../../repository/firebase_repository.dart';
 import '../../repository/shared_pref_app.dart';
 import 'messages_state.dart';
 
 class MessagesCubit extends Cubit<MessagesState> {
-  // User? user;
-  // late final _firebaseRepository = FirebaseRepository(user: user);
+  final _firebaseRepository = FirebaseRepository();
 
-  final FirebaseAuthRepository user;
-  late final _firebaseRepository = FirebaseRepository(user: user.currentUser);
-
-  MessagesCubit({required this.user}) : super(MessagesState(editMode: false));
+  MessagesCubit() : super(MessagesState(editMode: false));
 
   void init(Post post) async {
     initSharPref();
-    emit(
-      state.copyWith(
-        messageList: await _firebaseRepository.getAllMessages(post),
-      ),
-    );
+    _getAllMess(post.id.toString());
   }
 
   void initSharPref() {
@@ -35,12 +25,31 @@ class MessagesCubit extends Cubit<MessagesState> {
     );
   }
 
+  void _getAllMess(String postId) async {
+    _firebaseRepository.listenMessages(postId).listen(
+      (event) {
+        var messages = <Message>[];
+        var data = (event.snapshot.value ?? {}) as Map;
+        data.forEach(((key, value) {
+          messages.add(Message.fromJson({'id': key, ...value}));
+        }));
+        emit(
+          state.copyWith(
+            messageList: messages,
+          ),
+        );
+      },
+    );
+  }
+
   void addMessage(Message message) async {
     await _firebaseRepository.addMessage(message);
     final listM = state.messageList;
     listM.add(message);
     emit(
-      state.copyWith(messageList: listM),
+      state.copyWith(
+        messageList: listM,
+      ),
     );
   }
 
@@ -49,22 +58,24 @@ class MessagesCubit extends Cubit<MessagesState> {
     final listM = state.messageList;
     listM[index] = messageItem;
     emit(
-      state.copyWith(messageList: listM),
+      state.copyWith(
+        messageList: listM,
+      ),
     );
   }
 
-  void deleteMessage() async {
+  void deleteMessage(String postId, String messageId) async {
     for (int i = 0; i < state.messageList.length; i++) {
       if (state.messageList[i].isSelectedMessage) {
-        await _firebaseRepository.deleteMessage(
-          state.messageList[i],
-        );
+        await _firebaseRepository.deleteMessage(postId, state.messageList[i].id.toString());
         state.messageList.removeAt(i);
         i--;
       }
     }
     emit(
-      state.copyWith(messageList: state.messageList),
+      state.copyWith(
+        messageList: state.messageList,
+      ),
     );
   }
 

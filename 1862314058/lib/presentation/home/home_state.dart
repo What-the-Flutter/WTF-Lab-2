@@ -1,8 +1,6 @@
 import 'package:bloc/bloc.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../data/models/post.dart';
-import '../../repository/firebase_auth_repository.dart';
 import '../../repository/firebase_repository.dart';
 
 part 'home_cubit.dart';

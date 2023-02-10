@@ -1,18 +1,30 @@
 part of 'home_state.dart';
 
 class HomeCubit extends Cubit<HomeState> {
-  final FirebaseAuthRepository user;
-  late final _firebaseRepository = FirebaseRepository(
-    user: user.currentUser,
-  );
+  final _firebaseRepository = FirebaseRepository();
 
-  HomeCubit({required this.user}) : super(HomeState());
+  HomeCubit() : super(HomeState());
 
   void init() async {
-    emit(
-      state.copyWith(
-        postList: await _firebaseRepository.getAllPosts(),
-      ),
+    _getAllPosts();
+  }
+
+  void _getAllPosts() {
+    _firebaseRepository.listenPosts().listen(
+      (event) {
+        var posts = <Post>[];
+        var data = (event.snapshot.value ?? {}) as Map;
+        data.forEach((key, value) {
+          posts.add(
+            Post.fromJson({'id': key, ...value}),
+          );
+        });
+        emit(
+          state.copyWith(
+            postList: posts,
+          ),
+        );
+      },
     );
   }
 
@@ -21,7 +33,9 @@ class HomeCubit extends Cubit<HomeState> {
     final listP = state.postList;
     listP.add(post);
     emit(
-      state.copyWith(postList: listP),
+      state.copyWith(
+        postList: listP,
+      ),
     );
   }
 
@@ -30,16 +44,20 @@ class HomeCubit extends Cubit<HomeState> {
     _firebaseRepository.editPost(postItem);
     listP[index] = postItem;
     emit(
-      state.copyWith(postList: listP),
+      state.copyWith(
+        postList: listP,
+      ),
     );
   }
 
   void deletePost(int index) {
     final listP = state.postList;
-    _firebaseRepository.deletePost(listP[index]);
+    _firebaseRepository.deletePost(index.toString());
     listP.removeAt(index);
     emit(
-      state.copyWith(postList: listP),
+      state.copyWith(
+        postList: listP,
+      ),
     );
   }
 
@@ -53,7 +71,9 @@ class HomeCubit extends Cubit<HomeState> {
       listP.removeAt(index + 1);
     }
     emit(
-      state.copyWith(postList: listP),
+      state.copyWith(
+        postList: listP,
+      ),
     );
   }
 }

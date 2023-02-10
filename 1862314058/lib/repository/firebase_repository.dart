@@ -6,107 +6,48 @@ import '../data/models/message.dart';
 import '../data/models/post.dart';
 
 class FirebaseRepository {
-  final DatabaseReference _databaseReference = FirebaseDatabase.instance.ref();
+  final DatabaseReference _postRef =
+      FirebaseDatabase.instance.ref().child('posts');
+  final DatabaseReference _messageRef =
+      FirebaseDatabase.instance.ref().child('messages');
   final FirebaseStorage _firebaseStorage = FirebaseStorage.instance;
-  final User? user;
 
-  FirebaseRepository({
-    required this.user,
-  });
-
-  Future<List<Post>> getAllPosts() async {
-    final posts = <Post>[];
-    //final newPostKey = FirebaseDatabase.instance.ref().child('posts').get();
-    final databasePost =
-        await _databaseReference.child(user!.uid).child('posts').once();
-    for (final child in databasePost.snapshot.children) {
-      final map = child.value as Map<String, dynamic>;
-      final addPost = Post.fromJson(map);
-      posts.add(addPost);
-    }
-    return posts;
+  Stream<DatabaseEvent> listenPosts() async* {
+    yield* _postRef.onValue;
   }
 
-  Future<List<Message>> getAllMessages(Post post) async {
-    final messages = <Message>[];
-    final databaseMessage = await _databaseReference
-        .child(user!.uid)
-        .child('posts')
-        .child('messages')
-        .once();
-    for (final child in databaseMessage.snapshot.children) {
-      final map = child.value as Map<String, dynamic>;
-      final addMessage = Message.fromJson(map);
-      messages.add(addMessage);
-    }
-    return messages;
+  Stream<DatabaseEvent> listenMessages(String postId) async* {
+    yield* _messageRef.child(postId).onValue;
   }
 
-  Future<void> addPost(Post post) async {
-    await _databaseReference
-        .child(user!.uid)
-        .child('posts')
-        .child(post.id.toString())
-        .set(
+  void addPost(Post post) async {
+    await _postRef.push().set(
           post.toJson(),
         );
   }
 
-  Future<void> editPost(Post post) async {
-    await _databaseReference
-        .child(user!.uid)
-        .child('posts')
-        .child(post.id.toString())
-        .update(
-          post.toJson(),
-        );
+  void editPost(Post post) async {
+    await _postRef.child(post.id.toString()).update(post.toJson());
   }
 
-  Future<void> deletePost(Post post) async {
-    await _databaseReference
-        .child(user!.uid)
-        .child('posts')
-        .child(post.id.toString())
-        .remove();
+  void deletePost(String postId) async {
+    await _postRef.child(postId).remove();
   }
 
   Future<void> addMessage(Message message) async {
-    // final imagePath = message.textMessage;
-    // File? file;
-    // if (imagePath != null) {
-    //   file = File(imagePath);
-    // }
-    // if (file != null) {
-    //   await _firebaseStorage.ref('${user!.uid}/images').putFile(file);
-    // }
-
-    await _databaseReference
-        .child(user!.uid)
-        .child('posts')
-        .child('messages')
-        .child(message.id.toString())
-        .set(
+    await _messageRef.child(message.id.toString()).push().set(
           message.toJson(),
         );
   }
 
   Future<void> editMessage(Message message) async {
-    await _databaseReference
-        .child(user!.uid)
-        .child('posts')
-        .child('messages')
-        .child(message.id.toString())
-        .update(
+    await _messageRef.child(message.postId).child(message.id.toString()).update(
           message.toJson(),
         );
   }
 
-  Future<void> deleteMessage(Message message) async {
-    await _databaseReference
-        .child(user!.uid)
-        .child('posts')
-        .child('messages/${message.id}')
-        .remove();
+  Future<void> deleteMessage(String postId, String messageId) async {
+    await _messageRef.child(postId).child(messageId).remove();
   }
 }
 

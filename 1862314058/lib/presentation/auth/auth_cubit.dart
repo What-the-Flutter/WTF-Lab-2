@@ -34,20 +34,4 @@ class AuthCubit extends Cubit<AuthState> {
   void signAnon() async {
     await firebaseAuthRepository.signInAnonymous();
   }
-// Future<void> signInAnonymous() async {
-//   var isAuth = false;
-//   try {
-//     final userCredential = await FirebaseAuth.instance.signInAnonymously();
-//     if (userCredential != null) {
-//       isAuth = true;
-//     }
-//     emit(
-//       state.copyWith(
-//         isAuth: isAuth,
-//       ),
-//     );
-//   } catch (e) {
-//     print('Firebase error');
-//   }
-// }
 }

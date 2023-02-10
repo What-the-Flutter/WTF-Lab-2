@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import '../../repository/rive_utils.dart';
 import '../../theme/theme_state.dart';
 import '../../widgets/btm_nvg.dart';

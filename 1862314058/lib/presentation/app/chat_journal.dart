@@ -21,12 +21,12 @@ class ChatJournal extends StatelessWidget {
       providers: [
         BlocProvider(
           create: (context) => HomeCubit(
-            user: firebaseAuthRepository,
+            // user: firebaseAuthRepository,
           ),
         ),
         BlocProvider(
           create: (context) => MessagesCubit(
-            user: firebaseAuthRepository,
+            // user: firebaseAuthRepository,
           ),
         ),
         BlocProvider(

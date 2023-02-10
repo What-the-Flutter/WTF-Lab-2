@@ -8,8 +8,6 @@ void main() async {
   await Firebase.initializeApp();
   await SharedPreferencesServices.initialize();
 
-  ///final _user = await AuthService().signInAnonymous();
-
   runApp(
     ChatJournal(),
   );

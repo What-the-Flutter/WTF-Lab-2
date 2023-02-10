@@ -12,12 +12,12 @@ import 'messages_cubit.dart';
 import 'messages_state.dart';
 
 class MessagesPage extends StatefulWidget {
-  final Post item;
+  final Post postItem;
   final int index;
 
   const MessagesPage({
     super.key,
-    required this.item,
+    required this.postItem,
     required this.index,
   });
 
@@ -34,7 +34,7 @@ class _MessagesPageState extends State<MessagesPage> {
   @override
   void initState() {
     super.initState();
-    BlocProvider.of<MessagesCubit>(context).init(widget.item);
+    BlocProvider.of<MessagesCubit>(context).init(widget.postItem);
   }
 
   Future _getFromCamera() async {
@@ -47,6 +47,7 @@ class _MessagesPageState extends State<MessagesPage> {
     }
     final newMess = Message(
       id: DateTime.now().millisecondsSinceEpoch.toInt(),
+      postId: widget.postItem.id.toString(),
       textMessage: imageFile!.path,
       createMessageTime: DateFormat.jm().format(DateTime.now()).toString(),
       typeMessage: MessageType.image,
@@ -64,6 +65,7 @@ class _MessagesPageState extends State<MessagesPage> {
     }
     final newMess = Message(
         id: DateTime.now().millisecondsSinceEpoch.toInt(),
+        postId: widget.postItem.id.toString(),
         textMessage: imageFile!.path,
         createMessageTime: DateFormat.jm().format(DateTime.now()).toString(),
         typeMessage: MessageType.image);
@@ -129,7 +131,7 @@ class _MessagesPageState extends State<MessagesPage> {
 
   AppBar _defaultBar() {
     return AppBar(
-      title: Text(widget.item.title),
+      title: Text(widget.postItem.title),
       actions: <Widget>[
         IconButton(
           onPressed: () {},
@@ -167,7 +169,7 @@ class _MessagesPageState extends State<MessagesPage> {
         IconButton(
           icon: const Icon(Icons.delete),
           onPressed: () {
-            BlocProvider.of<MessagesCubit>(context).deleteMessage();
+            ///BlocProvider.of<MessagesCubit>(context).deleteMessage();
           },
         ),
       ],
@@ -271,6 +273,7 @@ class _MessagesPageState extends State<MessagesPage> {
             } else {
               final newMessage = Message(
                 id: DateTime.now().millisecondsSinceEpoch.toInt(),
+                postId: widget.postItem.id.toString(),
                 textMessage: _messageController.text,
                 createMessageTime:
                     DateFormat.jm().format(DateTime.now()).toString(),
