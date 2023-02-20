@@ -1,22 +1,22 @@
 part of 'chat_cubit.dart';
 
-class MessagesState {
+class ChatState {
   final List<Message> messages;
   final PicturePath? picturePath;
   final Filter filter;
 
-  MessagesState({
+  ChatState({
     required this.messages,
     required this.filter,
     this.picturePath,
   });
 
-  MessagesState copyWith({
+  ChatState copyWith({
     List<Message>? messages,
     Filter? filter,
     PicturePath? picturePath,
   }) {
-    return MessagesState(
+    return ChatState(
       messages: messages ?? this.messages,
       filter: filter ?? this.filter,
       picturePath: picturePath ?? this.picturePath,

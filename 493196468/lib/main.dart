@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'blocs_observer.dart';
 import 'firebase_options.dart';
@@ -14,9 +15,13 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   final isSignedIn = await _anonymousAuth();
+  final preferences = await SharedPreferences.getInstance();
 
   runApp(
-    ChatDiaryApp(isSignedIn: isSignedIn),
+    ChatDiaryApp(
+      isSignedIn: isSignedIn,
+      preferences: preferences,
+    ),
   );
 }
 

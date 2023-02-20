@@ -33,7 +33,7 @@ class HomeCubit extends Cubit<ChatsState> {
 
   void addChat({required ChatCard newChatCard}) async {
     final id = await chatsRepository.addChat(newChatCard);
-    var chats = state.chatCards;
+    final chats = state.chatCards;
     chats.add(newChatCard.copyWith(id: id));
     final newState = ChatsState(chats, state.selectedTabIndex);
     emit(newState);
@@ -42,7 +42,7 @@ class HomeCubit extends Cubit<ChatsState> {
   ChatCard getSelectedChat() =>
       state.chatCards.firstWhere((element) => element.isSelected);
 
-  List<ChatCard> getSelectedChats() =>
+  List<ChatCard>? getSelectedChats() =>
       state.chatCards.where((element) => element.isSelected).toList();
 
   void editChat(ChatCard chatCard) async {
@@ -61,7 +61,7 @@ class HomeCubit extends Cubit<ChatsState> {
     final selectedChats =
         state.chatCards.where((element) => element.isSelected).toList();
     chatsRepository.deleteSelectedChats(selectedChats);
-    for (var element in selectedChats) {
+    for (final element in selectedChats) {
       state.chatCards.remove(element);
     }
     emitAllChats();
@@ -77,7 +77,7 @@ class HomeCubit extends Cubit<ChatsState> {
   void unselectAllChats() {
     final selectedChats =
         state.chatCards.where((element) => element.isSelected).toList();
-    for (var element in selectedChats) {
+    for (final element in selectedChats) {
       editChatInState(element.copyWith(isSelected: false));
     }
     emitAllChats();

@@ -11,10 +11,10 @@ class TimelineView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return BlocBuilder<MessageCubit, MessagesState>(
+    return BlocBuilder<ChatCubit, ChatState>(
       builder: (context, state) {
         final messages =
-        context.read<MessageCubit>().getAllMessages();
+        context.read<ChatCubit>().getAllMessages();
         return Scaffold(
           appBar: getAppBar(
             context: context,

@@ -26,10 +26,10 @@ class ChatView extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final chatId = chatCard.id ?? '-1';
-    return BlocBuilder<MessageCubit, MessagesState>(
+    return BlocBuilder<ChatCubit, ChatState>(
       builder: (context, state) {
         final messages =
-            context.read<MessageCubit>().getMessagesFromChat(chatId);
+            context.read<ChatCubit>().getMessagesFromChat(chatId);
         return Scaffold(
           appBar: getAppBar(
             context: context,
@@ -96,7 +96,7 @@ class _SubmitButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
       onPressed: () {
-        context.read<MessageCubit>().addMessage(
+        context.read<ChatCubit>().addMessage(
               Message(
                 text: controller.text,
                 chatId: chatId,
@@ -170,7 +170,7 @@ class _TextFieldState extends State<_TextField> {
                 context,
               ).copyWith(color: Colors.blue),
               onSubmitted: (text) {
-                context.read<MessageCubit>().addMessage(
+                context.read<ChatCubit>().addMessage(
                       Message(
                         text: text,
                         chatId: widget.chatId,
@@ -250,7 +250,7 @@ class _CategoryView extends StatelessWidget {
                   context: context,
                   icon: const Icon(Icons.image_outlined),
                   onPressed: (context) async =>
-                      await context.read<MessageCubit>().pickImage().then(
+                      await context.read<ChatCubit>().pickImage().then(
                     (value) {
                       if (value == false) {
                         showDialog(
@@ -266,9 +266,7 @@ class _CategoryView extends StatelessWidget {
                 );
               }
             default:
-              {
                 return _categoryButtons(index - 2, state);
-              }
           }
         },
       ),
@@ -277,7 +275,7 @@ class _CategoryView extends StatelessWidget {
 
   Container _categoryButtons(int index, CategoryState state) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -321,7 +319,7 @@ class _CategoryView extends StatelessWidget {
           ),
           Text(
             text,
-            style: getBodyText(context, context),
+            style: getBodyText(TextSizeKeys.medium, context),
           ),
         ],
       ),
@@ -382,7 +380,7 @@ class _SelectedPictureView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final picturePath =
-        context.read<MessageCubit>().state.picturePath?.picturePath ?? '';
+        context.read<ChatCubit>().state.picturePath?.picturePath ?? '';
     return Container(
       constraints: const BoxConstraints(maxHeight: 100),
       child: picturePath.isNotEmpty
@@ -401,7 +399,7 @@ class _SelectedPictureView extends StatelessWidget {
           top: 0,
           right: 0,
           child: GestureDetector(
-            onTap: () => context.read<MessageCubit>().removePicture(),
+            onTap: () => context.read<ChatCubit>().removePicture(),
             child: const Icon(
               Icons.cancel,
             ),

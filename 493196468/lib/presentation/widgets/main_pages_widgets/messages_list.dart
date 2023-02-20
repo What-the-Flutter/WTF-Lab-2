@@ -97,7 +97,7 @@ class _DismissibleMessageTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onLongPress: () => context.read<MessageCubit>().selectMessage(
+      onLongPress: () => context.read<ChatCubit>().selectMessage(
             messages.reversed.elementAt(index),
           ),
       child: _DismissibleMessage(
@@ -105,10 +105,10 @@ class _DismissibleMessageTile extends StatelessWidget {
         onDismissed: (direction) {
           direction == DismissDirection.startToEnd
               ? context
-                  .read<MessageCubit>()
+                  .read<ChatCubit>()
                   .startEditMessage(messages.reversed.elementAt(index))
               : context
-                  .read<MessageCubit>()
+                  .read<ChatCubit>()
                   .deleteMessage(messages.reversed.elementAt(index));
         },
         child: _MessageTile(

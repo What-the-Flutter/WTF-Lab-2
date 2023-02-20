@@ -8,7 +8,7 @@ import '../../settings/theme.dart';
 
 AppBar getAppBar({
   required BuildContext context,
-  required MessagesState state,
+  required ChatState state,
   required String title,
   String? chatId,
 }) {
@@ -43,14 +43,14 @@ AppBar _commonAppBar(BuildContext context, int selectedAmount, String title) {
 IconButton _cancelSelectedButton(BuildContext context) {
   return IconButton(
     icon: const Icon(Icons.cancel_outlined),
-    onPressed: () => context.read<MessageCubit>().unselectAllMessages(),
+    onPressed: () => context.read<ChatCubit>().unselectAllMessages(),
   );
 }
 
 AppBar _filterAppBar(BuildContext context, int selectedAmount, String? chatId) {
   final hashTagFilters = chatId == null
-      ? context.read<MessageCubit>().getHashTagFilters()
-      : context.read<MessageCubit>().getHashTagFiltersFromChat(chatId);
+      ? context.read<ChatCubit>().getHashTagFilters()
+      : context.read<ChatCubit>().getHashTagFiltersFromChat(chatId);
   return AppBar(
     leading: _filterBackButton(context),
     title: selectedAmount == 0 ? const _AppBarTextField() : const SizedBox(),
@@ -70,7 +70,7 @@ IconButton _filterBackButton(BuildContext context) {
   return IconButton(
     icon: const Icon(Icons.arrow_back_ios),
     onPressed: () {
-      context.read<MessageCubit>().deleteFilter();
+      context.read<ChatCubit>().deleteFilter();
     },
   );
 }
@@ -90,14 +90,14 @@ class _AppBarButtons extends StatelessWidget {
     if (selectedAmount == 0 && isFiltered) {
       appBarButtonList.add(
         IconButton(
-          onPressed: () => context.read<MessageCubit>().setFilter(''),
+          onPressed: () => context.read<ChatCubit>().setFilter(''),
           icon: const Icon(Icons.search),
         ),
       );
       appBarButtonList.add(
         IconButton(
-          onPressed: () => context.read<MessageCubit>().setBookmarkFilter(),
-          icon: context.read<MessageCubit>().state.filter.isBookmarkFilterOn
+          onPressed: () => context.read<ChatCubit>().setBookmarkFilter(),
+          icon: context.read<ChatCubit>().state.filter.isBookmarkFilterOn
               ? const Icon(Icons.bookmark)
               : const Icon(Icons.bookmark_outline),
         ),
@@ -120,13 +120,13 @@ class _AppBarButtons extends StatelessWidget {
       appBarButtonList.add(
         IconButton(
           onPressed: () =>
-              context.read<MessageCubit>().deleteSelectedMessages(),
+              context.read<ChatCubit>().deleteSelectedMessages(),
           icon: const Icon(Icons.delete),
         ),
       );
       appBarButtonList.add(
         IconButton(
-          onPressed: () => context.read<MessageCubit>().changeBookmark(),
+          onPressed: () => context.read<ChatCubit>().changeBookmark(),
           icon: const Icon(Icons.bookmark),
         ),
       );
@@ -136,14 +136,14 @@ class _AppBarButtons extends StatelessWidget {
         appBarButtonList.add(
           IconButton(
             onPressed: () =>
-                context.read<MessageCubit>().startEditSelectedMessage(),
+                context.read<ChatCubit>().startEditSelectedMessage(),
             icon: const Icon(Icons.edit),
           ),
         );
       }
       appBarButtonList.add(
         IconButton(
-          onPressed: () => context.read<MessageCubit>().copyMessage(),
+          onPressed: () => context.read<ChatCubit>().copyMessage(),
           icon: const Icon(Icons.copy),
         ),
       );
@@ -175,7 +175,7 @@ class _AppBarTextFieldState extends State<_AppBarTextField> {
   @override
   void initState() {
     _controller = TextEditingController();
-    _controller.text = context.read<MessageCubit>().state.filter.filterStr;
+    _controller.text = context.read<ChatCubit>().state.filter.filterStr;
     super.initState();
   }
 
@@ -184,7 +184,7 @@ class _AppBarTextFieldState extends State<_AppBarTextField> {
     return TextField(
       controller: _controller,
       onChanged: (filter) {
-        context.read<MessageCubit>().setFilter(filter);
+        context.read<ChatCubit>().setFilter(filter);
       },
     );
   }
@@ -260,7 +260,7 @@ class _ShearingDialogState extends State<_ShearingDialog> {
         TextButton(
           onPressed: () {
             widget.messageContext
-                .read<MessageCubit>()
+                .read<ChatCubit>()
                 .migrateMessages(_radioValue);
             Navigator.pop(context);
           },
@@ -325,7 +325,7 @@ class _HashTagFiltersState extends State<_HashTagFilters> {
                             );
                           }
                           context
-                              .read<MessageCubit>()
+                              .read<ChatCubit>()
                               .addHashTagFilters(_filters);
                         });
                       },
