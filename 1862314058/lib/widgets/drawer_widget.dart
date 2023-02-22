@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../presentation/settings/settings_page.dart';
+import '../presentation/statistics/statistics_page.dart';
 
 class CustomDrawer extends StatelessWidget {
   const CustomDrawer({Key? key}) : super(key: key);
@@ -10,7 +11,8 @@ class CustomDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final webUrlApp =
         'https://play.google.com/store/apps/details?id=com.agiletelescope.chatjournal';
-    final textApp = 'Keep track of your life with Chat Journal, a simple and elegant chat-based journal/notes application that makes journaling/note-taking fun, easy, quick and effortless.';
+    final textApp =
+        'Keep track of your life with Chat Journal, a simple and elegant chat-based journal/notes application that makes journaling/note-taking fun, easy, quick and effortless.';
 
     return Drawer(
       child: ListView(
@@ -40,7 +42,7 @@ class CustomDrawer extends StatelessWidget {
               await Share.share('${textApp} ${webUrlApp}');
             },
           ),
-           ListTile(
+          ListTile(
             leading: Icon(
               Icons.search,
               color: Theme.of(context).iconTheme.color,
@@ -57,6 +59,23 @@ class CustomDrawer extends StatelessWidget {
             title: const Text(
               'Notification',
             ),
+          ),
+          ListTile(
+            leading: Icon(
+              Icons.auto_graph,
+              color: Theme.of(context).iconTheme.color,
+            ),
+            title: const Text(
+              'Statistics',
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => StatisticsPage(),
+                ),
+              );
+            },
           ),
           ListTile(
             leading: Icon(

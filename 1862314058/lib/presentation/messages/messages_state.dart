@@ -2,32 +2,41 @@ import '../../data/models/message.dart';
 
 class MessagesState {
   final List<Message> messageList;
-  final int index;
-  final bool editMode;
+  final String postId;
   final bool isBubbleAlignment;
   final String backgroundImage;
 
+  final int selectedMessage;
+  final bool isSelected;
+  final bool isEditing;
+
   MessagesState({
     this.messageList = const [],
-    this.index = 0,
-    required this.editMode,
+    this.postId = '',
     this.isBubbleAlignment = false,
     this.backgroundImage = '',
+    this.selectedMessage = 0,
+    this.isSelected = false,
+    this.isEditing = false,
   });
 
-  MessagesState copyWith({
-    List<Message>? messageList,
-    int? index,
-    bool? editMode,
-    bool? isBubbleAlignment,
-    String? backgroundImage
-  }) {
+  MessagesState copyWith(
+      {List<Message>? messageList,
+      String? postId,
+      bool? isBubbleAlignment,
+      String? backgroundImage,
+      int? selectedMessage,
+      bool? isSelected,
+        bool? isEditing,
+      }) {
     return MessagesState(
       messageList: messageList ?? this.messageList,
-      index: index ?? this.index,
-      editMode: editMode ?? this.editMode,
+      postId: postId ?? this.postId,
+      isEditing: isEditing ?? this.isEditing,
       isBubbleAlignment: isBubbleAlignment ?? this.isBubbleAlignment,
       backgroundImage: backgroundImage ?? this.backgroundImage,
+      selectedMessage: selectedMessage ?? this.selectedMessage,
+      isSelected: isSelected ?? this.isSelected,
     );
   }
 }

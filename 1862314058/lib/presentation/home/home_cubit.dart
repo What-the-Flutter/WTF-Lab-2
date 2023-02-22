@@ -1,44 +1,55 @@
 part of 'home_state.dart';
 
 class HomeCubit extends Cubit<HomeState> {
-  User? user;
-  late final _firebaseRepository = FirebaseRepository(user: user);
+  final _firebaseRepository = FirebaseRepository();
 
-  HomeCubit({required this.user}) : super(HomeState());
+  HomeCubit() : super(HomeState());
 
   void init() async {
+    _getAllPosts();
+  }
+
+  void _getAllPosts() async {
+    final posts = await _firebaseRepository.getAllPosts();
+    emit(state.copyWith(postList: posts));
+  }
+
+  void addPost(String titlePost) async {
+    final newPost = Post(
+      id: Uuid().v4(),
+      title: titlePost,
+      createPostTime: DateTime.now().toString(),
+    );
+    _firebaseRepository.addPost(newPost);
     emit(
       state.copyWith(
-        postList: await _firebaseRepository.getAllPosts(),
+        postList: state.postList,
       ),
     );
+    _getAllPosts();
   }
 
-  void addPost(Post post) async {
-    _firebaseRepository.addPost(post);
-    final listP = state.postList;
-    listP.add(post);
-    emit(
-      state.copyWith(postList: listP),
+  void editPost(String postText, int index) {
+    final editedPost = state.postList[index].copyWith(
+      title: postText,
     );
-  }
-
-  void editPost(Post postItem, int index) {
-    final listP = state.postList;
-    _firebaseRepository.editPost(postItem);
-    listP[index] = postItem;
+    _firebaseRepository.editPost(editedPost);
     emit(
-      state.copyWith(postList: listP),
+      state.copyWith(
+        postList: state.postList,
+      ),
     );
+    _getAllPosts();
   }
 
   void deletePost(int index) {
-    final listP = state.postList;
-    _firebaseRepository.deletePost(listP[index]);
-    listP.removeAt(index);
+    _firebaseRepository.deletePost(state.postList[index]);
     emit(
-      state.copyWith(postList: listP),
+      state.copyWith(
+        postList: state.postList,
+      ),
     );
+    _getAllPosts();
   }
 
   void pinPost(Post postItem, int index) {
@@ -51,7 +62,9 @@ class HomeCubit extends Cubit<HomeState> {
       listP.removeAt(index + 1);
     }
     emit(
-      state.copyWith(postList: listP),
+      state.copyWith(
+        postList: listP,
+      ),
     );
   }
 }

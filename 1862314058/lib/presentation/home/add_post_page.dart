@@ -86,34 +86,31 @@ class _AddPostPageState extends State<AddPostPage> {
       floatingActionButton: BlocBuilder<HomeCubit, HomeState>(
         builder: (context, state) {
           return FloatingActionButton(
-            onPressed: widget.isEditMode ? _updateData : _submitData,
+            onPressed: () {
+              if (_postTitle.text.isNotEmpty) {
+                if (widget.isEditMode) {
+                  context.read<HomeCubit>().editPost(
+                        _postTitle.text,
+                        widget.index!,
+                      );
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                } else {
+                  context.read<HomeCubit>().addPost(
+                        _postTitle.text,
+                      );
+                  _postTitle.clear();
+                  Navigator.pop(context);
+                }
+              } else {
+                print('Error input');
+              }
+            },
             backgroundColor: Colors.amber,
             child: const Icon(Icons.add),
           );
         },
       ),
     );
-  }
-
-  void _updateData() {
-    final newPost = Post(
-      id: DateTime.now().millisecondsSinceEpoch.toInt(),
-      title: _postTitle.text,
-      createPostTime: DateFormat.yMd().format(DateTime.now()).toString(),
-    );
-    context.read<HomeCubit>().editPost(newPost, widget.index!);
-    Navigator.pop(context);
-    Navigator.pop(context);
-  }
-
-  void _submitData() {
-    final newPost = Post(
-      id: DateTime.now().millisecondsSinceEpoch.toInt(),
-      title: _postTitle.text,
-      createPostTime: DateFormat.yMd().format(DateTime.now()).toString(),
-    );
-    context.read<HomeCubit>().addPost(newPost);
-    _postTitle.clear();
-    Navigator.pop(context);
   }
 }

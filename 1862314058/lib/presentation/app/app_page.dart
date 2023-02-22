@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../data/models/menu.dart';
 import '../../repository/rive_utils.dart';
 import '../../theme/theme_state.dart';
 import '../../widgets/btm_nvg.dart';
 import '../../widgets/drawer_widget.dart';
+import '../constants/menu.dart';
 import '../daily/daily_app_bar.dart';
 import '../daily/daily_page.dart';
 import '../explore/explore_app_bar.dart';

@@ -1,15 +1,20 @@
+enum AuthStatus {
+  auth,
+  unauth,
+}
+
 class AuthState {
-  final bool isAuth;
+  final AuthStatus authStatus;
 
   AuthState({
-    required this.isAuth,
+    required this.authStatus,
   });
 
   AuthState copyWith({
-    bool? isAuth,
+    AuthStatus? authStatus,
   }) {
     return AuthState(
-      isAuth: isAuth ?? this.isAuth,
+      authStatus: authStatus ?? this.authStatus,
     );
   }
 }

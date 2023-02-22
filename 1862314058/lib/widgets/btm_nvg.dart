@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:rive/rive.dart';
 
-import '../data/models/menu.dart';
+import '../presentation/constants/menu.dart';
 import 'animated_bar.dart';
 
 class BtmNavItem extends StatelessWidget {
-  const BtmNavItem(
-      {super.key,
-        required this.navBar,
-        required this.press,
-        required this.riveOnInit,
-        required this.selectedNav});
-
   final Menu navBar;
   final VoidCallback press;
   final ValueChanged<Artboard> riveOnInit;
   final Menu selectedNav;
+
+  const BtmNavItem({
+    super.key,
+    required this.navBar,
+    required this.press,
+    required this.riveOnInit,
+    required this.selectedNav,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +25,9 @@ class BtmNavItem extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          AnimatedBar(isActive: selectedNav == navBar),
+          AnimatedBar(
+            isActive: selectedNav == navBar,
+          ),
           SizedBox(
             height: 36,
             width: 36,

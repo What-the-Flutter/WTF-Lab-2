@@ -1,11 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import '../../data/models/post.dart';
-import '../../repository/anonymous_auth.dart';
 import '../../widgets/info_post_widget.dart';
 import '../bot/bot_page.dart';
-
 import '../messages/messages_page.dart';
 import 'add_post_page.dart';
 import 'home_state.dart';
@@ -32,7 +30,7 @@ class _HomePageState extends State<HomePage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
-                AuthService().currentUser!.uid,
+                FirebaseAuth.instance.currentUser!.uid,
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(
@@ -72,8 +70,7 @@ class _HomePageState extends State<HomePage> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => MessagesPage(
-                              item: state.postList[index],
-                              index: index,
+                              postItem: state.postList[index],
                             ),
                           ),
                         );
