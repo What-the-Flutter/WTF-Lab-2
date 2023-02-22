@@ -7,31 +7,77 @@ import '../data/models/post.dart';
 
 class FirebaseRepository {
   final DatabaseReference _postRef =
-      FirebaseDatabase.instance.ref().child('posts');
+      FirebaseDatabase.instance.ref().child('/posts');
   final DatabaseReference _messageRef =
-      FirebaseDatabase.instance.ref().child('messages');
+      FirebaseDatabase.instance.ref().child('/messages');
   final FirebaseStorage _firebaseStorage = FirebaseStorage.instance;
 
-  Stream<DatabaseEvent> listenPosts() async* {
-    yield* _postRef.onValue;
+  Future<List<Post>> getAllPosts() async {
+    final pList = <Post>[];
+    final resultList = <dynamic>[];
+    final childKeyList = <dynamic>[];
+    final childPostKeyList = <dynamic>[];
+    final snap = await _postRef.once();
+    for (var childSnapshot in snap.snapshot.children) {
+      var childKey = childSnapshot.key;
+      childKeyList.add(childKey);
+    }
+    DatabaseEvent snapPost;
+    for (var i = 0; i < childKeyList.length; i++) {
+      snapPost = await _postRef.child(childKeyList[i]).once();
+      for (var childSnapshot in snapPost.snapshot.children) {
+        var childPostKey = childSnapshot.key;
+        childPostKeyList.add(childPostKey);
+        resultList.add(snapPost.snapshot.child(childPostKeyList[i]).value);
+      }
+      final result = resultList[i];
+      print(result);
+      pList.add(
+        Post.fromJson(
+          Map<String, dynamic>.from(result),
+        ),
+      );
+    }
+    return pList;
   }
 
-  Stream<DatabaseEvent> listenMessages(String postId) async* {
-    yield* _messageRef.child(postId).onValue;
+  Future<List<Message>> getAllMessages() async {
+    final mList = <Message>[];
+    final resultList = <dynamic>[];
+    final childKeyList = <dynamic>[];
+    final childMessageKeyList = <dynamic>[];
+    final snap = await _messageRef.once();
+    for (var childSnapshot in snap.snapshot.children) {
+      var childKey = childSnapshot.key;
+      childKeyList.add(childKey);
+    }
+    DatabaseEvent snapMessages;
+    for (var i = 0; i < childKeyList.length; i++) {
+      snapMessages = await _messageRef.child(childKeyList[i]).once();
+      for (var childSnapshot in snapMessages.snapshot.children) {
+        var childMessageKey = childSnapshot.key;
+        childMessageKeyList.add(childMessageKey);
+        resultList
+            .add(snapMessages.snapshot.child(childMessageKeyList[i]).value);
+      }
+      final result = resultList[i];
+      mList.add(Message.fromJson(Map<String, dynamic>.from(result)));
+    }
+    return mList;
   }
 
   void addPost(Post post) async {
-    await _postRef.push().set(
+    await _postRef.child(post.id).push().set(
           post.toJson(),
         );
   }
 
-  void editPost(Post post) async {
-    await _postRef.child(post.id.toString()).update(post.toJson());
+  Future<void> editPost(Post post) async {
+    await _postRef.child(post.id).update(post.toJson());
   }
 
-  void deletePost(String postId) async {
-    await _postRef.child(postId).remove();
+  Future<void> deletePost(Post post) async {
+    await _postRef.child(post.id).remove();
   }
 
   Future<void> addMessage(Message message) async {
@@ -46,8 +92,8 @@ class FirebaseRepository {
         );
   }
 
-  Future<void> deleteMessage(String postId, String messageId) async {
-    await _messageRef.child(postId).child(messageId).remove();
+  Future<void> deleteMessage(Message message) async {
+    await _messageRef.child(message.id.toString()).remove();
   }
 }
 

@@ -9,56 +9,47 @@ class HomeCubit extends Cubit<HomeState> {
     _getAllPosts();
   }
 
-  void _getAllPosts() {
-    _firebaseRepository.listenPosts().listen(
-      (event) {
-        var posts = <Post>[];
-        var data = (event.snapshot.value ?? {}) as Map;
-        data.forEach((key, value) {
-          posts.add(
-            Post.fromJson({'id': key, ...value}),
-          );
-        });
-        emit(
-          state.copyWith(
-            postList: posts,
-          ),
-        );
-      },
-    );
+  void _getAllPosts() async {
+    final posts = await _firebaseRepository.getAllPosts();
+    emit(state.copyWith(postList: posts));
   }
 
-  void addPost(Post post) async {
-    _firebaseRepository.addPost(post);
-    final listP = state.postList;
-    listP.add(post);
+  void addPost(String titlePost) async {
+    final newPost = Post(
+      id: Uuid().v4(),
+      title: titlePost,
+      createPostTime: DateTime.now().toString(),
+    );
+    _firebaseRepository.addPost(newPost);
     emit(
       state.copyWith(
-        postList: listP,
+        postList: state.postList,
       ),
     );
+    _getAllPosts();
   }
 
-  void editPost(Post postItem, int index) {
-    final listP = state.postList;
-    _firebaseRepository.editPost(postItem);
-    listP[index] = postItem;
+  void editPost(String postText, int index) {
+    final editedPost = state.postList[index].copyWith(
+      title: postText,
+    );
+    _firebaseRepository.editPost(editedPost);
     emit(
       state.copyWith(
-        postList: listP,
+        postList: state.postList,
       ),
     );
+    _getAllPosts();
   }
 
   void deletePost(int index) {
-    final listP = state.postList;
-    _firebaseRepository.deletePost(index.toString());
-    listP.removeAt(index);
+    _firebaseRepository.deletePost(state.postList[index]);
     emit(
       state.copyWith(
-        postList: listP,
+        postList: state.postList,
       ),
     );
+    _getAllPosts();
   }
 
   void pinPost(Post postItem, int index) {

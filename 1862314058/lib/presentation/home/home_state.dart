@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../data/models/post.dart';
 import '../../repository/firebase_repository.dart';

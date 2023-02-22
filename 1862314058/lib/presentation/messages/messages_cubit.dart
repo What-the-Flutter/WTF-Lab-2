@@ -1,7 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/services.dart';
 import '../../data/models/message.dart';
-import '../../data/models/post.dart';
 import '../../repository/firebase_repository.dart';
 import '../../repository/shared_pref_app.dart';
 import 'messages_state.dart';
@@ -9,11 +8,12 @@ import 'messages_state.dart';
 class MessagesCubit extends Cubit<MessagesState> {
   final _firebaseRepository = FirebaseRepository();
 
-  MessagesCubit() : super(MessagesState(editMode: false));
+  MessagesCubit() : super(MessagesState());
 
-  void init(Post post) async {
+  void init(String postId) async {
     initSharPref();
-    _getAllMess(post.id.toString());
+    setPostId(postId);
+    _getAllMessages();
   }
 
   void initSharPref() {
@@ -25,21 +25,19 @@ class MessagesCubit extends Cubit<MessagesState> {
     );
   }
 
-  void _getAllMess(String postId) async {
-    _firebaseRepository.listenMessages(postId).listen(
-      (event) {
-        var messages = <Message>[];
-        var data = (event.snapshot.value ?? {}) as Map;
-        data.forEach(((key, value) {
-          messages.add(Message.fromJson({'id': key, ...value}));
-        }));
-        emit(
-          state.copyWith(
-            messageList: messages,
-          ),
-        );
-      },
+  void _getAllMessages() async {
+    final mList = await _firebaseRepository.getAllMessages();
+    final messageListByPostId =
+        mList.where((e) => e.postId == state.postId).toList();
+    emit(
+      state.copyWith(
+        messageList: messageListByPostId,
+      ),
     );
+  }
+
+  void setPostId(String postId) {
+    emit(state.copyWith(postId: postId));
   }
 
   void addMessage(Message message) async {
@@ -53,25 +51,34 @@ class MessagesCubit extends Cubit<MessagesState> {
     );
   }
 
-  void editMessage(Message messageItem, int index) async {
-    await _firebaseRepository.editMessage(messageItem);
-    final listM = state.messageList;
-    listM[index] = messageItem;
+  void editMessage(String messageText) {
+    var editedMess = state.messageList[state.selectedMessage].copyWith(
+      textMessage: messageText,
+    );
+    _firebaseRepository.editMessage(editedMess);
     emit(
       state.copyWith(
-        messageList: listM,
+        isEditing: false,
+        isSelected: false,
+        selectedMessage: -1,
       ),
     );
+    _getAllMessages();
   }
 
-  void deleteMessage(String postId, String messageId) async {
-    for (int i = 0; i < state.messageList.length; i++) {
-      if (state.messageList[i].isSelectedMessage) {
-        await _firebaseRepository.deleteMessage(postId, state.messageList[i].id.toString());
-        state.messageList.removeAt(i);
-        i--;
-      }
+  void deleteMessage(Message message) async {
+    _firebaseRepository.deleteMessage(message);
+    _getAllMessages();
+  }
+
+  void delete() async {
+    final selectedList = await _firebaseRepository.getAllMessages();
+    final selectedListByPostId =
+        selectedList.where((e) => e.isSelected == true).toList();
+    for (final mess in selectedListByPostId) {
+      _firebaseRepository.deleteMessage(mess);
     }
+    _getAllMessages();
     emit(
       state.copyWith(
         messageList: state.messageList,
@@ -79,37 +86,41 @@ class MessagesCubit extends Cubit<MessagesState> {
     );
   }
 
-  void changeEditMode() {
+  void cancelSelectMessage() async {
+    for (var i = 0; i < state.messageList.length; i++) {
+      if (state.messageList[i].isSelected) {
+        final unSelected = state.messageList[i].copyWith(
+          isSelected: false,
+        );
+        _firebaseRepository.editMessage(unSelected);
+      }
+    }
+    _getAllMessages();
     emit(
       state.copyWith(
-        editMode: !state.editMode,
+        isSelected: false,
       ),
     );
   }
 
-  void isSelectMessage(int index) {
-    final listM = state.messageList;
-    listM[index].isSelectedMessage = true;
-    emit(
-      state.copyWith(messageList: listM),
+  void isSelectMessage(int messageIndex) {
+    final selectedMess = state.messageList[messageIndex].copyWith(
+      isSelected: !state.messageList[messageIndex].isSelected,
     );
-  }
-
-  void cancelSelectMessage() {
-    for (final mess in state.messageList) {
-      if (mess.isSelectedMessage) {
-        mess.isSelectedMessage = false;
-      }
-    }
+    _firebaseRepository.editMessage(selectedMess);
+    _getAllMessages();
     emit(
-      state.copyWith(editMode: false),
+      state.copyWith(
+        isSelected: true,
+        selectedMessage: messageIndex,
+      ),
     );
   }
 
   void copyClipboardMessage() {
     String selectMessage = '';
     for (final mess in state.messageList) {
-      if (mess.isSelectedMessage) {
+      if (mess.isSelected) {
         selectMessage += '${mess.textMessage}';
       }
     }

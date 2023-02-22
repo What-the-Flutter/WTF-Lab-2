@@ -13,12 +13,10 @@ import 'messages_state.dart';
 
 class MessagesPage extends StatefulWidget {
   final Post postItem;
-  final int index;
 
   const MessagesPage({
     super.key,
     required this.postItem,
-    required this.index,
   });
 
   @override
@@ -34,7 +32,7 @@ class _MessagesPageState extends State<MessagesPage> {
   @override
   void initState() {
     super.initState();
-    BlocProvider.of<MessagesCubit>(context).init(widget.postItem);
+    BlocProvider.of<MessagesCubit>(context).init(widget.postItem.id);
   }
 
   Future _getFromCamera() async {
@@ -67,7 +65,10 @@ class _MessagesPageState extends State<MessagesPage> {
         id: DateTime.now().millisecondsSinceEpoch.toInt(),
         postId: widget.postItem.id.toString(),
         textMessage: imageFile!.path,
-        createMessageTime: DateFormat.jm().format(DateTime.now()).toString(),
+        createMessageTime: DateFormat.yMMMd().format(
+          DateTime.now(),
+        ),
+        //DateFormat.jm().format(DateTime.now()).toString(),
         typeMessage: MessageType.image);
     context.read<MessagesCubit>().addMessage(newMess);
   }
@@ -80,7 +81,8 @@ class _MessagesPageState extends State<MessagesPage> {
           key: _messageKey,
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(56),
-            child: state.editMode ? _selectBar(context, state) : _defaultBar(),
+            child:
+                state.isSelected ? _selectBar(context, state) : _defaultBar(),
           ),
           body: Container(
             decoration: BoxDecoration(
@@ -103,8 +105,7 @@ class _MessagesPageState extends State<MessagesPage> {
                       return GestureDetector(
                         onLongPress: () =>
                             BlocProvider.of<MessagesCubit>(context)
-                              ..changeEditMode()
-                              ..isSelectMessage(index),
+                                .isSelectMessage(index),
                         child: Row(
                           mainAxisAlignment: state.isBubbleAlignment
                               ? MainAxisAlignment.end
@@ -157,7 +158,10 @@ class _MessagesPageState extends State<MessagesPage> {
       actions: <Widget>[
         IconButton(
           icon: const Icon(Icons.edit),
-          onPressed: () {},
+          onPressed: () {
+            BlocProvider.of<MessagesCubit>(context)
+                .editMessage(_messageController.text);
+          },
         ),
         IconButton(
           icon: const Icon(Icons.copy),
@@ -168,13 +172,51 @@ class _MessagesPageState extends State<MessagesPage> {
         const Icon(Icons.bookmark_border),
         IconButton(
           icon: const Icon(Icons.delete),
-          onPressed: () {
-            ///BlocProvider.of<MessagesCubit>(context).deleteMessage();
-          },
+          onPressed: () => _showDeleteMessage(context, state),
         ),
       ],
       backgroundColor: Colors.deepPurple,
     );
+  }
+
+  _showDeleteMessage(BuildContext context, MessagesState state) {
+    var dialog = AlertDialog(
+      title: const Text('Delete entrys?'),
+      content: const Text('Are you sure?'),
+      actions: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            IconButton(
+              onPressed: () {
+                BlocProvider.of<MessagesCubit>(context).delete();
+                Navigator.of(context).pop();
+              },
+              icon: const Icon(Icons.delete),
+            ),
+            IconButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              icon: const Icon(Icons.cancel),
+            )
+          ],
+        )
+      ],
+    );
+    var futureResult = showDialog(
+        context: context,
+        builder: (context) {
+          return dialog;
+        });
+    futureResult.then((value) async {
+      await ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Deleted'),
+        ),
+      );
+      BlocProvider.of<MessagesCubit>(context).cancelSelectMessage();
+    });
   }
 
   SizedBox _imageTypeMessage(MessagesState state, int index) {
@@ -275,8 +317,10 @@ class _MessagesPageState extends State<MessagesPage> {
                 id: DateTime.now().millisecondsSinceEpoch.toInt(),
                 postId: widget.postItem.id.toString(),
                 textMessage: _messageController.text,
-                createMessageTime:
-                    DateFormat.jm().format(DateTime.now()).toString(),
+                createMessageTime: DateFormat.yMMMd().format(
+                  DateTime.now(),
+                ),
+                    //DateFormat.jm().format(DateTime.now()).toString(),
                 typeMessage: MessageType.text,
               );
               context.read<MessagesCubit>().addMessage(newMessage);

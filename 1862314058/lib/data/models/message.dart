@@ -5,14 +5,14 @@ class MessageFields {
     textMessage,
     createMessageTime,
     typeMessage,
-    isSelectedMessage,
+    isSelected,
   ];
   static const String id = '_id';
   static const String postId = 'postId';
   static const String textMessage = 'textMessage';
   static const String createMessageTime = 'createMessageTime';
   static const String typeMessage = 'type';
-  static const String isSelectedMessage = 'isSelectedMessage';
+  static const String isSelected = 'isSelected';
 }
 
 class Message {
@@ -21,7 +21,7 @@ class Message {
   final String textMessage;
   final String createMessageTime;
   final int typeMessage;
-  bool isSelectedMessage;
+  bool isSelected;
 
   Message({
     required this.textMessage,
@@ -29,7 +29,7 @@ class Message {
     required this.id,
     required this.postId,
     required this.typeMessage,
-    this.isSelectedMessage = false,
+    this.isSelected = false,
   });
 
   Map<String, dynamic> toJson() => {
@@ -38,7 +38,7 @@ class Message {
         MessageFields.textMessage: textMessage,
         MessageFields.createMessageTime: createMessageTime,
         MessageFields.typeMessage: typeMessage,
-        MessageFields.isSelectedMessage: isSelectedMessage,
+        MessageFields.isSelected: isSelected,
       };
 
   static Message fromJson(Map<String, dynamic> json) => Message(
@@ -47,7 +47,7 @@ class Message {
         textMessage: json[MessageFields.textMessage] as String,
         createMessageTime: json[MessageFields.createMessageTime] as String,
         typeMessage: json[MessageFields.typeMessage] as int,
-        isSelectedMessage: json[MessageFields.isSelectedMessage] as bool,
+        isSelected: json[MessageFields.isSelected] as bool,
       );
 
   Message copyWith({
@@ -56,7 +56,7 @@ class Message {
     String? textMessage,
     String? createMessageTime,
     int? typeMessage,
-    bool? isSelectedMessage,
+    bool? isSelected,
   }) =>
       Message(
         id: id ?? this.id,
@@ -64,6 +64,6 @@ class Message {
         textMessage: textMessage ?? this.textMessage,
         createMessageTime: createMessageTime ?? this.createMessageTime,
         typeMessage: typeMessage ?? this.typeMessage,
-        isSelectedMessage: isSelectedMessage ?? this.isSelectedMessage,
+        isSelected: isSelected ?? this.isSelected,
       );
 }

@@ -9,6 +9,7 @@ import '../auth/auth_state.dart';
 import '../home/home_state.dart';
 import '../messages/messages_cubit.dart';
 import '../settings/settings_state.dart';
+import '../statistics/statistics_state.dart';
 import 'app_page.dart';
 
 class ChatJournal extends StatelessWidget {
@@ -37,6 +38,9 @@ class ChatJournal extends StatelessWidget {
         ),
         BlocProvider(
           create: (context) => AuthCubit(firebaseAuthRepository)..checkAuth(),
+        ),
+        BlocProvider(
+          create: (context) => StatisticsCubit(),
         ),
       ],
       child: BlocBuilder<ThemeCubit, ThemeState>(

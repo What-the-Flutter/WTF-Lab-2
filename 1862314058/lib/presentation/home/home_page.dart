@@ -71,7 +71,6 @@ class _HomePageState extends State<HomePage> {
                           MaterialPageRoute(
                             builder: (context) => MessagesPage(
                               postItem: state.postList[index],
-                              index: index,
                             ),
                           ),
                         );

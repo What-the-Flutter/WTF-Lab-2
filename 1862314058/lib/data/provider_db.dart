@@ -37,7 +37,7 @@ class DBProvider {
 
     await db.execute('''
     CREATE TABLE $postTable (
-    ${PostFields.id} $idType,
+    ${PostFields.id} $textType,
     ${PostFields.title} $textType,
     ${PostFields.createPostTime} $textType
     )
@@ -48,10 +48,11 @@ class DBProvider {
     await db.execute('''
     CREATE TABLE $messageTable (
     ${MessageFields.id} $idType,
+    ${MessageFields.postId} $textType,
     ${MessageFields.textMessage} $textType,
     ${MessageFields.createMessageTime} $textType,
     ${MessageFields.typeMessage} $textType,
-    ${MessageFields.isSelectedMessage} $boolType
+    ${MessageFields.isSelected} $boolType
     )
     ''');
   }
@@ -62,7 +63,7 @@ class DBProvider {
       postTable,
       post.toJson(),
     );
-    return post.copyWith(id: id);
+    return post.copyWith(id: id.toString());
   }
 
   Future<int> editPost(Post post) async {

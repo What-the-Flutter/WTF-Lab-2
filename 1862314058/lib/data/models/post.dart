@@ -10,7 +10,7 @@ class PostFields {
 }
 
 class Post {
-  final int id;
+  final String id;
   final String title;
   final String createPostTime;
 
@@ -27,12 +27,12 @@ class Post {
       };
 
   static Post fromJson(Map<String, dynamic> json) => Post(
-        id: json[PostFields.id] as int,
+        id: json[PostFields.id] as String,
         title: json[PostFields.title] as String,
         createPostTime: json[PostFields.createPostTime] as String,
       );
 
-  Post copyWith({int? id, String? title, String? createPostTime}) => Post(
+  Post copyWith({String? id, String? title, String? createPostTime}) => Post(
         id: id ?? this.id,
         title: title ?? this.title,
         createPostTime: createPostTime ?? this.createPostTime,
